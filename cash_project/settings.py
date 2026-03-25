@@ -6,21 +6,40 @@ Configuration Django pour CASH - Comptabilité Analytique Hospitalière Sénéga
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
+from dotenv import load_dotenv
 
+# Charger les variables d'environnement depuis .env
+env_path = Path(__file__).resolve().parent.parent / '.env'
+if env_path.exists():
+    load_dotenv(env_path)
+else:
+    # Charger depuis .env.example si .env n'existe pas
+    load_dotenv(Path(__file__).resolve().parent.parent / '.env.example')
 
 # ==========  CONFIGURATION DE BASE ==========
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 
 # ========== SÉCURITÉ ==========
 
-SECRET_KEY = 'django-insecure-change-this-in-production'
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY or 'insecure' in SECRET_KEY:
+    raise ValueError('⚠️  SECRET_KEY non configurée. Copier .env.example en .env et générer une clé sécurisée.')
 
-# CSRF - TEMPORAIRE pour développement
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
+if not DEBUG and not SECRET_KEY.startswith('django-insecure'):
+    print('✅ Production mode: DEBUG=False, SECRET_KEY sécurisée')
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# CSRF & Session Security
+is_production = ENVIRONMENT == 'production' or not DEBUG
+CSRF_COOKIE_SECURE = is_production
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = is_production
+SESSION_COOKIE_HTTPONLY = True
 
 # ========== APPLICATIONS ==========
 
@@ -80,12 +99,28 @@ WSGI_APPLICATION = 'cash_project.wsgi.application'
 
 # ========== BASE DE DONNÉES ==========
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+db_engine = os.getenv('DB_ENGINE', 'sqlite3')
+
+if db_engine == 'sqlite3':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / os.getenv('DB_NAME', 'db.sqlite3'),
+        }
     }
-}
+elif db_engine in ['postgresql', 'django.db.backends.postgresql']:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+else:
+    raise ValueError(f'❌ DB_ENGINE inconnu: {db_engine}')
 
 
 # ========== SESSION & AUTHENTIFICATION ==========
@@ -151,10 +186,11 @@ REST_FRAMEWORK = {
 
 # ========== CORS ==========
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
+cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000')
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(',')]
+
+if not DEBUG:
+    CORS_ALLOW_CREDENTIALS = True
 
 
 # ========== LOGGING ==========
