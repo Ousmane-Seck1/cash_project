@@ -10,6 +10,9 @@ env/
 # Django / local config
 *.log
 logs/
+.env
+.env.local
+.env.*.local
 
 # Local databases and backups
 *.sqlite3
