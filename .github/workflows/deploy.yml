@@ -1,0 +1,86 @@
+name: Deployment (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r analytics/requirements.txt
+
+    - name: Create .env from secrets
+      run: |
+        cat > .env << EOF
+        SECRET_KEY=${{ secrets.SECRET_KEY }}
+        DEBUG=False
+        ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+        DB_ENGINE=${{ secrets.DB_ENGINE }}
+        DB_NAME=${{ secrets.DB_NAME }}
+        DB_USER=${{ secrets.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DB_HOST=${{ secrets.DB_HOST }}
+        DB_PORT=${{ secrets.DB_PORT }}
+        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+        EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+        ENVIRONMENT=${{ github.event.inputs.environment }}
+        EOF
+
+    - name: Django checks
+      run: python manage.py check --deploy
+
+    - name: Run migrations
+      run: python manage.py migrate
+
+    - name: Collect static files
+      run: python manage.py collectstatic --noinput
+
+    - name: Run tests before deployment
+      run: python manage.py test --keepdb
+
+    - name: Deploy notification
+      if: success()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: '✅ Deployment to ${{ github.event.inputs.environment }} successful!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      continue-on-error: true
+
+    - name: Failure notification
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: '❌ Deployment to ${{ github.event.inputs.environment }} failed!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      continue-on-error: true
+
+    # TODO: Remplacer par votre vrai processus de déploiement :
+    # - Copier vers le serveur (rsync, scp)
+    # - Redémarrer le service (systemctl, PM2, etc.)
+    # - Vérifier la santé de l'application
