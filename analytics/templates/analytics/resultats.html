@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>CASH - Résultats Analytiques</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -2001,9 +2002,15 @@
 
             try {
                 const response = await fetch(`/api/calcul/evolution_centre/?centre_cout=${centreId}`);
-                const evolutionData = await response.json();
+                const payload = await response.json();
 
-                if (!evolutionData || evolutionData.length === 0) {
+                if (!response.ok) {
+                    throw new Error(payload.error || 'Impossible de charger l\'évolution du centre');
+                }
+
+                const evolutionData = Array.isArray(payload?.evolution) ? payload.evolution : [];
+
+                if (evolutionData.length === 0) {
                     alert('Aucune donnée trouvée pour ce centre');
                     return;
                 }
@@ -2011,7 +2018,7 @@
                 renderChartEvolution(evolutionData);
             } catch (error) {
                 console.error('Erreur lors du chargement de l\'évolution:', error);
-                alert('Erreur lors du chargement des données');
+                alert(error.message || 'Erreur lors du chargement des données');
             }
         }
 
@@ -2102,7 +2109,11 @@
         }
         
         function getCookie(name) {
-            let cookieValue = null;
+            if (name === 'csrftoken') {
+                const metaToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (metaToken) return metaToken;
+            }
+            let cookieValue = '';
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i++) {

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>CASH - Configuration</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -744,7 +745,11 @@
     }
     
     function getCookie(name) {
-        let cookieValue = null;
+        if (name === 'csrftoken') {
+            const metaToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (metaToken) return metaToken;
+        }
+        let cookieValue = '';
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
@@ -758,14 +763,14 @@
         return cookieValue;
     }
     
-    csrfToken = getCookie('csrftoken');
-    console.log('CSRF Token:', csrfToken); // Debug
-    
+    csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || getCookie('csrftoken') || '';
+
     async function fetchAPI(url, options = {}) {
+        const token = document.querySelector('meta[name="csrf-token"]')?.content || getCookie('csrftoken') || '';
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': token
             },
             credentials: 'same-origin'
         };

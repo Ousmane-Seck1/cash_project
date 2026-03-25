@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>CASH - Rôles et Permissions</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -297,7 +298,11 @@
         let sessionInfo = { is_superuser: false, hopital_id: null };
 
         function getCookie(name) {
-            let cookieValue = null;
+            if (name === 'csrftoken') {
+                const metaToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (metaToken) return metaToken;
+            }
+            let cookieValue = '';
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i += 1) {

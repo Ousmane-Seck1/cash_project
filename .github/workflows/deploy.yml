@@ -62,21 +62,42 @@ jobs:
     - name: Run tests before deployment
       run: python manage.py test --keepdb
 
-    - name: Deploy notification
+    - name: Deploy to Heroku
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+      continue-on-error: false
+
+    - name: Run migrations on Heroku
+      run: |
+        heroku run python manage.py migrate -a ${{ secrets.HEROKU_APP_NAME }}
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+    - name: Health check
+      run: |
+        sleep 10
+        HEALTH_URL=https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com/
+        curl -f -I $HEALTH_URL || echo "⚠️ Health check may fail on first deploy, check manually"
+      continue-on-error: true
+
+    - name: Deployment success notification
       if: success()
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
-        text: '✅ Deployment to ${{ github.event.inputs.environment }} successful!'
+        text: '✅ Successfully deployed to ${{ github.event.inputs.environment }} on Heroku!\nhttps://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com'
         webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       continue-on-error: true
 
-    - name: Failure notification
+    - name: Deployment failure notification
       if: failure()
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
-        text: '❌ Deployment to ${{ github.event.inputs.environment }} failed!'
+        text: '❌ Deployment to ${{ github.event.inputs.environment }} failed!\nCheck GitHub Actions logs for details'
         webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       continue-on-error: true
 

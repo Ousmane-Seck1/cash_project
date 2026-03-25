@@ -37,7 +37,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 # CSRF & Session Security
 is_production = ENVIRONMENT == 'production' or not DEBUG
 CSRF_COOKIE_SECURE = is_production
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Must be False so JavaScript can read the csrftoken cookie for AJAX requests
 SESSION_COOKIE_SECURE = is_production
 SESSION_COOKIE_HTTPONLY = True
 
