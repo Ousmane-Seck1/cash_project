@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASH - Résultats Analytiques</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.5rem; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover, .back-btn:focus {
+            background: rgba(255,255,255,0.3);
+            outline: none;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        .tab:hover, .tab:focus {
+            outline: none;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .tab.active {
+            background: #f59e0b;
+            color: white;
+        }
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .card h3 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            background: #fff;
+        }
+        select.form-control option {
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .btn-calculate {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .btn-calculate:hover, .btn-calculate:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+            outline: none;
+        }
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+        .btn-calculate:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .hidden { display: none; }
+        .pilotage-banner.hidden { display: none !important; }
+        #tableCruInter th, #tableCruInter td {
+            padding: 0.45rem 0.5rem;
+            font-size: 0.86rem;
+            white-space: nowrap;
+        }
+        #tableCruInter th[colspan="2"] {
+            min-width: 180px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            .top-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border: 1px solid #d7dce5;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #d7dce5;
+            font-size: 0.95rem;
+        }
+        th { background: #f8f9fa; font-weight: 600; }
+        table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f8f9fa;
+        }
+        .table-scroll {
+            overflow: auto;
+            max-height: 65vh;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .table-scroll table {
+            margin-top: 0;
+        }
+        #tableCruInter thead tr:first-child th {
+            top: 0;
+            z-index: 6;
+        }
+        #tableCruInter thead tr:nth-child(2) th {
+            top: 36px;
+            z-index: 5;
+        }
+        .row-total td {
+            background: #f8fafc;
+            font-weight: 700;
+        }
+        .num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .positive { color: #10b981; font-weight: 600; }
+        .negative { color: #ef4444; font-weight: 600; }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+        }
+        .top-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .sort-indicator {
+            margin-left: 0.25rem;
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+        .pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .kpi-card-lite {
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 0.8rem;
+        }
+        .kpi-card-lite .label {
+            color: #475569;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+        .kpi-card-lite .value {
+            color: #0f172a;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.2rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .pill.ok { background: #dcfce7; color: #166534; }
+        .pill.warn { background: #fef3c7; color: #92400e; }
+            .pilotage-banner {
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border: 1px solid #93c5fd;
+                border-radius: 12px;
+                padding: 1.25rem 1.75rem;
+                margin-bottom: 1.5rem;
+                display: flex;
+                gap: 1.5rem;
+                align-items: flex-end;
+                flex-wrap: wrap;
+            }
+            .pilotage-banner h3 { margin: 0 0 0.5rem 0; color: #1d4ed8; font-size: 1rem; font-weight: 700; width: 100%; }
+            .pilotage-banner .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+            .pilotage-banner label { font-weight: 600; font-size: 0.88rem; color: #374151; }
+            .pilotage-info { padding: 0.75rem 1rem; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; color: #92400e; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="pageTitle">📊 CASH - Résultats Analytiques</h1>
+        <a href="/accueil/" class="back-btn">← Retour à l'accueil</a>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('calcul', this)">🧮 Lancer Calcul</button>
+            <button class="tab" onclick="showTab('tableau', this)">📋 Résultats Centre de Coût </button>
+            <button class="tab" onclick="showTab('responsabilites', this)">🏢 Résultats Centre de Resp.</button>
+            <button class="tab" onclick="showTab('comparaison', this)">⚖️ Comparaison Tarif/CRU</button>
+            <button class="tab hidden" id="tabInterHopitaux" onclick="showTab('interhopitaux', this)">🏥 Comparaison Hôpitaux</button>
+            <button class="tab hidden" id="tabCruInterHopitaux" onclick="showTab('cru_interhopitaux', this)">📊 Comparaison CRU/Tarifs</button>
+            <button class="tab" id="tabDetails" onclick="showTab('details', this)">🔍 Charges Détaillées</button>
+            <button class="tab" onclick="showTab('dashboard', this)">📈 Dashboard</button>
+            <button class="tab" onclick="showTab('evolution', this)">📉 Évolution</button>
+        </div>
+
+        <!-- Pilotage banner (mode=pilotage superuser) -->
+        <div id="pilotageSelectorBanner" class="pilotage-banner hidden">
+            <h3>Pilotage Global - Selection de l'hopital et de l'exercice</h3>
+            <div class="form-group">
+                <label for="selectPilotageHopital">Hopital</label>
+                <select class="form-control" id="selectPilotageHopital" style="min-width:260px;" onchange="onPilotageHopitalChange(this.value)">
+                    <option value="">-- Choisir un hopital --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="selectPilotageExercice">Exercice</label>
+                <select class="form-control" id="selectPilotageExercice" style="min-width:200px;" onchange="onPilotageExerciceChange(this.value)" disabled>
+                    <option value="">-- Choisir un exercice --</option>
+                </select>
+            </div>
+            <div class="pilotage-info" id="pilotageInfoMsg" style="width:100%;">Veuillez selectionner un hopital et un exercice pour acceder aux onglets.</div>
+        </div>
+
+        <!-- Lancer Calcul -->
+        <div id="calcul" class="content">
+            <div class="card" style="text-align: left; padding: 3rem;">
+                <h2 style="margin-bottom: 1rem;">Calcul Analytique</h2>
+                <p style="color: #666; margin-bottom: 2rem;">
+                    Cette opération va exécuter :<br>
+                    1. Répartition primaire <br>
+                    2. Répartition secondaire 1 <br>
+                    3. Répartition secondaire 2 <br>
+                    4. Calcul des résultats analytiques et des coûts de revient unitaires                </p>
+                <button class="btn btn-calculate" onclick="lancerCalculComplet()">
+                    🚀 Lancer le Calcul Analytique
+                </button>
+                <div id="calculStatus" style="margin-top: 2rem;"></div>
+            </div>
+        </div>
+
+        <!-- Tableau Résultats -->
+        <div id="tableau" class="content hidden">
+            <div class="card">
+                <h3>Résultats par Centre de Coût</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="exporterTableauResultatsExcel()">📥 Export Excel</button>
+                    <button class="btn" style="background:#6b7280;color:white;" onclick="exporterTableauResultatsPdf()">🧾 Export PDF</button>
+                </div>
+                <div class="table-scroll">
+                    <table id="tableResultats">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Centre de Coût</th>
+                                <th>Type</th>
+                                <th>Charges Directes</th>
+                                <th>Charges Indirectes</th>
+                                <th>Charges Totales</th>
+                                <th>Produits</th>
+                                <th>Résultats</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats par Responsabilité -->
+        <div id="responsabilites" class="content hidden">
+            <div class="card">
+                <h3>Résultats par Centre de Responsabilité</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="exporterResponsabilitesExcel()">📥 Export Excel</button>
+                    <button class="btn" style="background:#6b7280;color:white;" onclick="exporterResponsabilitesPdf()">🧾 Export PDF</button>
+                </div>
+                <div class="table-scroll">
+                    <table id="tableResponsabilites">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Centre de Responsabilité</th>
+                                <th>Nb Centres</th>
+                                <th>Charges Directes</th>
+                                <th>Charges Indirectes</th>
+                                <th>Charges Totales</th>
+                                <th>Produits</th>
+                                <th>Résultats</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison Tarif / CRU -->
+        <div id="comparaison" class="content hidden">
+            <div class="card">
+                <h3>Comparaison Tarif vs Coût de Revient Unitaire</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="exporterComparaisonTarifCruExcel()">📥 Export Excel</button>
+                    <button class="btn" style="background:#6b7280;color:white;" onclick="exporterComparaisonTarifCruPdf()">🧾 Export PDF</button>
+                </div>
+                <div class="table-scroll">
+                    <table id="tableComparaisonTarifCru">
+                        <thead>
+                            <tr>
+                                <th>Centre de Coût</th>
+                                <th>Charges totales</th>
+                                <th>Volume d'activités</th>
+                                <th>Unité d'Œuvre</th>
+                                <th>Coût de Revient Unitaire</th>
+                                <th>Tarif</th>
+                                <th>Écart (Tarif - CRU)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison Inter-Hôpitaux (Superuser) -->
+        <div id="interhopitaux" class="content hidden">
+            <div class="card">
+                <h3>Comparaison Inter-Hôpitaux</h3>
+                <div class="form-row" style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;">
+                    <div>
+                        <label style="display:block; margin-bottom:0.4rem; font-weight:600;">Année</label>
+                        <select class="form-control" id="filtreAnneeInterHopitaux" style="width: 220px;">
+                            <option value="">Exercice actif / dernier</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:0.4rem; font-weight:600;">Indicateur principal</label>
+                        <select class="form-control" id="filtreIndicateurInterHopitaux" style="width: 220px;">
+                            <option value="resultat">Résultat</option>
+                            <option value="charges">Charges</option>
+                            <option value="produits">Produits</option>
+                            <option value="marge">Marge (%)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:0.4rem; font-weight:600;">Hôpitaux (multi-sélection)</label>
+                        <select multiple class="form-control" id="filtreHopitauxInterHopitaux" style="width: 320px; min-height: 120px;"></select>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; min-height: 42px;">
+                        <input type="checkbox" id="filtreActifsInterHopitaux">
+                        <label for="filtreActifsInterHopitaux" style="font-weight:600; margin:0;">Hôpitaux actifs seulement</label>
+                    </div>
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="chargerComparaisonInterHopitaux()">Actualiser</button>
+                    <button class="btn" style="background:#16a34a;color:white;" onclick="exporterComparaisonInterHopitauxExcel()">📥 Export Excel</button>
+                    <button class="btn" style="background:#4b5563;color:white;" onclick="exporterComparaisonInterHopitauxPdf()">🧾 Export PDF</button>
+                </div>
+
+                <div class="kpi-grid" id="kpiInterHopitaux">
+                    <div class="kpi-card-lite"><div class="label">Hôpitaux comparés</div><div class="value" id="kpiInterNbHopitaux">-</div></div>
+                    <div class="kpi-card-lite"><div class="label">Résultat total</div><div class="value" id="kpiInterResultatTotal">-</div></div>
+                    <div class="kpi-card-lite"><div class="label">Moyenne résultat</div><div class="value" id="kpiInterMoyenne">-</div></div>
+                    <div class="kpi-card-lite"><div class="label">Ecart max/min</div><div class="value" id="kpiInterEcart">-</div></div>
+                    <div class="kpi-card-lite"><div class="label">Alertes</div><div class="value" id="kpiInterAlertes">-</div></div>
+                </div>
+
+                <div class="top-list" style="margin-bottom:1rem;">
+                    <div class="card" style="margin:0;">
+                        <h3 style="font-size:1.2rem;">🏆 Top hôpitaux (résultat)</h3>
+                        <div id="topHopitauxInter">-</div>
+                    </div>
+                    <div class="card" style="margin:0;">
+                        <h3 style="font-size:1.2rem;">⚠️ Flop hôpitaux (résultat)</h3>
+                        <div id="flopHopitauxInter">-</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin:0 0 1rem 0; background:#fff7ed; border-color:#fed7aa;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                        <h3 style="font-size:1.1rem; margin:0;">Alertes consolidées</h3>
+                        <span id="interAlertStatus" class="pill ok">Aucune alerte</span>
+                    </div>
+                    <ul id="interAlertList" style="margin:0.8rem 0 0 1.2rem;"></ul>
+                </div>
+
+                <div class="table-scroll">
+                    <table id="tableInterHopitaux">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortInterHopitauxBy('hopital_nom')">Hôpital <span class="sort-indicator" data-col="hopital_nom">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('annee')">Année <span class="sort-indicator" data-col="annee">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('exercice_actif')">Statut exercice <span class="sort-indicator" data-col="exercice_actif">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('charges')">Charges <span class="sort-indicator" data-col="charges">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('produits')">Produits <span class="sort-indicator" data-col="produits">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('resultat')">Résultat <span class="sort-indicator" data-col="resultat">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('marge')">Marge (%) <span class="sort-indicator" data-col="marge">↕</span></th>
+                                <th class="sortable" onclick="sortInterHopitauxBy('nb_centres')">Centres calculés <span class="sort-indicator" data-col="nb_centres">↕</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="8" style="text-align:center;color:#666;">Réservé au superuser.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-bar">
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <button class="btn" style="background:#e5e7eb;color:#111827;" onclick="changeInterHopitauxPage(-1)">← Précédent</button>
+                        <button class="btn" style="background:#e5e7eb;color:#111827;" onclick="changeInterHopitauxPage(1)">Suivant →</button>
+                    </div>
+                    <div id="interHopitauxPaginationInfo" style="color:#475569; font-weight:600;">Page 1/1</div>
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <label for="interHopitauxPageSize" style="font-weight:600; color:#334155;">Lignes/page</label>
+                        <select id="interHopitauxPageSize" class="form-control" style="width:100px;" onchange="onInterHopitauxPageSizeChange()">
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison CRU / Tarifs Inter-Hopitaux (Superuser) -->
+        <div id="cru_interhopitaux" class="content hidden">
+            <div class="card">
+                <h3>Comparaison CRU et Tarifs des Prestations de Soins Inter-Hopitaux</h3>
+                <div class="form-row" style="margin-bottom:1rem;display:flex;gap:1rem;align-items:end;flex-wrap:wrap;">
+                    <div>
+                        <label style="display:block;margin-bottom:0.4rem;font-weight:600;">Annee</label>
+                        <select class="form-control" id="filtreAnneeCruInter" style="width:220px;">
+                            <option value="">Exercice actif / dernier</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:0.4rem;font-weight:600;">Hopitaux (multi-selection)</label>
+                        <select multiple class="form-control" id="filtreHopitauxCruInter" style="width:320px;min-height:100px;"></select>
+                        <small style="color:#64748b;display:block;margin-top:0.35rem;">Cliquez pour selectionner/desselectionner plusieurs hopitaux.</small>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;min-height:42px;">
+                        <input type="checkbox" id="filtreActifsCruInter">
+                        <label for="filtreActifsCruInter" style="font-weight:600;margin:0;">Hopitaux actifs seulement</label>
+                    </div>
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="chargerCruInterHopitaux()">Actualiser</button>
+                </div>
+                <div class="table-scroll">
+                    <table id="tableCruInter">
+                        <thead id="tableCruInterHead">
+                            <tr>
+                                <th>Code</th>
+                                <th>Centre de Cout</th>
+                                <th>UO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="3" style="text-align:center;color:#666;">Reserve au superuser.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-bar">
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <button class="btn" style="background:#e5e7eb;color:#111827;" onclick="changeCruInterPage(-1)">&larr; Precedent</button>
+                        <button class="btn" style="background:#e5e7eb;color:#111827;" onclick="changeCruInterPage(1)">Suivant &rarr;</button>
+                    </div>
+                    <div id="cruInterPaginationInfo" style="color:#475569;font-weight:600;">Page 1/1</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <label for="cruInterPageSize" style="font-weight:600;color:#334155;">Lignes/page</label>
+                        <select id="cruInterPageSize" class="form-control" style="width:100px;" onchange="cruInterPage=1; renderCruInterTable();">
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charges Detaillees -->
+        <!-- Charges Détaillées -->
+        <div id="details" class="content hidden">
+            <div class="card">
+                <h3>Charges Détaillées par Centre de coût</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="exporterChargesDetailleesExcel()">📥 Export Excel</button>
+                    <button class="btn" style="background:#6b7280;color:white;" onclick="exporterChargesDetailleesPdf()">🧾 Export PDF</button>
+                </div>
+                <div class="form-row" style="margin-bottom: 1rem;">
+                    <select class="form-control" id="filtreResp" style="width: 320px; margin-right: 1rem;">
+                        <option value="">Tous les centres de responsabilité</option>
+                    </select>
+                    <select class="form-control" id="filtreCentre" style="width: 320px;">
+                        <option value="">Tous les centres de coûts</option>
+                    </select>
+                </div>
+                <table id="tableDetails">
+                    <thead>
+                        <tr><th>Date</th><th>Centre de Resp.</th><th>Centre de Coût</th><th>Compte</th><th>Désignation</th><th>Montant</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="content hidden">
+            <div style="margin-bottom: 1rem;">
+                <button class="btn" style="background:#3b82f6;color:white;" onclick="exporterDashboardExcel()">📥 Export Excel</button>
+                <button class="btn" style="background:#6b7280;color:white;" onclick="exporterDashboardPdf()">🧾 Export PDF</button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="dashCharges">-</div>
+                    <div class="stat-label">Total Charges</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dashProduits">-</div>
+                    <div class="stat-label">Total Produits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dashResultat">-</div>
+                    <div class="stat-label">Résultat analytique Global</div>
+                </div>
+            </div>
+
+            <div class="top-list">
+                <div class="card">
+                    <h3>🏆 Top 10 Centres Excédentaires</h3>
+                    <div id="topExcédentaires"></div>
+                </div>
+                <div class="card">
+                    <h3>⚠️ Top 10 Centres Déficitaires</h3>
+                    <div id="topDéficitaires"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Répartition des Charges par Fonction</h3>
+                <div class="chart-container">
+                    <canvas id="chartRepartition"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Évolution -->
+        <div id="evolution" class="content hidden">
+            <div class="card">
+                <h3>Évolution des Centres Tarifaires</h3>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" style="background:#3b82f6;color:white;" onclick="exporterEvolutionExcel()">📥 Export Excel</button>
+                    <button class="btn" style="background:#6b7280;color:white;" onclick="exporterEvolutionPdf()">🧾 Export PDF</button>
+                </div>
+                <div class="form-row" style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <label for="filtreRespEvolution" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Filtrer par Responsabilité:</label>
+                        <select class="form-control" id="filtreRespEvolution" style="width: 300px;">
+                            <option value="">Tous les centres tarifaires</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filtreCentreEvolution" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Sélectionner un Centre:</label>
+                        <select class="form-control" id="filtreCentreEvolution" style="width: 300px;">
+                            <option value="">Sélectionner un centre tarifaire...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container" style="position: relative; height: 400px; margin-top: 2rem;">
+                    <canvas id="chartEvolution"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartRepartition = null;
+        let chartEvolution = null;
+        let resultatsCache = [];
+        let centresCache = [];
+        let responsabilitesCache = [];
+        let chargesCache = [];
+        let interHopitauxCache = [];
+        let interHopitauxTotaux = { charges: 0, produits: 0, resultat: 0 };
+        let interHopitauxSortKey = 'resultat';
+        let interHopitauxSortDirection = 'desc';
+        let interHopitauxPage = 1;
+        let sessionInfo = null;
+        let currentExerciceId = null;
+        let currentHopitalId = null;
+        let pageMode = null;
+        let cruInterHopitauxCache = [];
+        let cruInterHopitauxColumns = [];
+        let cruInterHopitauxSortKey = 'centre_code';
+        let cruInterHopitauxSortDirection = 'asc';
+        let cruInterPage = 1;
+
+        function tokenizeForNaturalSort(value) {
+            return String(value || '')
+                .trim()
+                .split(/(\d+)/)
+                .filter(Boolean)
+                .map(part => (/^\d+$/.test(part) ? Number(part) : part.toLowerCase()));
+        }
+
+        function compareCodeValues(left, right) {
+            const leftParts = tokenizeForNaturalSort(left);
+            const rightParts = tokenizeForNaturalSort(right);
+            const maxLength = Math.max(leftParts.length, rightParts.length);
+
+            for (let index = 0; index < maxLength; index += 1) {
+                if (index >= leftParts.length) return -1;
+                if (index >= rightParts.length) return 1;
+
+                const leftPart = leftParts[index];
+                const rightPart = rightParts[index];
+
+                if (leftPart === rightPart) continue;
+
+                if (typeof leftPart === 'number' && typeof rightPart === 'number') {
+                    return leftPart - rightPart;
+                }
+
+                return String(leftPart).localeCompare(String(rightPart), 'fr', { numeric: true, sensitivity: 'base' });
+            }
+
+            return 0;
+        }
+
+        function sortByCode(items, fieldName) {
+            return [...items].sort((firstItem, secondItem) => compareCodeValues(firstItem[fieldName], secondItem[fieldName]));
+        }
+        
+        function showTab(tabId, clickedElement) {
+            const regularTabs = ['calcul', 'tableau', 'responsabilites', 'comparaison', 'details', 'dashboard', 'evolution'];
+            if (pageMode === 'pilotage' && regularTabs.includes(tabId) && !currentExerciceId) {
+                const msg = document.getElementById('pilotageInfoMsg');
+                if (msg) {
+                    msg.style.background = '#fee2e2';
+                    msg.style.borderColor = '#fca5a5';
+                    msg.style.color = '#991b1b';
+                }
+                return;
+            }
+
+            document.querySelectorAll('.content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            if (clickedElement) clickedElement.classList.add('active');
+
+            if (tabId === 'tableau') chargerTableauResultats();
+            if (tabId === 'responsabilites') chargerResultatsParResponsabilite();
+            if (tabId === 'comparaison') chargerComparaisonTarifCru();
+            if (tabId === 'interhopitaux') chargerComparaisonInterHopitaux();
+            if (tabId === 'cru_interhopitaux') chargerCruInterHopitaux();
+            if (tabId === 'details') chargerChargesDetaillees();
+            if (tabId === 'dashboard') chargerDashboard();
+            if (tabId === 'evolution') initChartEvolution();
+        }
+
+        function getQueryParam(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+
+        function getTabButton(tabId) {
+            return document.querySelector(`.tab[onclick*="showTab('${tabId}'"]`) || null;
+        }
+
+        function enableSimpleMultiSelect(selectId) {
+            const select = document.getElementById(selectId);
+            if (!select || select.dataset.simpleMultiBound === '1') return;
+
+            select.addEventListener('mousedown', (event) => {
+                const option = event.target;
+                if (!option || option.tagName !== 'OPTION') return;
+                event.preventDefault();
+                option.selected = !option.selected;
+            });
+
+            select.dataset.simpleMultiBound = '1';
+        }
+
+        function setTabVisibility(tabId, visible) {
+            const button = getTabButton(tabId);
+            if (!button) return;
+            if (visible) button.classList.remove('hidden');
+            else button.classList.add('hidden');
+        }
+
+        function ensureExerciceSelected() {
+            if (currentExerciceId) return true;
+            if (pageMode === 'pilotage' && sessionInfo?.is_superuser) {
+                const msg = document.getElementById('pilotageInfoMsg');
+                if (msg) {
+                    msg.style.background = '#fee2e2';
+                    msg.style.borderColor = '#fca5a5';
+                    msg.style.color = '#991b1b';
+                    msg.textContent = 'Veuillez selectionner un hopital et un exercice.';
+                }
+            }
+            return false;
+        }
+
+        async function initComparaisonInterHopitaux() {
+            try {
+                const resp = await fetch('/api/info-session/', { credentials: 'same-origin' });
+                if (!resp.ok) return;
+                sessionInfo = await resp.json();
+                pageMode = getQueryParam('mode');
+
+                const [exercices, hopitaux] = await Promise.all([
+                    fetchAllPagesGet('/api/exercices/'),
+                    fetchAllPagesGet('/api/hopitaux/')
+                ]);
+
+                const annees = [...new Set((exercices || []).map(ex => ex.annee).filter(Boolean))].sort((a, b) => b - a);
+                const selectAnnee = document.getElementById('filtreAnneeInterHopitaux');
+                if (selectAnnee) {
+                    selectAnnee.innerHTML = '<option value="">Exercice actif / dernier</option>' +
+                        annees.map(a => `<option value="${a}">${a}</option>`).join('');
+                }
+                const selectAnneeCru = document.getElementById('filtreAnneeCruInter');
+                if (selectAnneeCru) {
+                    selectAnneeCru.innerHTML = '<option value="">Exercice actif / dernier</option>' +
+                        annees.map(a => `<option value="${a}">${a}</option>`).join('');
+                }
+
+                const hopitauxOptions = (hopitaux || [])
+                    .sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || ''), 'fr', { sensitivity: 'base' }))
+                    .map(h => `<option value="${h.id}">${h.nom} (${h.code || '-'})</option>`)
+                    .join('');
+
+                const filtreHopitaux = document.getElementById('filtreHopitauxInterHopitaux');
+                if (filtreHopitaux) filtreHopitaux.innerHTML = hopitauxOptions;
+                const filtreHopitauxCru = document.getElementById('filtreHopitauxCruInter');
+                if (filtreHopitauxCru) filtreHopitauxCru.innerHTML = hopitauxOptions;
+
+                enableSimpleMultiSelect('filtreHopitauxInterHopitaux');
+                enableSimpleMultiSelect('filtreHopitauxCruInter');
+
+                if (!sessionInfo?.is_superuser) {
+                    const tabInter = document.getElementById('tabInterHopitaux');
+                    if (tabInter) tabInter.classList.add('hidden');
+                    const tabCru = document.getElementById('tabCruInterHopitaux');
+                    if (tabCru) tabCru.classList.add('hidden');
+                    currentHopitalId = sessionInfo?.hopital_id || null;
+                    currentExerciceId = sessionInfo?.exercice_id || null;
+                    return;
+                }
+
+                const tabInter = document.getElementById('tabInterHopitaux');
+                if (tabInter) tabInter.classList.remove('hidden');
+                const tabCru = document.getElementById('tabCruInterHopitaux');
+                if (tabCru) tabCru.classList.remove('hidden');
+
+                if (pageMode === 'pilotage') {
+                    await initPilotageMode(hopitaux, exercices);
+                } else if (pageMode === 'comparaison') {
+                    const banner = document.getElementById('pilotageSelectorBanner');
+                    if (banner) banner.classList.add('hidden');
+                    const title = document.getElementById('pageTitle');
+                    if (title) title.textContent = '📊 CASH - Comparaison Inter-Hopitaux';
+                    setTabVisibility('calcul', false);
+                    setTabVisibility('tableau', false);
+                    setTabVisibility('responsabilites', false);
+                    setTabVisibility('comparaison', false);
+                    setTabVisibility('details', false);
+                    setTabVisibility('dashboard', false);
+                    setTabVisibility('evolution', false);
+                    const interBtn = document.getElementById('tabInterHopitaux');
+                    if (interBtn) showTab('interhopitaux', interBtn);
+                } else {
+                    const banner = document.getElementById('pilotageSelectorBanner');
+                    if (banner) banner.classList.add('hidden');
+                    currentHopitalId = sessionInfo?.hopital_id || null;
+                    currentExerciceId = sessionInfo?.exercice_id || null;
+                }
+
+                await chargerComparaisonInterHopitaux();
+                await chargerCruInterHopitaux();
+            } catch (error) {
+                console.error('Erreur init comparaison inter-hopitaux:', error);
+            }
+        }
+
+        function buildInterHopitauxParams() {
+            const params = new URLSearchParams();
+            const annee = document.getElementById('filtreAnneeInterHopitaux')?.value || '';
+            const actifsSeulement = document.getElementById('filtreActifsInterHopitaux')?.checked;
+            const hopitauxSelection = Array.from(document.getElementById('filtreHopitauxInterHopitaux')?.selectedOptions || [])
+                .map(option => option.value)
+                .filter(Boolean);
+
+            if (annee) params.set('annee', annee);
+            if (actifsSeulement) params.set('actifs_seulement', '1');
+            if (hopitauxSelection.length) params.set('hopitaux', hopitauxSelection.join(','));
+
+            return params;
+        }
+
+        function renderTopFlopInterHopitaux(payload) {
+            const topContainer = document.getElementById('topHopitauxInter');
+            const flopContainer = document.getElementById('flopHopitauxInter');
+            const topRows = payload?.top_flop?.top || [];
+            const flopRows = payload?.top_flop?.flop || [];
+
+            topContainer.innerHTML = topRows.length
+                ? topRows.map((row, index) => `
+                    <div style="display:flex; justify-content:space-between; padding:0.45rem 0.55rem; background:#ecfdf5; margin:0.3rem 0; border-radius:6px; border-left:4px solid #10b981;">
+                        <span>${index + 1}. ${row.hopital_nom}</span>
+                        <strong class="positive">${formatMontant(row.resultat, true)}</strong>
+                    </div>
+                `).join('')
+                : '<div style="color:#666;">Aucune donnée.</div>';
+
+            flopContainer.innerHTML = flopRows.length
+                ? flopRows.map((row, index) => `
+                    <div style="display:flex; justify-content:space-between; padding:0.45rem 0.55rem; background:#fef2f2; margin:0.3rem 0; border-radius:6px; border-left:4px solid #ef4444;">
+                        <span>${index + 1}. ${row.hopital_nom}</span>
+                        <strong class="negative">${formatMontant(row.resultat, true)}</strong>
+                    </div>
+                `).join('')
+                : '<div style="color:#666;">Aucune donnée.</div>';
+        }
+
+        function renderInterHopitauxKpi(payload) {
+            const kpis = payload?.kpis || {};
+            const totaux = payload?.totaux || {};
+
+            document.getElementById('kpiInterNbHopitaux').textContent = formatMontant(kpis.nb_hopitaux || 0);
+            document.getElementById('kpiInterResultatTotal').textContent = formatMontant(totaux.resultat || 0, true);
+            document.getElementById('kpiInterMoyenne').textContent = formatMontant(kpis.moyenne_resultat || 0, true);
+            document.getElementById('kpiInterEcart').textContent = formatMontant(kpis.ecart_resultat || 0);
+            document.getElementById('kpiInterAlertes').textContent = formatMontant(kpis.nb_alertes || 0);
+        }
+
+        function renderInterHopitauxAlertes(payload) {
+            const alertes = payload?.alertes || [];
+            const alertList = document.getElementById('interAlertList');
+            const status = document.getElementById('interAlertStatus');
+
+            if (!alertes.length) {
+                status.textContent = 'Aucune alerte';
+                status.classList.remove('warn');
+                status.classList.add('ok');
+                alertList.innerHTML = '<li style="color:#64748b;">Aucune alerte sur le périmètre sélectionné.</li>';
+                return;
+            }
+
+            status.textContent = `${alertes.length} alerte(s)`;
+            status.classList.remove('ok');
+            status.classList.add('warn');
+            alertList.innerHTML = alertes.slice(0, 12).map(alertItem => `<li>${alertItem.message}</li>`).join('');
+        }
+
+        function getInterHopitauxPageSize() {
+            const pageSizeRaw = document.getElementById('interHopitauxPageSize')?.value || '10';
+            const parsed = parseInt(pageSizeRaw, 10);
+            return Number.isNaN(parsed) ? 10 : parsed;
+        }
+
+        function updateInterHopitauxSortIndicators() {
+            document.querySelectorAll('.sort-indicator[data-col]').forEach(el => {
+                const col = el.getAttribute('data-col');
+                if (col === interHopitauxSortKey) {
+                    el.textContent = interHopitauxSortDirection === 'asc' ? '▲' : '▼';
+                    el.style.color = '#111827';
+                } else {
+                    el.textContent = '↕';
+                    el.style.color = '#9ca3af';
+                }
+            });
+        }
+
+        function compareInterHopitauxRows(a, b) {
+            const key = interHopitauxSortKey;
+            const direction = interHopitauxSortDirection === 'asc' ? 1 : -1;
+
+            if (key === 'hopital_nom') {
+                return direction * String(a.hopital_nom || '').localeCompare(String(b.hopital_nom || ''), 'fr', { sensitivity: 'base' });
+            }
+
+            if (key === 'exercice_actif') {
+                const av = a.exercice_actif ? 1 : 0;
+                const bv = b.exercice_actif ? 1 : 0;
+                return direction * (av - bv);
+            }
+
+            const av = Number(a[key] || 0);
+            const bv = Number(b[key] || 0);
+            return direction * (av - bv);
+        }
+
+        function renderInterHopitauxTable() {
+            const tbody = document.querySelector('#tableInterHopitaux tbody');
+            const rows = [...interHopitauxCache].sort(compareInterHopitauxRows);
+            const pageSize = getInterHopitauxPageSize();
+            const totalRows = rows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            if (interHopitauxPage > totalPages) interHopitauxPage = totalPages;
+            if (interHopitauxPage < 1) interHopitauxPage = 1;
+
+            const startIndex = (interHopitauxPage - 1) * pageSize;
+            const pageRows = rows.slice(startIndex, startIndex + pageSize);
+
+            if (!pageRows.length) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;">Aucune donnée disponible.</td></tr>';
+                document.getElementById('interHopitauxPaginationInfo').textContent = 'Page 1/1';
+                updateInterHopitauxSortIndicators();
+                return;
+            }
+
+            tbody.innerHTML = pageRows.map(r => {
+                const resultatClass = r.resultat > 0 ? 'positive' : r.resultat < 0 ? 'negative' : '';
+                const statut = r.exercice_actif ? '<span class="pill ok">Actif</span>' : '<span class="pill warn">Inactif</span>';
+                return `
+                    <tr>
+                        <td>${r.hopital_nom} (${r.hopital_code || '-'})</td>
+                        <td>${r.annee || '-'}</td>
+                        <td>${statut}</td>
+                        <td class="num">${formatMontant(r.charges)}</td>
+                        <td class="num">${formatMontant(r.produits)}</td>
+                        <td class="num ${resultatClass}">${formatMontant(r.resultat, true)}</td>
+                        <td class="num">${Number(r.marge || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}</td>
+                        <td class="num">${formatMontant(r.nb_centres || 0)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (interHopitauxPage === totalPages) {
+                const totalResultatClass = Number(interHopitauxTotaux.resultat || 0) > 0 ? 'positive' : Number(interHopitauxTotaux.resultat || 0) < 0 ? 'negative' : '';
+                tbody.innerHTML += `
+                    <tr class="row-total">
+                        <td colspan="3">TOTAL</td>
+                        <td class="num">${formatMontant(interHopitauxTotaux.charges || 0)}</td>
+                        <td class="num">${formatMontant(interHopitauxTotaux.produits || 0)}</td>
+                        <td class="num ${totalResultatClass}">${formatMontant(interHopitauxTotaux.resultat || 0, true)}</td>
+                        <td class="num">-</td>
+                        <td class="num">-</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('interHopitauxPaginationInfo').textContent = `Page ${interHopitauxPage}/${totalPages} • ${totalRows} lignes`;
+            updateInterHopitauxSortIndicators();
+        }
+
+        function sortInterHopitauxBy(key) {
+            if (interHopitauxSortKey === key) {
+                interHopitauxSortDirection = interHopitauxSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                interHopitauxSortKey = key;
+                interHopitauxSortDirection = key === 'hopital_nom' ? 'asc' : 'desc';
+            }
+            interHopitauxPage = 1;
+            renderInterHopitauxTable();
+        }
+
+        function changeInterHopitauxPage(step) {
+            const pageSize = getInterHopitauxPageSize();
+            const totalPages = Math.max(1, Math.ceil(interHopitauxCache.length / pageSize));
+            interHopitauxPage = Math.min(totalPages, Math.max(1, interHopitauxPage + step));
+            renderInterHopitauxTable();
+        }
+
+        function onInterHopitauxPageSizeChange() {
+            interHopitauxPage = 1;
+            renderInterHopitauxTable();
+        }
+
+        async function chargerComparaisonInterHopitaux() {
+            if (!sessionInfo?.is_superuser) return;
+
+            try {
+                const indicateur = document.getElementById('filtreIndicateurInterHopitaux').value;
+                const params = buildInterHopitauxParams();
+                const suffix = params.toString();
+                const url = suffix
+                    ? `/api/hopitaux/comparaison_interhopitaux/?${suffix}`
+                    : '/api/hopitaux/comparaison_interhopitaux/';
+
+                const response = await fetch(url, { credentials: 'same-origin' });
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}`);
+                }
+                const payload = await response.json();
+                interHopitauxCache = payload?.rows || [];
+                interHopitauxTotaux = payload?.totaux || { charges: 0, produits: 0, resultat: 0 };
+
+                renderInterHopitauxKpi(payload);
+                renderTopFlopInterHopitaux(payload);
+                renderInterHopitauxAlertes(payload);
+
+                interHopitauxSortKey = indicateur || 'resultat';
+                interHopitauxSortDirection = 'desc';
+                interHopitauxPage = 1;
+                renderInterHopitauxTable();
+            } catch (error) {
+                const tbody = document.querySelector('#tableInterHopitaux tbody');
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#ef4444;">Erreur: ${error.message}</td></tr>`;
+            }
+        }
+
+        function exporterComparaisonInterHopitauxExcel() {
+            const params = buildInterHopitauxParams();
+            const suffix = params.toString();
+            window.location.href = suffix
+                ? `/api/hopitaux/export_comparaison_interhopitaux/?${suffix}`
+                : '/api/hopitaux/export_comparaison_interhopitaux/';
+        }
+
+        function exporterComparaisonInterHopitauxPdf() {
+            const params = buildInterHopitauxParams();
+            const suffix = params.toString();
+            window.location.href = suffix
+                ? `/api/hopitaux/export_comparaison_interhopitaux_pdf/?${suffix}`
+                : '/api/hopitaux/export_comparaison_interhopitaux_pdf/';
+        }
+
+        async function initPilotageMode(hopitaux, exercices) {
+            const banner = document.getElementById('pilotageSelectorBanner');
+            const pageTitle = document.getElementById('pageTitle');
+            const infoMsg = document.getElementById('pilotageInfoMsg');
+            const selectHopital = document.getElementById('selectPilotageHopital');
+            const selectExercice = document.getElementById('selectPilotageExercice');
+
+            if (banner) banner.classList.remove('hidden');
+            if (pageTitle) pageTitle.textContent = '📊 CASH - Pilotage Global';
+            if (!selectHopital || !selectExercice) return;
+
+            const sortedHopitaux = [...(hopitaux || [])].sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || ''), 'fr', { sensitivity: 'base' }));
+            selectHopital.innerHTML = '<option value="">-- Choisir un hopital --</option>' +
+                sortedHopitaux.map(h => `<option value="${h.id}">${h.nom} (${h.code || '-'})</option>`).join('');
+
+            const exercicesByHopital = {};
+            (exercices || []).forEach(ex => {
+                const hopitalKey = String(ex.hopital);
+                if (!exercicesByHopital[hopitalKey]) exercicesByHopital[hopitalKey] = [];
+                exercicesByHopital[hopitalKey].push(ex);
+            });
+            Object.keys(exercicesByHopital).forEach(key => {
+                exercicesByHopital[key].sort((a, b) => (b.annee || 0) - (a.annee || 0));
+            });
+
+            const defaultHopital = sortedHopitaux[0] || null;
+            if (!defaultHopital) return;
+
+            currentHopitalId = defaultHopital.id;
+            selectHopital.value = String(defaultHopital.id);
+
+            const defaultHopitalExercices = exercicesByHopital[String(defaultHopital.id)] || [];
+            selectExercice.disabled = false;
+            selectExercice.innerHTML = '<option value="">-- Choisir un exercice --</option>' +
+                defaultHopitalExercices.map(ex => {
+                    const suffix = ex.est_actif && !ex.est_clos ? ' (Actif)' : (ex.est_clos ? ' (Cloture)' : '');
+                    return `<option value="${ex.id}">${ex.annee}${suffix}</option>`;
+                }).join('');
+
+            const defaultExercice = defaultHopitalExercices[0] || null;
+            if (defaultExercice) {
+                currentExerciceId = defaultExercice.id;
+                selectExercice.value = String(defaultExercice.id);
+                if (infoMsg) {
+                    infoMsg.style.background = '#dcfce7';
+                    infoMsg.style.borderColor = '#86efac';
+                    infoMsg.style.color = '#166534';
+                    infoMsg.textContent = `Hopital selectionne: ${defaultHopital.nom} | Exercice: ${defaultExercice.annee}`;
+                }
+            }
+
+            const tabInter = document.getElementById('tabInterHopitaux');
+            const tabCru = document.getElementById('tabCruInterHopitaux');
+            if (tabInter) tabInter.classList.add('hidden');
+            if (tabCru) tabCru.classList.add('hidden');
+        }
+
+        async function onPilotageHopitalChange(hopitalIdRaw) {
+            const hopitalId = hopitalIdRaw ? parseInt(hopitalIdRaw, 10) : null;
+            currentHopitalId = hopitalId;
+            currentExerciceId = null;
+            resultatsCache = [];
+            chargesCache = [];
+
+            const infoMsg = document.getElementById('pilotageInfoMsg');
+            const selectExercice = document.getElementById('selectPilotageExercice');
+            if (!selectExercice) return;
+
+            if (!hopitalId) {
+                selectExercice.disabled = true;
+                selectExercice.innerHTML = '<option value="">-- Choisir un exercice --</option>';
+                if (infoMsg) {
+                    infoMsg.style.background = '#fef3c7';
+                    infoMsg.style.borderColor = '#fcd34d';
+                    infoMsg.style.color = '#92400e';
+                    infoMsg.textContent = 'Veuillez selectionner un hopital et un exercice pour acceder aux onglets.';
+                }
+                return;
+            }
+
+            try {
+                const exercices = await fetchAllPagesGet('/api/exercices/');
+                const exercicesHopital = (exercices || [])
+                    .filter(ex => parseInt(ex.hopital, 10) === hopitalId)
+                    .sort((a, b) => (b.annee || 0) - (a.annee || 0));
+
+                selectExercice.disabled = false;
+                selectExercice.innerHTML = '<option value="">-- Choisir un exercice --</option>' +
+                    exercicesHopital.map(ex => {
+                        const suffix = ex.est_actif && !ex.est_clos ? ' (Actif)' : (ex.est_clos ? ' (Cloture)' : '');
+                        return `<option value="${ex.id}">${ex.annee}${suffix}</option>`;
+                    }).join('');
+
+                if (exercicesHopital.length) {
+                    selectExercice.value = String(exercicesHopital[0].id);
+                    await onPilotageExerciceChange(selectExercice.value);
+                }
+            } catch (error) {
+                console.error('Erreur chargement exercices pilotage:', error);
+            }
+        }
+
+        async function onPilotageExerciceChange(exerciceIdRaw) {
+            const exerciceId = exerciceIdRaw ? parseInt(exerciceIdRaw, 10) : null;
+            currentExerciceId = exerciceId;
+            resultatsCache = [];
+            chargesCache = [];
+
+            const infoMsg = document.getElementById('pilotageInfoMsg');
+            if (!exerciceId) {
+                if (infoMsg) {
+                    infoMsg.style.background = '#fef3c7';
+                    infoMsg.style.borderColor = '#fcd34d';
+                    infoMsg.style.color = '#92400e';
+                    infoMsg.textContent = 'Veuillez choisir un exercice.';
+                }
+                return;
+            }
+
+            const hopitalText = document.querySelector('#selectPilotageHopital option:checked')?.textContent || '-';
+            const exerciceText = document.querySelector('#selectPilotageExercice option:checked')?.textContent || '-';
+            if (infoMsg) {
+                infoMsg.style.background = '#dcfce7';
+                infoMsg.style.borderColor = '#86efac';
+                infoMsg.style.color = '#166534';
+                infoMsg.textContent = `Hopital selectionne: ${hopitalText} | Exercice: ${exerciceText}`;
+            }
+
+            const defaultBtn = getTabButton('calcul') || document.querySelector('.tab');
+            showTab('calcul', defaultBtn);
+        }
+
+        function buildCruInterParams() {
+            const params = new URLSearchParams();
+            const annee = document.getElementById('filtreAnneeCruInter')?.value || '';
+            const actifsSeulement = document.getElementById('filtreActifsCruInter')?.checked;
+            const hopitauxSelection = Array.from(document.getElementById('filtreHopitauxCruInter')?.selectedOptions || [])
+                .map(option => option.value)
+                .filter(Boolean);
+
+            if (annee) params.set('annee', annee);
+            if (actifsSeulement) params.set('actifs_seulement', '1');
+            if (hopitauxSelection.length) params.set('hopitaux', hopitauxSelection.join(','));
+
+            return params;
+        }
+
+        function getCruInterPageSize() {
+            const pageSizeRaw = document.getElementById('cruInterPageSize')?.value || '20';
+            const parsed = parseInt(pageSizeRaw, 10);
+            return Number.isNaN(parsed) ? 20 : parsed;
+        }
+
+        function updateCruInterSortIndicators() {
+            document.querySelectorAll('.sort-indicator[data-cru-col]').forEach(el => {
+                const col = el.getAttribute('data-cru-col');
+                if (col === cruInterHopitauxSortKey) {
+                    el.textContent = cruInterHopitauxSortDirection === 'asc' ? '▲' : '▼';
+                    el.style.color = '#111827';
+                } else {
+                    el.textContent = '↕';
+                    el.style.color = '#9ca3af';
+                }
+            });
+        }
+
+        function buildCruInterHeader() {
+            const thead = document.getElementById('tableCruInterHead');
+            if (!thead) return;
+
+            const topRowFixed = `
+                <th class="sortable" rowspan="2" onclick="sortCruInterBy('centre_code')">Code <span class="sort-indicator" data-cru-col="centre_code">&#8597;</span></th>
+                <th class="sortable" rowspan="2" onclick="sortCruInterBy('centre_libelle')">Centre de Cout <span class="sort-indicator" data-cru-col="centre_libelle">&#8597;</span></th>
+                <th class="sortable" rowspan="2" onclick="sortCruInterBy('unite_oeuvre')">UO <span class="sort-indicator" data-cru-col="unite_oeuvre">&#8597;</span></th>
+            `;
+
+            if (!cruInterHopitauxColumns.length) {
+                thead.innerHTML = `<tr>${topRowFixed}</tr>`;
+                updateCruInterSortIndicators();
+                return;
+            }
+
+            const topRowDynamic = cruInterHopitauxColumns
+                .map(col => `<th colspan="2">${col.hopital_nom} (${col.annee || '-'})</th>`)
+                .join('');
+            const secondRowDynamic = cruInterHopitauxColumns
+                .map(() => '<th>CRU</th><th>Tarif</th>')
+                .join('');
+
+            thead.innerHTML = `
+                <tr>
+                    ${topRowFixed}
+                    ${topRowDynamic}
+                </tr>
+                <tr>
+                    ${secondRowDynamic}
+                </tr>
+            `;
+            updateCruInterSortIndicators();
+        }
+
+        function compareCruInterRows(a, b) {
+            const key = cruInterHopitauxSortKey;
+            const direction = cruInterHopitauxSortDirection === 'asc' ? 1 : -1;
+            if (['centre_code', 'centre_libelle', 'unite_oeuvre'].includes(key)) {
+                return direction * String(a[key] || '').localeCompare(String(b[key] || ''), 'fr', { sensitivity: 'base' });
+            }
+            return 0;
+        }
+
+        function renderCruInterTable() {
+            const tbody = document.querySelector('#tableCruInter tbody');
+            if (!tbody) return;
+            buildCruInterHeader();
+
+            const rows = [...cruInterHopitauxCache].sort(compareCruInterRows);
+            const pageSize = getCruInterPageSize();
+            const totalRows = rows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            if (cruInterPage > totalPages) cruInterPage = totalPages;
+            if (cruInterPage < 1) cruInterPage = 1;
+
+            const startIndex = (cruInterPage - 1) * pageSize;
+            const pageRows = rows.slice(startIndex, startIndex + pageSize);
+            const totalColumns = Math.max(3, 3 + (cruInterHopitauxColumns.length * 2));
+
+            if (!pageRows.length) {
+                tbody.innerHTML = `<tr><td colspan="${totalColumns}" style="text-align:center;color:#666;">Aucune donnee disponible.</td></tr>`;
+                document.getElementById('cruInterPaginationInfo').textContent = 'Page 1/1';
+                updateCruInterSortIndicators();
+                return;
+            }
+
+            tbody.innerHTML = pageRows.map(row => {
+                const hopitauxCells = cruInterHopitauxColumns.map(col => {
+                    const value = row.values[col.key] || {};
+                    const cru = value.cru !== null && value.cru !== undefined ? formatMontant(value.cru) : '-';
+                    const tarif = value.tarif !== null && value.tarif !== undefined ? formatMontant(value.tarif) : '-';
+                    return `<td class="num">${cru}</td><td class="num">${tarif}</td>`;
+                }).join('');
+                return `
+                    <tr>
+                        <td>${row.centre_code || '-'}</td>
+                        <td>${row.centre_libelle || '-'}</td>
+                        <td>${row.unite_oeuvre || '-'}</td>
+                        ${hopitauxCells}
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('cruInterPaginationInfo').textContent = `Page ${cruInterPage}/${totalPages} • ${totalRows} lignes`;
+            updateCruInterSortIndicators();
+        }
+
+        function sortCruInterBy(key) {
+            if (cruInterHopitauxSortKey === key) {
+                cruInterHopitauxSortDirection = cruInterHopitauxSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                cruInterHopitauxSortKey = key;
+                cruInterHopitauxSortDirection = 'asc';
+            }
+            cruInterPage = 1;
+            renderCruInterTable();
+        }
+
+        function changeCruInterPage(step) {
+            const pageSize = getCruInterPageSize();
+            const totalPages = Math.max(1, Math.ceil(cruInterHopitauxCache.length / pageSize));
+            cruInterPage = Math.min(totalPages, Math.max(1, cruInterPage + step));
+            renderCruInterTable();
+        }
+
+        async function chargerCruInterHopitaux() {
+            if (!sessionInfo?.is_superuser) return;
+
+            try {
+                const params = buildCruInterParams();
+                const suffix = params.toString();
+                const url = suffix
+                    ? `/api/hopitaux/comparaison_cru_tarifs_interhopitaux/?${suffix}`
+                    : '/api/hopitaux/comparaison_cru_tarifs_interhopitaux/';
+
+                const response = await fetch(url, { credentials: 'same-origin' });
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const sourceRows = payload?.rows || [];
+                const payloadColumns = Array.isArray(payload?.columns) ? payload.columns : [];
+                const columnMap = new Map();
+                const rowMap = new Map();
+
+                payloadColumns.forEach(col => {
+                    const key = `${col.hopital_id || col.hopital_nom}::${col.annee || ''}`;
+                    if (!columnMap.has(key)) {
+                        columnMap.set(key, {
+                            key,
+                            hopital_nom: col.hopital_nom || '-',
+                            annee: col.annee || ''
+                        });
+                    }
+                });
+
+                sourceRows.forEach(item => {
+                    const columnKey = `${item.hopital_id || item.hopital_nom}::${item.annee || ''}`;
+                    if (!columnMap.has(columnKey)) {
+                        columnMap.set(columnKey, {
+                            key: columnKey,
+                            hopital_nom: item.hopital_nom || '-',
+                            annee: item.annee || ''
+                        });
+                    }
+
+                    const rowKey = `${item.centre_code || ''}::${item.centre_libelle || ''}::${item.unite_oeuvre || ''}`;
+                    if (!rowMap.has(rowKey)) {
+                        rowMap.set(rowKey, {
+                            centre_code: item.centre_code || '-',
+                            centre_libelle: item.centre_libelle || '-',
+                            unite_oeuvre: item.unite_oeuvre || '-',
+                            values: {}
+                        });
+                    }
+
+                    const row = rowMap.get(rowKey);
+                    row.values[columnKey] = {
+                        cru: item.cru,
+                        tarif: item.tarif
+                    };
+                });
+
+                cruInterHopitauxColumns = Array.from(columnMap.values()).sort((a, b) => {
+                    const byHopital = String(a.hopital_nom || '').localeCompare(String(b.hopital_nom || ''), 'fr', { sensitivity: 'base' });
+                    if (byHopital !== 0) return byHopital;
+                    return Number(b.annee || 0) - Number(a.annee || 0);
+                });
+
+                cruInterHopitauxCache = Array.from(rowMap.values());
+                cruInterHopitauxSortKey = 'centre_code';
+                cruInterHopitauxSortDirection = 'asc';
+                cruInterPage = 1;
+                renderCruInterTable();
+            } catch (error) {
+                const tbody = document.querySelector('#tableCruInter tbody');
+                if (tbody) {
+                    const totalColumns = Math.max(3, 3 + (cruInterHopitauxColumns.length * 2));
+                    tbody.innerHTML = `<tr><td colspan="${totalColumns}" style="text-align:center;color:#ef4444;">Erreur: ${error.message}</td></tr>`;
+                }
+            }
+        }
+        
+        async function lancerCalculComplet() {
+            if (!ensureExerciceSelected()) return;
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Calcul en cours...';
+            
+            try {
+                const response = await fetch('/api/calcul/lancer_calcul/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({exercice: currentExerciceId})
+                });
+                const data = await response.json();
+                
+                document.getElementById('calculStatus').innerHTML = 
+                    `<div style="color: #10b981; font-size: 1.2rem;">
+                        ✅ ${data.message}<br>
+                        <small>${data.nb_centres} centres calculés</small>
+                     </div>`;
+            } catch (e) {
+                document.getElementById('calculStatus').innerHTML = 
+                    `<div style="color: #ef4444;">❌ Erreur: ${e.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Lancer le Calcul Analytique';
+            }
+        }
+        
+        async function chargerTableauResultats() {
+            if (!ensureExerciceSelected()) return;
+            try {
+                resultatsCache = sortByCode(await fetchAllPagesGet(`/api/calcul/resultats/?exercice=${currentExerciceId}`), 'centre_cout_code');
+                
+                const tbody = document.querySelector('#tableResultats tbody');
+                if (!resultatsCache.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;">Aucun résultat calculé.</td></tr>';
+                    renderTableResponsabilites(resultatsCache);
+                    return;
+                }
+
+                const totalDirectes = resultatsCache.reduce((sum, r) => sum + parseFloat(r.charges_directes || 0), 0);
+                const totalIndirectes = resultatsCache.reduce((sum, r) => sum + parseFloat(r.charges_indirectes || 0), 0);
+                const totalCharges = resultatsCache.reduce((sum, r) => sum + parseFloat(r.charges_totales || 0), 0);
+                const totalProduits = resultatsCache.reduce((sum, r) => sum + parseFloat(r.produits || 0), 0);
+                const totalResultat = resultatsCache.reduce((sum, r) => sum + parseFloat(r.resultat_analytique || 0), 0);
+
+                const lignes = resultatsCache.map(r => {
+                    const resultat = r.resultat_analytique || 0;
+                    const resultatClass = resultat > 0 ? 'positive' : resultat < 0 ? 'negative' : '';
+                    return `
+                        <tr>
+                            <td>${r.centre_cout_code}</td>
+                            <td>${r.centre_cout_libelle}</td>
+                            <td>${r.centre_cout_type_centre || '-'}</td>
+                            <td class="num">${formatMontant(r.charges_directes)}</td>
+                            <td class="num">${formatMontant(r.charges_indirectes)}</td>
+                            <td class="num"><strong>${formatMontant(r.charges_totales)}</strong></td>
+                            <td class="num">${formatMontant(r.produits)}</td>
+                            <td class="num ${resultatClass}">${formatMontant(resultat, true)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const totalClass = totalResultat > 0 ? 'positive' : totalResultat < 0 ? 'negative' : '';
+                tbody.innerHTML = lignes + `
+                    <tr class="row-total">
+                        <td colspan="3">TOTAL</td>
+                        <td class="num">${formatMontant(totalDirectes)}</td>
+                        <td class="num">${formatMontant(totalIndirectes)}</td>
+                        <td class="num">${formatMontant(totalCharges)}</td>
+                        <td class="num">${formatMontant(totalProduits)}</td>
+                        <td class="num ${totalClass}">${formatMontant(totalResultat, true)}</td>
+                    </tr>
+                `;
+
+                renderTableResponsabilites(resultatsCache);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function chargerResultatsParResponsabilite() {
+            if (!resultatsCache.length) {
+                await chargerTableauResultats();
+                return;
+            }
+            renderTableResponsabilites(resultatsCache);
+        }
+
+        async function chargerComparaisonTarifCru() {
+            if (!resultatsCache.length) {
+                await chargerTableauResultats();
+            }
+            renderTableComparaisonTarifCru(resultatsCache);
+        }
+
+        function renderTableResponsabilites(resultats) {
+            const regroupes = {};
+
+            resultats.forEach(r => {
+                const respId = r.centre_responsabilite_id || 0;
+                const key = String(respId);
+                if (!regroupes[key]) {
+                    regroupes[key] = {
+                        code: r.centre_responsabilite_code || '-',
+                        libelle: r.centre_responsabilite_libelle || 'Sans centre de responsabilité',
+                        nb_centres: 0,
+                        charges_directes: 0,
+                        charges_indirectes: 0,
+                        charges_totales: 0,
+                        produits: 0,
+                        resultat: 0
+                    };
+                }
+
+                regroupes[key].nb_centres += 1;
+                regroupes[key].charges_directes += parseFloat(r.charges_directes || 0);
+                regroupes[key].charges_indirectes += parseFloat(r.charges_indirectes || 0);
+                regroupes[key].charges_totales += parseFloat(r.charges_totales || 0);
+                regroupes[key].produits += parseFloat(r.produits || 0);
+                regroupes[key].resultat += parseFloat(r.resultat_analytique || 0);
+            });
+
+            const rows = Object.values(regroupes).sort((a, b) => a.code.localeCompare(b.code));
+            const tbody = document.querySelector('#tableResponsabilites tbody');
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;">Aucun résultat calculé.</td></tr>';
+                return;
+            }
+
+            const totalCentres = rows.reduce((sum, r) => sum + parseFloat(r.nb_centres || 0), 0);
+            const totalDirectes = rows.reduce((sum, r) => sum + parseFloat(r.charges_directes || 0), 0);
+            const totalIndirectes = rows.reduce((sum, r) => sum + parseFloat(r.charges_indirectes || 0), 0);
+            const totalCharges = rows.reduce((sum, r) => sum + parseFloat(r.charges_totales || 0), 0);
+            const totalProduits = rows.reduce((sum, r) => sum + parseFloat(r.produits || 0), 0);
+            const totalResultat = rows.reduce((sum, r) => sum + parseFloat(r.resultat || 0), 0);
+
+            const lignes = rows.map(r => {
+                const resultatClass = r.resultat > 0 ? 'positive' : r.resultat < 0 ? 'negative' : '';
+                return `
+                    <tr>
+                        <td>${r.code}</td>
+                        <td>${r.libelle}</td>
+                        <td class="num">${r.nb_centres}</td>
+                        <td class="num">${formatMontant(r.charges_directes)}</td>
+                        <td class="num">${formatMontant(r.charges_indirectes)}</td>
+                        <td class="num"><strong>${formatMontant(r.charges_totales)}</strong></td>
+                        <td class="num">${formatMontant(r.produits)}</td>
+                        <td class="num ${resultatClass}">${formatMontant(r.resultat, true)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const totalClass = totalResultat > 0 ? 'positive' : totalResultat < 0 ? 'negative' : '';
+            tbody.innerHTML = lignes + `
+                <tr class="row-total">
+                    <td colspan="2">TOTAL</td>
+                    <td class="num">${formatMontant(totalCentres)}</td>
+                    <td class="num">${formatMontant(totalDirectes)}</td>
+                    <td class="num">${formatMontant(totalIndirectes)}</td>
+                    <td class="num">${formatMontant(totalCharges)}</td>
+                    <td class="num">${formatMontant(totalProduits)}</td>
+                    <td class="num ${totalClass}">${formatMontant(totalResultat, true)}</td>
+                </tr>
+            `;
+        }
+
+        function renderTableComparaisonTarifCru(resultats) {
+            const tbody = document.querySelector('#tableComparaisonTarifCru tbody');
+            const lignes = resultats
+                .filter(r => r.centre_cout_type_centre === 'CT_MT' || r.centre_cout_type_centre === 'CT_CL')
+                .map(r => {
+                    const cru = r.cout_revient_unitaire !== null && r.cout_revient_unitaire !== undefined
+                        ? parseFloat(r.cout_revient_unitaire)
+                        : null;
+                    const tarif = r.centre_cout_tarif !== null && r.centre_cout_tarif !== undefined
+                        ? parseFloat(r.centre_cout_tarif)
+                        : null;
+                    const ecart = (cru !== null && !Number.isNaN(cru) && tarif !== null && !Number.isNaN(tarif))
+                        ? (tarif - cru)
+                        : null;
+                    return {
+                        centre: `${r.centre_cout_code || '-'} - ${r.centre_cout_libelle || '-'}`,
+                        charges_totales: r.charges_totales,
+                        volume: r.volume_activite,
+                        unite_oeuvre: r.centre_cout_unite_oeuvre || '-',
+                        cru,
+                        tarif,
+                        ecart,
+                    };
+                })
+                .sort((firstItem, secondItem) => compareCodeValues(firstItem.centre, secondItem.centre));
+
+            if (!lignes.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;">Aucun centre tarifaire trouvé pour la comparaison.</td></tr>';
+                return;
+            }
+
+            const totalCharges = lignes.reduce((sum, l) => sum + parseFloat(l.charges_totales || 0), 0);
+
+            const lignesHtml = lignes.map(l => {
+                const ecartClass = l.ecart > 0 ? 'positive' : l.ecart < 0 ? 'negative' : '';
+                return `
+                    <tr>
+                        <td>${l.centre}</td>
+                        <td class="num">${formatMontant(l.charges_totales)}</td>
+                        <td class="num">${l.volume !== null && l.volume !== undefined ? formatMontant(l.volume) : '-'}</td>
+                        <td>${l.unite_oeuvre}</td>
+                        <td class="num">${l.cru !== null && !Number.isNaN(l.cru) ? formatMontant(l.cru) : '-'}</td>
+                        <td class="num">${l.tarif !== null && !Number.isNaN(l.tarif) ? formatMontant(l.tarif) : '-'}</td>
+                        <td class="num ${ecartClass}">${l.ecart !== null && !Number.isNaN(l.ecart) ? formatMontant(l.ecart, true) : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = lignesHtml + `
+                <tr class="row-total">
+                    <td>TOTAL</td>
+                    <td class="num">${formatMontant(totalCharges)}</td>
+                    <td class="num">-</td>
+                    <td>-</td>
+                    <td class="num">-</td>
+                    <td class="num">-</td>
+                    <td class="num">-</td>
+                </tr>
+            `;
+        }
+
+        function exporterResponsabilitesExcel() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_responsabilites/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterResponsabilitesPdf() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_responsabilites_pdf/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterTableauResultatsExcel() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_tableau_resultats/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterTableauResultatsPdf() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_tableau_resultats_pdf/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterComparaisonTarifCruExcel() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_comparaison_tarif_cru/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterComparaisonTarifCruPdf() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_comparaison_tarif_cru_pdf/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterChargesDetailleesExcel() {
+            if (!ensureExerciceSelected()) return;
+            const respId = document.getElementById('filtreResp')?.value || '';
+            const centreId = document.getElementById('filtreCentre')?.value || '';
+            const params = new URLSearchParams({ exercice: String(currentExerciceId) });
+            if (respId) params.append('centre_responsabilite', respId);
+            if (centreId) params.append('centre_cout', centreId);
+            window.location.href = `/api/calcul/export_charges_detaillees/?${params.toString()}`;
+        }
+
+        function exporterChargesDetailleesPdf() {
+            if (!ensureExerciceSelected()) return;
+            const respId = document.getElementById('filtreResp')?.value || '';
+            const centreId = document.getElementById('filtreCentre')?.value || '';
+            const params = new URLSearchParams({ exercice: String(currentExerciceId) });
+            if (respId) params.append('centre_responsabilite', respId);
+            if (centreId) params.append('centre_cout', centreId);
+            window.location.href = `/api/calcul/export_charges_detaillees_pdf/?${params.toString()}`;
+        }
+
+        function exporterDashboardExcel() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_dashboard/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterDashboardPdf() {
+            if (!ensureExerciceSelected()) return;
+            window.location.href = `/api/calcul/export_dashboard_pdf/?exercice=${currentExerciceId}`;
+        }
+
+        function exporterEvolutionExcel() {
+            const centreId = document.getElementById('filtreCentreEvolution')?.value;
+            if (!centreId) {
+                alert('Veuillez sélectionner un centre tarifaire avant export.');
+                return;
+            }
+            window.location.href = `/api/calcul/export_evolution_centre/?centre_cout=${encodeURIComponent(centreId)}`;
+        }
+
+        function exporterEvolutionPdf() {
+            const centreId = document.getElementById('filtreCentreEvolution')?.value;
+            if (!centreId) {
+                alert('Veuillez sélectionner un centre tarifaire avant export.');
+                return;
+            }
+            window.location.href = `/api/calcul/export_evolution_centre_pdf/?centre_cout=${encodeURIComponent(centreId)}`;
+        }
+
+        async function fetchAllPagesGet(url) {
+            let nextUrl = url;
+            const allItems = [];
+
+            while (nextUrl) {
+                const response = await fetch(nextUrl, { credentials: 'same-origin' });
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}`);
+                }
+                const payload = await response.json();
+
+                if (Array.isArray(payload)) {
+                    return payload;
+                }
+
+                allItems.push(...(payload.results || []));
+                nextUrl = payload.next;
+            }
+
+            return allItems;
+        }
+
+        async function chargerFiltresDetails() {
+            const [responsabilites, centres] = await Promise.all([
+                fetchAllPagesGet('/api/centres-responsabilite/'),
+                fetchAllPagesGet('/api/centres-couts/')
+            ]);
+
+            responsabilitesCache = sortByCode(responsabilites, 'code');
+            centresCache = sortByCode(centres, 'code');
+
+            const filtreResp = document.getElementById('filtreResp');
+            filtreResp.innerHTML = '<option value="">Tous les centres de responsabilité</option>' +
+                responsabilitesCache.map(r => `<option value="${r.id}">${r.code} - ${r.libelle}</option>`).join('');
+
+            updateFiltreCentreDetails();
+        }
+
+        function updateFiltreCentreDetails() {
+            const filtreResp = document.getElementById('filtreResp');
+            const filtreCentre = document.getElementById('filtreCentre');
+            const respId = filtreResp.value;
+
+            const centresFiltres = !respId
+                ? centresCache
+                : centresCache.filter(c => String(c.centre_responsabilite || '') === String(respId));
+
+            filtreCentre.innerHTML = '<option value="">Tous les centres de coûts</option>' +
+                centresFiltres.map(c => `<option value="${c.id}">${c.code} - ${c.libelle}</option>`).join('');
+        }
+
+        async function chargerChargesDetaillees() {
+            if (!ensureExerciceSelected()) return;
+            try {
+                if (!responsabilitesCache.length || !centresCache.length) {
+                    await chargerFiltresDetails();
+                }
+
+                chargesCache = await fetchAllPagesGet(`/api/charges/?exercice=${currentExerciceId}`);
+
+                const respId = document.getElementById('filtreResp').value;
+                const centreId = document.getElementById('filtreCentre').value;
+
+                const lignes = chargesCache.filter(c => {
+                    const okResp = !respId || String(c.centre_responsabilite_id || '') === String(respId);
+                    const okCentre = !centreId || String(c.centre_cout || '') === String(centreId);
+                    return okResp && okCentre;
+                });
+
+                const tbody = document.querySelector('#tableDetails tbody');
+                if (!lignes.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;">Aucune charge trouvée.</td></tr>';
+                    return;
+                }
+
+                const totalMontant = lignes.reduce((sum, c) => sum + parseFloat(c.montant || 0), 0);
+                const lignesHtml = lignes.map(c => `
+                    <tr>
+                        <td>${new Date(c.date).toLocaleDateString('fr-FR')}</td>
+                        <td>${c.centre_responsabilite_code || '-'} - ${c.centre_responsabilite_libelle || '-'}</td>
+                        <td>${c.centre_cout_code || '-'} - ${c.centre_cout_libelle || '-'}</td>
+                        <td>${c.compte_numero || '-'} - ${c.compte_libelle || '-'}</td>
+                        <td>${c.designation || '-'}</td>
+                        <td class="num">${formatMontant(c.montant)}</td>
+                    </tr>
+                `).join('');
+
+                tbody.innerHTML = lignesHtml + `
+                    <tr class="row-total">
+                        <td colspan="5">TOTAL</td>
+                        <td class="num">${formatMontant(totalMontant)}</td>
+                    </tr>
+                `;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        async function chargerDashboard() {
+            if (!ensureExerciceSelected()) return;
+            try {
+                const response = await fetch(`/api/calcul/dashboard/?exercice=${currentExerciceId}`);
+                const data = await response.json();
+                
+                document.getElementById('dashCharges').textContent = formatMontant(data.statistiques.total_charges);
+                document.getElementById('dashProduits').textContent = formatMontant(data.statistiques.total_produits);
+                document.getElementById('dashResultat').textContent = formatMontant(data.statistiques.resultat_global, true);
+                
+                // Top 10 excédentaires
+                document.getElementById('topExcédentaires').innerHTML = 
+                    data.centres_rentables.slice(0, 10).map((c, i) => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #ecfdf5; margin: 0.25rem 0; border-radius: 4px; border-left: 4px solid #10b981;">
+                            <span>${i+1}. ${c.centre_cout_code} - ${c.centre_cout_libelle}</span>
+                            <span class="positive">+${formatMontant(c.resultat_analytique)}</span>
+                        </div>
+                    `).join('');
+                
+                // Top 10 déficitaires
+                document.getElementById('topDéficitaires').innerHTML = 
+                    data.centres_deficitaires.slice(0, 10).map((c, i) => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #fef2f2; margin: 0.25rem 0; border-radius: 4px; border-left: 4px solid #ef4444;">
+                            <span>${i+1}. ${c.centre_cout_code} - ${c.centre_cout_libelle}</span>
+                            <span class="negative">${formatMontant(c.resultat_analytique)}</span>
+                        </div>
+                    `).join('');
+                
+                // Graphique répartition
+                initChartRepartition(data);
+                
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        function initChartRepartition(data) {
+            const ctx = document.getElementById('chartRepartition').getContext('2d');
+            
+            if (chartRepartition) chartRepartition.destroy();
+            
+            chartRepartition = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Médico-technique', 'Clinique', 'Non tarifaire'],
+                    datasets: [{
+                        data: [30, 50, 20], // À remplacer par vraies données
+                        backgroundColor: ['#667eea', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        async function chargerResponsabilitesEvolution() {
+            try {
+                const responsabilites = sortByCode(await fetchAllPagesGet('/api/centres-responsabilite/'), 'code');
+                const select = document.getElementById('filtreRespEvolution');
+                select.innerHTML = '<option value="">Tous les centres de responsabilité</option>';
+                responsabilitesCache = responsabilites;
+                responsabilites.forEach(resp => {
+                    const option = document.createElement('option');
+                    option.value = resp.id;
+                    option.textContent = `${resp.code} - ${resp.libelle}`;
+                    select.appendChild(option);
+                });
+                await updateFiltreCentreEvolution();
+            } catch (error) {
+                console.error('Erreur lors du chargement des centres de responsabilité:', error);
+            }
+        }
+
+        async function updateFiltreCentreEvolution() {
+            const respId = document.getElementById('filtreRespEvolution').value;
+            const centreSelect = document.getElementById('filtreCentreEvolution');
+            centreSelect.innerHTML = '<option value="">Sélectionner un centre tarifaire...</option>';
+
+            try {
+                const tousCentres = await fetchAllPagesGet('/api/centres-couts/');
+                const centresTarifaires = tousCentres.filter(c => c.type_centre === 'CT_MT' || c.type_centre === 'CT_CL');
+                const centresFiltres = !respId
+                    ? centresTarifaires
+                    : centresTarifaires.filter(c => String(c.centre_responsabilite || '') === String(respId));
+                const centresTries = sortByCode(centresFiltres, 'code');
+
+                centresTries.forEach(centre => {
+                    const option = document.createElement('option');
+                    option.value = centre.id;
+                    option.textContent = `${centre.code} - ${centre.libelle}`;
+                    centreSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement des centres:', error);
+            }
+        }
+
+        async function chargerEvolution() {
+            const centreId = document.getElementById('filtreCentreEvolution').value;
+
+            if (!centreId) {
+                alert('Veuillez sélectionner un centre tarifaire');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/calcul/evolution_centre/?centre_cout=${centreId}`);
+                const evolutionData = await response.json();
+
+                if (!evolutionData || evolutionData.length === 0) {
+                    alert('Aucune donnée trouvée pour ce centre');
+                    return;
+                }
+
+                renderChartEvolution(evolutionData);
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'évolution:', error);
+                alert('Erreur lors du chargement des données');
+            }
+        }
+
+        function renderChartEvolution(evolutionData) {
+            const ctx = document.getElementById('chartEvolution').getContext('2d');
+            
+            if (chartEvolution) chartEvolution.destroy();
+
+            const annees = evolutionData.map(d => d.annee);
+            const charges = evolutionData.map(d => d.charges_totales);
+            const produits = evolutionData.map(d => d.produits);
+
+            chartEvolution = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: annees.map(a => a.toString()),
+                    datasets: [
+                        {
+                            label: 'Charges Totales',
+                            data: charges,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Produits',
+                            data: produits,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Évolution des Charges et Produits'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Montant'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('fr-FR', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initChartEvolution() {
+            chargerResponsabilitesEvolution();
+            
+            // Ajouter les listeners
+            document.getElementById('filtreRespEvolution').addEventListener('change', updateFiltreCentreEvolution);
+            document.getElementById('filtreCentreEvolution').addEventListener('change', chargerEvolution);
+        }
+        
+        function formatMontant(montant, avecSigne = false) {
+            if (montant === null || montant === undefined) return '-';
+            const num = parseFloat(montant);
+            const signe = avecSigne && num > 0 ? '+' : '';
+            return signe + num.toLocaleString('fr-FR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.getElementById('filtreResp').addEventListener('change', () => {
+            updateFiltreCentreDetails();
+            chargerChargesDetaillees();
+        });
+        document.getElementById('filtreCentre').addEventListener('change', chargerChargesDetaillees);
+
+        window.addEventListener('load', initComparaisonInterHopitaux);
+    </script>
+</body>
+</html>

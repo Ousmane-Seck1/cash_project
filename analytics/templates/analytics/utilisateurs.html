@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASH - Gestion des Utilisateurs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.5rem; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        .container {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .card-header h2 { color: #333; font-size: 1.3rem; }
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .table-scroll {
+            overflow: auto;
+            max-height: 65vh;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        tr:hover td { background: #f9f9f9; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-controleur { background: #ede9fe; color: #7c3aed; }
+        .badge-directeur { background: #dbeafe; color: #2563eb; }
+        .badge-responsable_financier { background: #fef3c7; color: #d97706; }
+        .badge-comptable { background: #dcfce7; color: #16a34a; }
+        .badge-agent_saisie { background: #ffe4e6; color: #be123c; }
+        .badge-admin { background: #fee2e2; color: #b91c1c; }
+        .badge-actif { background: #dcfce7; color: #16a34a; }
+        .badge-inactif { background: #fee2e2; color: #dc2626; }
+        .permissions-list {
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            background: #fafafa;
+        }
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        .permission-note {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.35rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 540px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.75rem;
+        }
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        .form-group label .required { color: #ef4444; margin-left: 2px; }
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+        }
+        .btn-cancel { background: #e5e7eb; color: #374151; }
+        .btn-cancel:hover { background: #d1d5db; }
+        .password-hint {
+            font-size: 0.78rem;
+            color: #888;
+            margin-top: 0.3rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        .alert {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .alert-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+        .alert-success { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+        #alertMsg { display: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 Gestion des Utilisateurs</h1>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+            <a href="/roles-permissions/" class="back-btn">🔐 Rôles & Permissions</a>
+            <a href="/accueil/" class="back-btn">⬅ Accueil</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alertMsg" class="alert"></div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Utilisateurs du système</h2>
+                <button class="btn btn-primary" onclick="ouvrirModal()">+ Nouvel utilisateur</button>
+            </div>
+
+            <div class="table-scroll">
+                <table id="tableUtilisateurs">
+                    <thead>
+                        <tr>
+                            <th>Identifiant</th>
+                            <th>Nom complet</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Hôpital</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="7" style="text-align:center;padding:2rem;color:#999;">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Création / Édition -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 id="modalTitre">Nouvel Utilisateur</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input type="text" id="userFirstName" class="form-control" placeholder="Prénom">
+                </div>
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" id="userLastName" class="form-control" placeholder="Nom">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Identifiant (login) <span class="required">*</span></label>
+                <input type="text" id="userUsername" class="form-control" placeholder="Ex: jean.dupont">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="userEmail" class="form-control" placeholder="exemple@hopital.dz">
+            </div>
+
+            <div class="form-group">
+                <label id="labelPassword">Mot de passe <span class="required">*</span></label>
+                <input type="password" id="userPassword" class="form-control" placeholder="Mot de passe">
+                <div class="password-hint" id="passwordHint">Laissez vide pour ne pas modifier le mot de passe existant.</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rôle <span class="required">*</span></label>
+                    <select id="userRole" class="form-control">
+                        <option value="">-- Sélectionner un rôle d'hôpital --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Hôpital</label>
+                    <select id="userHopital" class="form-control">
+                        <option value="">Tous les hôpitaux</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" id="permissionsGroup">
+                <label>Permissions du rôle</label>
+                <div id="rolePermissionsList" class="permissions-list"></div>
+                <div class="permission-note">Les permissions cochées mettent à jour le rôle sélectionné pour cet hôpital.</div>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="userIsActive" checked style="margin-right: 0.5rem;">
+                    Compte actif
+                </label>
+            </div>
+
+            <div class="form-group" id="superuserGroup">
+                <label>
+                    <input type="checkbox" id="userIsSuperuser" style="margin-right: 0.5rem;">
+                    Administrateur global (superuser)
+                </label>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="fermerModal()">Annuler</button>
+                <button class="btn btn-success" onclick="sauvegarderUtilisateur()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let editId = null;
+        let hopitauxCache = [];
+        let hopitalRolesCache = [];
+        let permissionCatalog = [];
+        let sessionInfo = { is_superuser: false, hopital_id: null };
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function fetchAPI(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                credentials: 'same-origin',
+            };
+            const response = await fetch(url, { ...defaultOptions, ...options });
+            if (response.status === 204) return { success: true };
+
+            const contentType = response.headers.get('content-type') || '';
+            let payload;
+            if (contentType.includes('application/json')) {
+                payload = await response.json();
+            } else {
+                const text = await response.text();
+                payload = { detail: text.slice(0, 300) };
+            }
+
+            if (!response.ok) {
+                const details = typeof payload === 'string'
+                    ? payload
+                    : (payload.detail || JSON.stringify(payload));
+                throw new Error(details || `Erreur ${response.status}`);
+            }
+
+            return payload;
+        }
+
+        function showAlert(msg, type = 'danger') {
+            const el = document.getElementById('alertMsg');
+            el.className = `alert alert-${type}`;
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+
+        async function chargerContexteSession() {
+            sessionInfo = await fetchAPI('/api/info-session/');
+        }
+
+        async function chargerHopitaux() {
+            try {
+                const data = await fetchAPI(`${API_URL}/hopitaux/`);
+                hopitauxCache = data.results || data;
+                const sel = document.getElementById('userHopital');
+                const baseOption = sessionInfo.is_superuser
+                    ? '<option value="">Tous les hôpitaux</option>'
+                    : '<option value="">Hôpital de mon compte</option>';
+                sel.innerHTML = baseOption + hopitauxCache.map(h => `<option value="${h.id}">${h.code} - ${h.nom}</option>`).join('');
+
+                if (!sessionInfo.is_superuser) {
+                    sel.value = sessionInfo.hopital_id ? String(sessionInfo.hopital_id) : '';
+                    sel.disabled = true;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function chargerPermissionCatalog() {
+            try {
+                permissionCatalog = await fetchAPI(`${API_URL}/hopital-roles/permission_catalog/`);
+            } catch (e) {
+                console.error(e);
+                permissionCatalog = [];
+            }
+        }
+
+        async function chargerRolesHopital(hopitalId = '') {
+            try {
+                const effectiveHopitalId = (!sessionInfo.is_superuser && sessionInfo.hopital_id)
+                    ? sessionInfo.hopital_id
+                    : hopitalId;
+                const query = hopitalId ? `?hopital=${hopitalId}&est_actif=true` : '?est_actif=true';
+                const effectiveQuery = effectiveHopitalId
+                    ? `?hopital=${effectiveHopitalId}&est_actif=true`
+                    : '?est_actif=true';
+                const data = await fetchAPI(`${API_URL}/hopital-roles/${effectiveQuery}`);
+                hopitalRolesCache = data.results || data;
+
+                const roleSelect = document.getElementById('userRole');
+                roleSelect.innerHTML = '<option value="">-- Sélectionner un rôle d\'hôpital --</option>' +
+                    hopitalRolesCache.map(r => `<option value="${r.id}">${r.libelle} (${r.hopital_nom})</option>`).join('');
+
+                renderRolePermissions();
+            } catch (e) {
+                console.error(e);
+                hopitalRolesCache = [];
+                document.getElementById('userRole').innerHTML = '<option value="">-- Aucun rôle disponible --</option>';
+                renderRolePermissions();
+            }
+        }
+
+        function getRoleById(roleId) {
+            return hopitalRolesCache.find(r => String(r.id) === String(roleId));
+        }
+
+        function renderRolePermissions() {
+            const container = document.getElementById('rolePermissionsList');
+            const isSuperuser = document.getElementById('userIsSuperuser').checked;
+            const roleId = document.getElementById('userRole').value;
+            const role = getRoleById(roleId);
+
+            if (isSuperuser) {
+                container.innerHTML = '<div class="permission-item">Accès complet à tous les hôpitaux, rôles et permissions.</div>';
+                return;
+            }
+
+            if (!role) {
+                container.innerHTML = '<div class="permission-item" style="color:#6b7280;">Sélectionnez un rôle pour choisir ses permissions.</div>';
+                return;
+            }
+
+            const checked = new Set(role.permissions || []);
+            container.innerHTML = permissionCatalog.map(item => `
+                <label class="permission-item">
+                    <input type="checkbox" value="${item.code}" ${checked.has(item.code) ? 'checked' : ''}>
+                    <span>${item.libelle}</span>
+                </label>
+            `).join('');
+        }
+
+        function getCheckedPermissionCodes() {
+            return Array.from(document.querySelectorAll('#rolePermissionsList input[type="checkbox"]:checked'))
+                .map(input => input.value)
+                .sort();
+        }
+
+        function applySuperuserState() {
+            const isSuperuser = sessionInfo.is_superuser && document.getElementById('userIsSuperuser').checked;
+            document.getElementById('userHopital').disabled = isSuperuser;
+            document.getElementById('userRole').disabled = isSuperuser;
+            renderRolePermissions();
+        }
+
+        async function chargerUtilisateurs() {
+            try {
+                const data = await fetchAPI(`${API_URL}/utilisateurs/`);
+                const utilisateurs = data.results || data;
+                const tbody = document.querySelector('#tableUtilisateurs tbody');
+
+                if (!utilisateurs.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Aucun utilisateur trouvé.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = utilisateurs.map(u => {
+                    const nom = [u.first_name, u.last_name].filter(Boolean).join(' ') || '-';
+                    const roleCls = u.is_superuser ? 'badge badge-admin' : `badge badge-${u.role}`;
+                    const statutCls = u.is_active ? 'badge badge-actif' : 'badge badge-inactif';
+                    return `
+                        <tr>
+                            <td><strong>${u.username}</strong></td>
+                            <td>${nom}</td>
+                            <td>${u.email || '-'}</td>
+                            <td><span class="${roleCls}">${u.role_libelle}</span></td>
+                            <td>${u.hopital_nom || '<em style="color:#aaa">Tous hôpitaux</em>'}</td>
+                            <td><span class="${statutCls}">${u.is_active ? 'Actif' : 'Inactif'}</span></td>
+                            <td>
+                                <button onclick="editerUtilisateur(${u.id})" class="btn btn-warning btn-sm">✏️</button>
+                                <button onclick="supprimerUtilisateur(${u.id}, '${u.username}')" class="btn btn-danger btn-sm" style="margin-left:4px;">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch(e) {
+                console.error(e);
+                showAlert(`Erreur lors du chargement des utilisateurs: ${e.message}`);
+            }
+        }
+
+        function ouvrirModal(id = null) {
+            editId = id;
+            document.getElementById('modalTitre').textContent = id ? 'Modifier l\'utilisateur' : 'Nouvel Utilisateur';
+            document.getElementById('labelPassword').innerHTML = id
+                ? 'Nouveau mot de passe'
+                : 'Mot de passe <span class="required">*</span>';
+            document.getElementById('passwordHint').style.display = id ? 'block' : 'none';
+            if (!id) resetForm();
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function fermerModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            editId = null;
+            resetForm();
+        }
+
+        function resetForm() {
+            ['userFirstName','userLastName','userUsername','userEmail','userPassword'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('userRole').value = '';
+            document.getElementById('userHopital').value = sessionInfo.hopital_id ? String(sessionInfo.hopital_id) : '';
+            document.getElementById('userIsActive').checked = true;
+            document.getElementById('userIsSuperuser').checked = false;
+            if (!sessionInfo.is_superuser) {
+                document.getElementById('userIsSuperuser').disabled = true;
+                document.getElementById('superuserGroup').style.display = 'none';
+                document.getElementById('userHopital').disabled = true;
+            } else {
+                document.getElementById('userIsSuperuser').disabled = false;
+                document.getElementById('superuserGroup').style.display = 'block';
+            }
+            applySuperuserState();
+            renderRolePermissions();
+        }
+
+        async function editerUtilisateur(id) {
+            try {
+                const u = await fetchAPI(`${API_URL}/utilisateurs/${id}/`);
+                ouvrirModal(id);
+                document.getElementById('userFirstName').value = u.first_name || '';
+                document.getElementById('userLastName').value = u.last_name || '';
+                document.getElementById('userUsername').value = u.username || '';
+                document.getElementById('userEmail').value = u.email || '';
+                document.getElementById('userHopital').value = u.hopital || '';
+                document.getElementById('userIsActive').checked = u.is_active !== false;
+                document.getElementById('userIsSuperuser').checked = sessionInfo.is_superuser && u.is_superuser === true;
+                const hopitalForRoles = sessionInfo.is_superuser ? (u.hopital || '') : (sessionInfo.hopital_id || '');
+                await chargerRolesHopital(hopitalForRoles);
+                document.getElementById('userRole').value = u.hopital_role || '';
+                if (!sessionInfo.is_superuser) {
+                    document.getElementById('userHopital').value = sessionInfo.hopital_id ? String(sessionInfo.hopital_id) : '';
+                }
+                applySuperuserState();
+                renderRolePermissions();
+            } catch(e) {
+                showAlert(`Erreur lors du chargement des données utilisateur: ${e.message}`);
+            }
+        }
+
+        async function sauvegarderUtilisateur() {
+            const username = document.getElementById('userUsername').value.trim();
+            const roleId = document.getElementById('userRole').value;
+            const password = document.getElementById('userPassword').value;
+            const isSuperuser = sessionInfo.is_superuser && document.getElementById('userIsSuperuser').checked;
+            const selectedRole = getRoleById(roleId);
+
+            if (!username) { showAlert('L\'identifiant est obligatoire.'); return; }
+            if (!isSuperuser && !roleId) { showAlert('Le rôle d\'hôpital est obligatoire.'); return; }
+            if (!editId && !password) { showAlert('Le mot de passe est obligatoire pour un nouvel utilisateur.'); return; }
+
+            const hopitalVal = document.getElementById('userHopital').value;
+            const payload = {
+                username,
+                first_name: document.getElementById('userFirstName').value.trim(),
+                last_name: document.getElementById('userLastName').value.trim(),
+                email: document.getElementById('userEmail').value.trim(),
+                role: isSuperuser ? 'controleur' : undefined,
+                hopital_role: isSuperuser ? null : parseInt(roleId),
+                hopital: isSuperuser
+                    ? (hopitalVal ? parseInt(hopitalVal) : null)
+                    : (sessionInfo.hopital_id || selectedRole?.hopital || null),
+                is_active: document.getElementById('userIsActive').checked,
+                is_superuser: isSuperuser,
+            };
+            if (!isSuperuser && payload.role === undefined) {
+                delete payload.role;
+            }
+            if (password) payload.password = password;
+
+            try {
+                if (!isSuperuser && selectedRole) {
+                    const selectedPermissions = getCheckedPermissionCodes();
+                    const currentPermissions = [...(selectedRole.permissions || [])].sort();
+                    if (JSON.stringify(selectedPermissions) !== JSON.stringify(currentPermissions)) {
+                        await fetchAPI(`${API_URL}/hopital-roles/${selectedRole.id}/`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ permissions: selectedPermissions })
+                        });
+                    }
+                }
+
+                if (editId) {
+                    await fetchAPI(`${API_URL}/utilisateurs/${editId}/`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(payload),
+                    });
+                    showAlert('Utilisateur modifié avec succès.', 'success');
+                } else {
+                    await fetchAPI(`${API_URL}/utilisateurs/`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                    });
+                    showAlert('Utilisateur créé avec succès.', 'success');
+                }
+                fermerModal();
+                chargerUtilisateurs();
+            } catch(e) {
+                showAlert(`Erreur lors de l'enregistrement: ${e.message}`);
+            }
+        }
+
+        async function supprimerUtilisateur(id, username) {
+            if (!confirm(`Supprimer définitivement l'utilisateur "${username}" ?`)) return;
+            try {
+                await fetchAPI(`${API_URL}/utilisateurs/${id}/`, { method: 'DELETE' });
+                showAlert(`Utilisateur "${username}" supprimé.`, 'success');
+                chargerUtilisateurs();
+            } catch(e) {
+                showAlert(`Erreur lors de la suppression: ${e.message}`);
+            }
+        }
+
+        // Fermer le modal en cliquant sur l'overlay
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) fermerModal();
+        });
+
+        document.getElementById('userHopital').addEventListener('change', async function() {
+            if (!sessionInfo.is_superuser) return;
+            await chargerRolesHopital(this.value);
+        });
+
+        document.getElementById('userRole').addEventListener('change', function() {
+            renderRolePermissions();
+        });
+
+        document.getElementById('userIsSuperuser').addEventListener('change', function() {
+            applySuperuserState();
+        });
+
+        // Initialisation
+        (async function initPage() {
+            await chargerContexteSession();
+            await chargerHopitaux();
+            await chargerPermissionCatalog();
+            await chargerRolesHopital(sessionInfo.is_superuser ? '' : (sessionInfo.hopital_id || ''));
+            await chargerUtilisateurs();
+        })();
+    </script>
+</body>
+</html>

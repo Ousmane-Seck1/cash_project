@@ -1,0 +1,654 @@
+﻿excel_row,reason,compte,centre,designation,montant
+5,invalid_required_fields,6611000,93.3.8.3 endoscopie,SALAIRES,None
+15,missing_centre_after_93to94,6611000,93. 3.17.4 Actes Gynécologie Obstétrique,SALAIRES,19964107
+17,invalid_required_fields,6611000,93.3.20.2 Hospitalisations Ophtalmologie,SALAIRES,None
+22,missing_centre_after_93to94,6611000,93.2.3.2Radio standard,SALAIRES,17836547
+41,missing_centre_after_93to94,6611000,93.3.2.3 hospitalisation Anesthesie Réanimation,SALAIRES,13147734
+43,invalid_required_fields,6611000,93.3.3.2 Mise en Observations Consultations externes,SALAIRES,None
+47,missing_centre_after_93to94,6611000,93.3.7.3 Actes Dermatologie,SALAIRES,349479
+52,missing_centre_after_93to94,6611000,93.3.6.5 Echocoeur,SALAIRES,3139328
+58,invalid_required_fields,6611000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,SALAIRES,None
+61,invalid_required_fields,6611000,93.1.1.2.1 CA,SALAIRES,None
+62,invalid_required_fields,6611000,93.1.1.2.2 CME,SALAIRES,None
+63,invalid_required_fields,6611000,93.1.1.2.3 CTE,SALAIRES,None
+64,invalid_required_fields,6611000,93.1.1.2.4 Commission de passation des marchés,SALAIRES,None
+66,missing_centre_after_93to94,6611000,93.1.2.2.1 Bureau de la facturation,SALAIRES,15228757
+67,missing_centre_after_93to94,6611000,93.1.2.2.2 Bureau des entrées,SALAIRES,8228557
+72,missing_centre_after_93to94,6611000,93.1.6.2.1 Caisse dépenses,SALAIRES,5353489
+73,missing_centre_after_93to94,6611000,93.1.6.2.2 Caisse recettes (caisse principale),SALAIRES,14707535
+74,missing_centre_after_93to94,6611000,93.1.6.3 Division recouvrement,SALAIRES,3680193
+76,invalid_required_fields,6611000,93.1.3.2 division Comptabilité analytique,SALAIRES,None
+77,invalid_required_fields,6611000,93.1.3.3 division suivi budgétaire,SALAIRES,None
+79,invalid_required_fields,6611000,93.1.11.1 Brancardage,SALAIRES,None
+80,invalid_required_fields,6611000,93.1.11.2 Division qualité ,SALAIRES,None
+82,invalid_required_fields,6611000,93.1.11.4.1 CLIN,SALAIRES,None
+83,invalid_required_fields,6611000,93.1.11.4.2 Comité 5S,SALAIRES,None
+85,invalid_required_fields,6611000,93.1.9.2 Cellule de communication,SALAIRES,None
+86,missing_centre_after_93to94,6611000,93.1.9.3 Division accueil et orientation,SALAIRES,3760964
+87,invalid_required_fields,6611000,93.1.9.4 Prise en charge des Cas sociaux,SALAIRES,None
+88,invalid_required_fields,6611000,93.1.9.5 MAGAL,SALAIRES,None
+90,missing_centre_after_93to94,6611000,93.1.5.2.1 Administration du personnel,SALAIRES,968883
+91,missing_centre_after_93to94,6611000,93.1.5.2.2 Gestion de la paie,SALAIRES,1453325
+92,invalid_required_fields,6611000,93.1.5.3.1 Bureau formation,SALAIRES,None
+93,missing_centre_after_93to94,6611000,93.1.5.3.2 Gestion des carrières et des compétences,SALAIRES,1453325
+94,invalid_required_fields,6611000,93.1.5.3.3 CHST,SALAIRES,None
+95,missing_centre_after_93to94,6611000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",SALAIRES,5562019
+96,missing_centre_after_93to94,6611000,93.1. 12.3 Division biomédicale,SALAIRES,3337212
+97,missing_centre_after_93to94,6611000,93.1. 12.4 Cellule informatique et télécoms,SALAIRES,3337212
+98,missing_centre_after_93to94,6611000,93.1. 12.5 magasin STM,SALAIRES,10011635
+99,missing_centre_after_93to94,6611000,93.1. 13.1 Division hygiène,SALAIRES,4998185
+100,missing_centre_after_93to94,6611000,93.1. 13.2 Division sécurité,SALAIRES,4998185
+108,invalid_required_fields,6612000,93.3.8.3 endoscopie,RESPONSABILITE,None
+118,missing_centre_after_93to94,6612000,93. 3.17.4 Actes Gynécologie Obstétrique,RESPONSABILITE,2580055
+120,invalid_required_fields,6612000,93.3.20.2 Hospitalisations Ophtalmologie,RESPONSABILITE,None
+125,missing_centre_after_93to94,6612000,93.2.3.2Radio standard,RESPONSABILITE,704942
+142,invalid_required_fields,6612000,93.1.14.1 Pharmacie IB,RESPONSABILITE,None
+146,missing_centre_after_93to94,6612000,93.3.2.3 hospitalisation Anesthesie Réanimation,RESPONSABILITE,1373517
+148,invalid_required_fields,6612000,93.3.3.2 Mise en Observations Consultations externes,RESPONSABILITE,None
+150,invalid_required_fields,6612000,93.3.7.1 consultations Dermatologie,RESPONSABILITE,None
+151,invalid_required_fields,6612000,93.3.7.2 Hospitalisations Dermatologie,RESPONSABILITE,None
+152,invalid_required_fields,6612000,93.3.7.3 Actes Dermatologie,RESPONSABILITE,None
+157,missing_centre_after_93to94,6612000,93.3.6.5 Echocoeur,RESPONSABILITE,757908
+163,invalid_required_fields,6612000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,RESPONSABILITE,None
+169,invalid_required_fields,6612000,93.1.1.2.1 CA,RESPONSABILITE,None
+170,invalid_required_fields,6612000,93.1.1.2.2 CME,RESPONSABILITE,None
+171,invalid_required_fields,6612000,93.1.1.2.3 CTE,RESPONSABILITE,None
+172,invalid_required_fields,6612000,93.1.1.2.4 Commission de passation des marchés,RESPONSABILITE,None
+174,missing_centre_after_93to94,6612000,93.1.2.2.1 Bureau de la facturation,RESPONSABILITE,1487016
+175,missing_centre_after_93to94,6612000,93.1.2.2.2 Bureau des entrées,RESPONSABILITE,1487016
+180,missing_centre_after_93to94,6612000,93.1.6.2.1 Caisse dépenses,RESPONSABILITE,1106556
+181,missing_centre_after_93to94,6612000,93.1.6.2.2 Caisse recettes (caisse principale),RESPONSABILITE,2213112
+182,missing_centre_after_93to94,6612000,93.1.6.3 Division recouvrement,RESPONSABILITE,553776
+185,invalid_required_fields,6612000,93.1.3.3 division suivi budgétaire,RESPONSABILITE,None
+187,invalid_required_fields,6612000,93.1.11.1 Brancardage,RESPONSABILITE,None
+188,invalid_required_fields,6612000,93.1.11.2 Division qualité ,RESPONSABILITE,None
+190,invalid_required_fields,6612000,93.1.11.4.1 CLIN,RESPONSABILITE,None
+191,invalid_required_fields,6612000,93.1.11.4.2 Comité 5S,RESPONSABILITE,None
+193,invalid_required_fields,6612000,93.1.9.2 Cellule de communication,RESPONSABILITE,None
+194,missing_centre_after_93to94,6612000,93.1.9.3 Division accueil et orientation,RESPONSABILITE,360000
+195,invalid_required_fields,6612000,93.1.9.4 Prise en charge des Cas sociaux,RESPONSABILITE,None
+196,invalid_required_fields,6612000,93.1.9.5 MAGAL,RESPONSABILITE,None
+198,missing_centre_after_93to94,6612000,93.1.5.2.1 Administration du personnel,RESPONSABILITE,277500
+199,missing_centre_after_93to94,6612000,93.1.5.2.2 Gestion de la paie,RESPONSABILITE,416250
+200,invalid_required_fields,6612000,93.1.5.3.1 Bureau formation,RESPONSABILITE,None
+201,missing_centre_after_93to94,6612000,93.1.5.3.2 Gestion des carrières et des compétences,RESPONSABILITE,416250
+202,invalid_required_fields,6612000,93.1.5.3.3 CHST,RESPONSABILITE,None
+203,missing_centre_after_93to94,6612000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",RESPONSABILITE,1050000
+204,missing_centre_after_93to94,6612000,93.1. 12.3 Division biomédicale,RESPONSABILITE,630000
+205,missing_centre_after_93to94,6612000,93.1. 12.4 Cellule informatique et télécoms,RESPONSABILITE,630000
+206,missing_centre_after_93to94,6612000,93.1. 12.5 magasin STM,RESPONSABILITE,1890000
+207,missing_centre_after_93to94,6612000,93.1. 13.1 Division hygiène,RESPONSABILITE,985000
+208,missing_centre_after_93to94,6612000,93.1. 13.2 Division sécurité,RESPONSABILITE,985000
+216,invalid_required_fields,6618000,93.3.8.3 endoscopie,ASTREINTE,None
+226,missing_centre_after_93to94,6618000,93. 3.17.4 Actes Gynécologie Obstétrique,ASTREINTE,1207337
+228,invalid_required_fields,6618000,93.3.20.2 Hospitalisations Ophtalmologie,ASTREINTE,None
+233,missing_centre_after_93to94,6618000,93.2.3.2Radio standard,ASTREINTE,623639
+239,invalid_required_fields,6618000,93.3.16.1 Séance ,ASTREINTE,None
+250,invalid_required_fields,6618000,93.1.14.1 Pharmacie IB,ASTREINTE,None
+254,missing_centre_after_93to94,6618000,93.3.2.3 hospitalisation Anesthesie Réanimation,ASTREINTE,262645
+256,invalid_required_fields,6618000,93.3.3.2 Mise en Observations Consultations externes,ASTREINTE,None
+258,invalid_required_fields,6618000,93.3.7.1 consultations Dermatologie,ASTREINTE,None
+259,invalid_required_fields,6618000,93.3.7.2 Hospitalisations Dermatologie,ASTREINTE,None
+260,invalid_required_fields,6618000,93.3.7.3 Actes Dermatologie,ASTREINTE,None
+265,missing_centre_after_93to94,6618000,93.3.6.5 Echocoeur,ASTREINTE,621722
+271,invalid_required_fields,6618000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,ASTREINTE,None
+276,invalid_required_fields,6618000,93.1.1.1 Secrétariat Direction,ASTREINTE,None
+277,invalid_required_fields,6618000,93.1.1.2.1 CA,ASTREINTE,None
+278,invalid_required_fields,6618000,93.1.1.2.2 CME,ASTREINTE,None
+279,invalid_required_fields,6618000,93.1.1.2.3 CTE,ASTREINTE,None
+280,invalid_required_fields,6618000,93.1.1.2.4 Commission de passation des marchés,ASTREINTE,None
+282,missing_centre_after_93to94,6618000,93.1.2.2.1 Bureau de la facturation,ASTREINTE,91308
+283,missing_centre_after_93to94,6618000,93.1.2.2.2 Bureau des entrées,ASTREINTE,91308
+287,invalid_required_fields,6618000,93.1.6.1 Secrétariat ACP,ASTREINTE,None
+288,invalid_required_fields,6618000,93.1.6.2.1 Caisse dépenses,ASTREINTE,None
+289,invalid_required_fields,6618000,93.1.6.2.2 Caisse recettes (caisse principale),ASTREINTE,None
+290,invalid_required_fields,6618000,93.1.6.3 Division recouvrement,ASTREINTE,None
+292,invalid_required_fields,6618000,93.1.3.2 division Comptabilité analytique,ASTREINTE,None
+293,invalid_required_fields,6618000,93.1.3.3 division suivi budgétaire,ASTREINTE,None
+295,invalid_required_fields,6618000,93.1.11.1 Brancardage,ASTREINTE,None
+296,invalid_required_fields,6618000,93.1.11.2 Division qualité ,ASTREINTE,None
+298,invalid_required_fields,6618000,93.1.11.4.1 CLIN,ASTREINTE,None
+299,invalid_required_fields,6618000,93.1.11.4.2 Comité 5S,ASTREINTE,None
+301,invalid_required_fields,6618000,93.1.9.2 Cellule de communication,ASTREINTE,None
+302,missing_centre_after_93to94,6618000,93.1.9.3 Division accueil et orientation,ASTREINTE,126000
+303,invalid_required_fields,6618000,93.1.9.4 Prise en charge des Cas sociaux,ASTREINTE,None
+304,invalid_required_fields,6618000,93.1.9.5 MAGAL,ASTREINTE,None
+306,missing_centre_after_93to94,6618000,93.1.5.2.1 Administration du personnel,ASTREINTE,42000
+307,missing_centre_after_93to94,6618000,93.1.5.2.2 Gestion de la paie,ASTREINTE,63000
+308,invalid_required_fields,6618000,93.1.5.3.1 Bureau formation,ASTREINTE,None
+309,missing_centre_after_93to94,6618000,93.1.5.3.2 Gestion des carrières et des compétences,ASTREINTE,63000
+310,invalid_required_fields,6618000,93.1.5.3.3 CHST,ASTREINTE,None
+311,missing_centre_after_93to94,6618000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",ASTREINTE,105000
+312,missing_centre_after_93to94,6618000,93.1. 12.3 Division biomédicale,ASTREINTE,63000
+313,missing_centre_after_93to94,6618000,93.1. 12.4 Cellule informatique et télécoms,ASTREINTE,63000
+314,missing_centre_after_93to94,6618000,93.1. 12.5 magasin STM,ASTREINTE,189000
+315,invalid_required_fields,6618000,93.1. 13.1 Division hygiène,ASTREINTE,None
+316,invalid_required_fields,6618000,93.1. 13.2 Division sécurité,ASTREINTE,None
+317,invalid_required_fields,6618000,93.1.7.1 Magasin CM,ASTREINTE,None
+318,invalid_required_fields,6618000,93.1.7.2 Comptabilité des matières S,ASTREINTE,None
+324,missing_centre_after_93to94,6041100,93.3.2.3 hospitalisation Anesthesie Réanimation,MEDICAMENT ET CONSOMMABLE,2774266
+337,missing_centre_after_93to94,6041100,93. 3.17.4 Actes Gynécologie Obstétrique,MEDICAMENT ET CONSOMMABLE,5112192
+339,invalid_required_fields,6041100,93.3.20.2 Hospitalisations Ophtalmologie,MEDICAMENT ET CONSOMMABLE,None
+344,missing_centre_after_93to94,6041100,93.2.3.2Radio standard,MEDICAMENT ET CONSOMMABLE,8404437
+361,invalid_required_fields,6041100,93.1.14.1 Pharmacie IB,MEDICAMENT ET CONSOMMABLE,None
+364,invalid_required_fields,6041100,93.3.3.2 Mise en Observations Consultations externes,MEDICAMENT ET CONSOMMABLE,None
+368,missing_centre_after_93to94,6041100,93.3.7.3 Actes Dermatologie,MEDICAMENT ET CONSOMMABLE,39226
+373,missing_centre_after_93to94,6041100,93.3.6.5 Echocoeur,MEDICAMENT ET CONSOMMABLE,1391801
+379,invalid_required_fields,6041100,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,MEDICAMENT ET CONSOMMABLE,None
+385,invalid_required_fields,6041100,93.1.1.2.1 CA,MEDICAMENT ET CONSOMMABLE,None
+386,invalid_required_fields,6041100,93.1.1.2.2 CME,MEDICAMENT ET CONSOMMABLE,None
+387,invalid_required_fields,6041100,93.1.1.2.3 CTE,MEDICAMENT ET CONSOMMABLE,None
+388,invalid_required_fields,6041100,93.1.1.2.4 Commission de passation des marchés,MEDICAMENT ET CONSOMMABLE,None
+390,missing_centre_after_93to94,6041100,93.1.2.2.1 Bureau de la facturation,MEDICAMENT ET CONSOMMABLE,7870
+391,missing_centre_after_93to94,6041100,93.1.2.2.2 Bureau des entrées,MEDICAMENT ET CONSOMMABLE,7870
+396,missing_centre_after_93to94,6041100,93.1.6.2.1 Caisse dépenses,MEDICAMENT ET CONSOMMABLE,1378
+397,missing_centre_after_93to94,6041100,93.1.6.2.2 Caisse recettes (caisse principale),MEDICAMENT ET CONSOMMABLE,2755
+398,missing_centre_after_93to94,6041100,93.1.6.3 Division recouvrement,MEDICAMENT ET CONSOMMABLE,689
+401,invalid_required_fields,6041100,93.1.3.3 division suivi budgétaire,MEDICAMENT ET CONSOMMABLE,None
+402,invalid_required_fields,6041100,93.1.4.1 Audit interne,MEDICAMENT ET CONSOMMABLE,None
+404,invalid_required_fields,6041100,93.1.11.2 Division qualité ,MEDICAMENT ET CONSOMMABLE,None
+406,invalid_required_fields,6041100,93.1.11.4.1 CLIN,MEDICAMENT ET CONSOMMABLE,None
+407,invalid_required_fields,6041100,93.1.11.4.2 Comité 5S,MEDICAMENT ET CONSOMMABLE,None
+409,invalid_required_fields,6041100,93.1.9.2 Cellule de communication,MEDICAMENT ET CONSOMMABLE,None
+410,missing_centre_after_93to94,6041100,93.1.9.3 Division accueil et orientation,MEDICAMENT ET CONSOMMABLE,472463
+411,invalid_required_fields,6041100,93.1.9.4 Prise en charge des Cas sociaux,MEDICAMENT ET CONSOMMABLE,None
+412,invalid_required_fields,6041100,93.1.9.5 MAGAL,MEDICAMENT ET CONSOMMABLE,None
+414,missing_centre_after_93to94,6041100,93.1.5.2.1 Administration du personnel,MEDICAMENT ET CONSOMMABLE,1500
+415,missing_centre_after_93to94,6041100,93.1.5.2.2 Gestion de la paie,MEDICAMENT ET CONSOMMABLE,2250
+416,invalid_required_fields,6041100,93.1.5.3.1 Bureau formation,MEDICAMENT ET CONSOMMABLE,None
+417,missing_centre_after_93to94,6041100,93.1.5.3.2 Gestion des carrières et des compétences,MEDICAMENT ET CONSOMMABLE,2250
+418,invalid_required_fields,6041100,93.1.5.3.3 CHST,MEDICAMENT ET CONSOMMABLE,None
+419,missing_centre_after_93to94,6041100,"93.1. 12.2 Division génie-civil (infrastructures, etc)",MEDICAMENT ET CONSOMMABLE,48950
+420,missing_centre_after_93to94,6041100,93.1. 12.3 Division biomédicale,MEDICAMENT ET CONSOMMABLE,29370
+421,missing_centre_after_93to94,6041100,93.1. 12.4 Cellule informatique et télécoms,MEDICAMENT ET CONSOMMABLE,29370
+422,missing_centre_after_93to94,6041100,93.1. 12.5 magasin STM,MEDICAMENT ET CONSOMMABLE,88110
+423,missing_centre_after_93to94,6041100,93.1. 13.1 Division hygiène,MEDICAMENT ET CONSOMMABLE,74175
+424,missing_centre_after_93to94,6041100,93.1. 13.2 Division sécurité,MEDICAMENT ET CONSOMMABLE,74175
+427,invalid_required_fields,6041100,93.1.8.1 SIH,MEDICAMENT ET CONSOMMABLE,None
+428,invalid_required_fields,6041100,93.1.8.2 Division des archives,MEDICAMENT ET CONSOMMABLE,None
+437,invalid_required_fields,6631200,93.3.8.3 endoscopie,INDEMNITES DE TRANSPORT,None
+447,missing_centre_after_93to94,6631200,93. 3.17.4 Actes Gynécologie Obstétrique,INDEMNITES DE TRANSPORT,1010592
+449,invalid_required_fields,6631200,93.3.20.2 Hospitalisations Ophtalmologie,INDEMNITES DE TRANSPORT,None
+454,missing_centre_after_93to94,6631200,93.2.3.2Radio standard,INDEMNITES DE TRANSPORT,123167
+457,invalid_required_fields,6631200,93.3.15.1 Consultations Orthopédie,INDEMNITES DE TRANSPORT,None
+458,invalid_required_fields,6631200,93.3.15.2 Hospitalisations Orthopédie,INDEMNITES DE TRANSPORT,None
+459,invalid_required_fields,6631200,93.3.15.3 Actes chirurgicaux Orthopédie,INDEMNITES DE TRANSPORT,None
+471,invalid_required_fields,6631200,93.1.14.1 Pharmacie IB,INDEMNITES DE TRANSPORT,None
+475,missing_centre_after_93to94,6631200,93.3.2.3 hospitalisation Anesthesie Réanimation,INDEMNITES DE TRANSPORT,96207
+477,invalid_required_fields,6631200,93.3.3.2 Mise en Observations Consultations externes,INDEMNITES DE TRANSPORT,None
+479,invalid_required_fields,6631200,93.3.7.1 consultations Dermatologie,INDEMNITES DE TRANSPORT,None
+480,invalid_required_fields,6631200,93.3.7.2 Hospitalisations Dermatologie,INDEMNITES DE TRANSPORT,None
+481,invalid_required_fields,6631200,93.3.7.3 Actes Dermatologie,INDEMNITES DE TRANSPORT,None
+482,invalid_required_fields,6631200,93.3.6.1 consultations Cardiologie,INDEMNITES DE TRANSPORT,None
+483,invalid_required_fields,6631200,93.3.6.2 hospitalisations Cardiologie,INDEMNITES DE TRANSPORT,None
+484,invalid_required_fields,6631200,93.3.6.3 ECG,INDEMNITES DE TRANSPORT,None
+485,invalid_required_fields,6631200,93.3.6.4 MAPA,INDEMNITES DE TRANSPORT,None
+486,invalid_required_fields,6631200,93.3.6.5 Echocoeur,INDEMNITES DE TRANSPORT,None
+487,invalid_required_fields,6631200,93.3.6.6 Holter,INDEMNITES DE TRANSPORT,None
+491,invalid_required_fields,6631200,93.3.12.1 Consultations Néphrologie Hémodialyse,INDEMNITES DE TRANSPORT,None
+492,invalid_required_fields,6631200,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,INDEMNITES DE TRANSPORT,None
+493,invalid_required_fields,6631200,93.3.12.3 Dialyse,INDEMNITES DE TRANSPORT,None
+494,invalid_required_fields,6631200,93.3.18.1 Consultations Urologie,INDEMNITES DE TRANSPORT,None
+495,invalid_required_fields,6631200,93.3.18.2 Hospitalisations Urologie,INDEMNITES DE TRANSPORT,None
+496,invalid_required_fields,6631200,93.3.18.3 actes Urologie,INDEMNITES DE TRANSPORT,None
+498,invalid_required_fields,6631200,93.1.1.2.1 CA,INDEMNITES DE TRANSPORT,None
+499,invalid_required_fields,6631200,93.1.1.2.2 CME,INDEMNITES DE TRANSPORT,None
+500,invalid_required_fields,6631200,93.1.1.2.3 CTE,INDEMNITES DE TRANSPORT,None
+501,invalid_required_fields,6631200,93.1.1.2.4 Commission de passation des marchés,INDEMNITES DE TRANSPORT,None
+503,missing_centre_after_93to94,6631200,93.1.2.2.1 Bureau de la facturation,INDEMNITES DE TRANSPORT,639701
+504,missing_centre_after_93to94,6631200,93.1.2.2.2 Bureau des entrées,INDEMNITES DE TRANSPORT,639701
+509,missing_centre_after_93to94,6631200,93.1.6.2.1 Caisse dépenses,INDEMNITES DE TRANSPORT,55461
+510,missing_centre_after_93to94,6631200,93.1.6.2.2 Caisse recettes (caisse principale),INDEMNITES DE TRANSPORT,110922
+511,missing_centre_after_93to94,6631200,93.1.6.3 Division recouvrement,INDEMNITES DE TRANSPORT,27756
+514,invalid_required_fields,6631200,93.1.3.3 division suivi budgétaire,INDEMNITES DE TRANSPORT,None
+516,invalid_required_fields,6631200,93.1.11.1 Brancardage,INDEMNITES DE TRANSPORT,None
+517,invalid_required_fields,6631200,93.1.11.2 Division qualité ,INDEMNITES DE TRANSPORT,None
+518,invalid_required_fields,6631200,93.1.11.3 Division formation,INDEMNITES DE TRANSPORT,None
+519,invalid_required_fields,6631200,93.1.11.4.1 CLIN,INDEMNITES DE TRANSPORT,None
+520,invalid_required_fields,6631200,93.1.11.4.2 Comité 5S,INDEMNITES DE TRANSPORT,None
+522,invalid_required_fields,6631200,93.1.9.2 Cellule de communication,INDEMNITES DE TRANSPORT,None
+523,missing_centre_after_93to94,6631200,93.1.9.3 Division accueil et orientation,INDEMNITES DE TRANSPORT,31200
+524,invalid_required_fields,6631200,93.1.9.4 Prise en charge des Cas sociaux,INDEMNITES DE TRANSPORT,None
+525,invalid_required_fields,6631200,93.1.9.5 MAGAL,INDEMNITES DE TRANSPORT,None
+526,invalid_required_fields,6631200,93.1.5.1 Secrétariat RH,INDEMNITES DE TRANSPORT,None
+527,invalid_required_fields,6631200,93.1.5.2.1 Administration du personnel,INDEMNITES DE TRANSPORT,None
+528,invalid_required_fields,6631200,93.1.5.2.2 Gestion de la paie,INDEMNITES DE TRANSPORT,None
+529,invalid_required_fields,6631200,93.1.5.3.1 Bureau formation,INDEMNITES DE TRANSPORT,None
+530,invalid_required_fields,6631200,93.1.5.3.2 Gestion des carrières et des compétences,INDEMNITES DE TRANSPORT,None
+531,invalid_required_fields,6631200,93.1.5.3.3 CHST,INDEMNITES DE TRANSPORT,None
+532,missing_centre_after_93to94,6631200,"93.1. 12.2 Division génie-civil (infrastructures, etc)",INDEMNITES DE TRANSPORT,473200
+533,missing_centre_after_93to94,6631200,93.1. 12.3 Division biomédicale,INDEMNITES DE TRANSPORT,283920
+534,missing_centre_after_93to94,6631200,93.1. 12.4 Cellule informatique et télécoms,INDEMNITES DE TRANSPORT,283920
+535,missing_centre_after_93to94,6631200,93.1. 12.5 magasin STM,INDEMNITES DE TRANSPORT,851760
+536,missing_centre_after_93to94,6631200,93.1. 13.1 Division hygiène,INDEMNITES DE TRANSPORT,374400
+537,missing_centre_after_93to94,6631200,93.1. 13.2 Division sécurité,INDEMNITES DE TRANSPORT,374400
+540,invalid_required_fields,6631200,93.1.8.1 SIH,INDEMNITES DE TRANSPORT,None
+541,invalid_required_fields,6631200,93.1.8.2 Division des archives,INDEMNITES DE TRANSPORT,None
+545,invalid_required_fields,6631300,93.3.8.3 endoscopie,INDEMNITES DE LOGEMENT,None
+555,missing_centre_after_93to94,6631300,93. 3.17.4 Actes Gynécologie Obstétrique,INDEMNITES DE LOGEMENT,1505350
+557,invalid_required_fields,6631300,93.3.20.2 Hospitalisations Ophtalmologie,INDEMNITES DE LOGEMENT,None
+562,missing_centre_after_93to94,6631300,93.2.3.2Radio standard,INDEMNITES DE LOGEMENT,668285
+579,invalid_required_fields,6631300,93.1.14.1 Pharmacie IB,INDEMNITES DE LOGEMENT,None
+583,missing_centre_after_93to94,6631300,93.3.2.3 hospitalisation Anesthesie Réanimation,INDEMNITES DE LOGEMENT,231592
+585,invalid_required_fields,6631300,93.3.3.2 Mise en Observations Consultations externes,INDEMNITES DE LOGEMENT,None
+587,invalid_required_fields,6631300,93.3.7.1 consultations Dermatologie,INDEMNITES DE LOGEMENT,None
+588,invalid_required_fields,6631300,93.3.7.2 Hospitalisations Dermatologie,INDEMNITES DE LOGEMENT,None
+589,invalid_required_fields,6631300,93.3.7.3 Actes Dermatologie,INDEMNITES DE LOGEMENT,None
+594,missing_centre_after_93to94,6631300,93.3.6.5 Echocoeur,INDEMNITES DE LOGEMENT,997715
+600,invalid_required_fields,6631300,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,INDEMNITES DE LOGEMENT,None
+605,invalid_required_fields,6631300,93.1.1.1 Secrétariat Direction,INDEMNITES DE LOGEMENT,None
+606,invalid_required_fields,6631300,93.1.1.2.1 CA,INDEMNITES DE LOGEMENT,None
+607,invalid_required_fields,6631300,93.1.1.2.2 CME,INDEMNITES DE LOGEMENT,None
+608,invalid_required_fields,6631300,93.1.1.2.3 CTE,INDEMNITES DE LOGEMENT,None
+609,invalid_required_fields,6631300,93.1.1.2.4 Commission de passation des marchés,INDEMNITES DE LOGEMENT,None
+610,invalid_required_fields,6631300,93.1.2.1 Secrétariat SAF,INDEMNITES DE LOGEMENT,None
+611,invalid_required_fields,6631300,93.1.2.2.1 Bureau de la facturation,INDEMNITES DE LOGEMENT,None
+612,invalid_required_fields,6631300,93.1.2.2.2 Bureau des entrées,INDEMNITES DE LOGEMENT,None
+613,invalid_required_fields,6631300,93.1.2.3.1 Cuisine,INDEMNITES DE LOGEMENT,None
+614,invalid_required_fields,6631300,93.1.2.3.2 Buanderie,INDEMNITES DE LOGEMENT,None
+615,invalid_required_fields,6631300,93.1.2.3.3 Parc automobile,INDEMNITES DE LOGEMENT,None
+616,invalid_required_fields,6631300,93.1.6.1 Secrétariat ACP,INDEMNITES DE LOGEMENT,None
+617,invalid_required_fields,6631300,93.1.6.2.1 Caisse dépenses,INDEMNITES DE LOGEMENT,None
+618,invalid_required_fields,6631300,93.1.6.2.2 Caisse recettes (caisse principale),INDEMNITES DE LOGEMENT,None
+619,invalid_required_fields,6631300,93.1.6.3 Division recouvrement,INDEMNITES DE LOGEMENT,None
+621,invalid_required_fields,6631300,93.1.3.2 division Comptabilité analytique,INDEMNITES DE LOGEMENT,None
+622,invalid_required_fields,6631300,93.1.3.3 division suivi budgétaire,INDEMNITES DE LOGEMENT,None
+624,invalid_required_fields,6631300,93.1.11.1 Brancardage,INDEMNITES DE LOGEMENT,None
+625,invalid_required_fields,6631300,93.1.11.2 Division qualité ,INDEMNITES DE LOGEMENT,None
+627,invalid_required_fields,6631300,93.1.11.4.1 CLIN,INDEMNITES DE LOGEMENT,None
+628,invalid_required_fields,6631300,93.1.11.4.2 Comité 5S,INDEMNITES DE LOGEMENT,None
+630,invalid_required_fields,6631300,93.1.9.2 Cellule de communication,INDEMNITES DE LOGEMENT,None
+631,missing_centre_after_93to94,6631300,93.1.9.3 Division accueil et orientation,INDEMNITES DE LOGEMENT,355500
+632,invalid_required_fields,6631300,93.1.9.4 Prise en charge des Cas sociaux,INDEMNITES DE LOGEMENT,None
+633,invalid_required_fields,6631300,93.1.9.5 MAGAL,INDEMNITES DE LOGEMENT,None
+635,missing_centre_after_93to94,6631300,93.1.5.2.1 Administration du personnel,INDEMNITES DE LOGEMENT,118500
+636,missing_centre_after_93to94,6631300,93.1.5.2.2 Gestion de la paie,INDEMNITES DE LOGEMENT,177750
+637,invalid_required_fields,6631300,93.1.5.3.1 Bureau formation,INDEMNITES DE LOGEMENT,None
+638,missing_centre_after_93to94,6631300,93.1.5.3.2 Gestion des carrières et des compétences,INDEMNITES DE LOGEMENT,177750
+639,invalid_required_fields,6631300,93.1.5.3.3 CHST,INDEMNITES DE LOGEMENT,None
+640,missing_centre_after_93to94,6631300,"93.1. 12.2 Division génie-civil (infrastructures, etc)",INDEMNITES DE LOGEMENT,50000
+641,missing_centre_after_93to94,6631300,93.1. 12.3 Division biomédicale,INDEMNITES DE LOGEMENT,30000
+642,missing_centre_after_93to94,6631300,93.1. 12.4 Cellule informatique et télécoms,INDEMNITES DE LOGEMENT,30000
+643,missing_centre_after_93to94,6631300,93.1. 12.5 magasin STM,INDEMNITES DE LOGEMENT,90000
+644,missing_centre_after_93to94,6631300,93.1. 13.1 Division hygiène,INDEMNITES DE LOGEMENT,592500
+645,missing_centre_after_93to94,6631300,93.1. 13.2 Division sécurité,INDEMNITES DE LOGEMENT,592500
+653,invalid_required_fields,6638200,93.3.8.3 endoscopie,PRIMES D'INTERESSEMENT,None
+663,missing_centre_after_93to94,6638200,93. 3.17.4 Actes Gynécologie Obstétrique,PRIMES D'INTERESSEMENT,11367928
+665,invalid_required_fields,6638200,93.3.20.2 Hospitalisations Ophtalmologie,PRIMES D'INTERESSEMENT,None
+670,missing_centre_after_93to94,6638200,93.2.3.2Radio standard,PRIMES D'INTERESSEMENT,3371797
+687,invalid_required_fields,6638200,93.1.14.1 Pharmacie IB,PRIMES D'INTERESSEMENT,None
+691,missing_centre_after_93to94,6638200,93.3.2.3 hospitalisation Anesthesie Réanimation,PRIMES D'INTERESSEMENT,1675674
+693,invalid_required_fields,6638200,93.3.3.2 Mise en Observations Consultations externes,PRIMES D'INTERESSEMENT,None
+695,invalid_required_fields,6638200,93.3.7.1 consultations Dermatologie,PRIMES D'INTERESSEMENT,None
+696,invalid_required_fields,6638200,93.3.7.2 Hospitalisations Dermatologie,PRIMES D'INTERESSEMENT,None
+697,invalid_required_fields,6638200,93.3.7.3 Actes Dermatologie,PRIMES D'INTERESSEMENT,None
+702,missing_centre_after_93to94,6638200,93.3.6.5 Echocoeur,PRIMES D'INTERESSEMENT,6114109
+708,invalid_required_fields,6638200,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,PRIMES D'INTERESSEMENT,None
+714,invalid_required_fields,6638200,93.1.1.2.1 CA,PRIMES D'INTERESSEMENT,None
+715,invalid_required_fields,6638200,93.1.1.2.2 CME,PRIMES D'INTERESSEMENT,None
+716,invalid_required_fields,6638200,93.1.1.2.3 CTE,PRIMES D'INTERESSEMENT,None
+717,invalid_required_fields,6638200,93.1.1.2.4 Commission de passation des marchés,PRIMES D'INTERESSEMENT,None
+719,missing_centre_after_93to94,6638200,93.1.2.2.1 Bureau de la facturation,PRIMES D'INTERESSEMENT,8604459
+720,missing_centre_after_93to94,6638200,93.1.2.2.2 Bureau des entrées,PRIMES D'INTERESSEMENT,8604459
+725,missing_centre_after_93to94,6638200,93.1.6.2.1 Caisse dépenses,PRIMES D'INTERESSEMENT,2439897
+726,missing_centre_after_93to94,6638200,93.1.6.2.2 Caisse recettes (caisse principale),PRIMES D'INTERESSEMENT,4879795
+727,missing_centre_after_93to94,6638200,93.1.6.3 Division recouvrement,PRIMES D'INTERESSEMENT,1221047
+730,invalid_required_fields,6638200,93.1.3.3 division suivi budgétaire,PRIMES D'INTERESSEMENT,None
+732,invalid_required_fields,6638200,93.1.11.1 Brancardage,PRIMES D'INTERESSEMENT,None
+733,invalid_required_fields,6638200,93.1.11.2 Division qualité ,PRIMES D'INTERESSEMENT,None
+735,invalid_required_fields,6638200,93.1.11.4.1 CLIN,PRIMES D'INTERESSEMENT,None
+736,invalid_required_fields,6638200,93.1.11.4.2 Comité 5S,PRIMES D'INTERESSEMENT,None
+739,invalid_required_fields,6638200,93.1.11.3 Division formation,PRIMES D'INTERESSEMENT,None
+740,invalid_required_fields,6638200,93.1.9.4 Prise en charge des Cas sociaux,PRIMES D'INTERESSEMENT,None
+741,invalid_required_fields,6638200,93.1.9.5 MAGAL,PRIMES D'INTERESSEMENT,None
+743,missing_centre_after_93to94,6638200,93.1.5.2.1 Administration du personnel,PRIMES D'INTERESSEMENT,4111117
+744,missing_centre_after_93to94,6638200,93.1.5.2.2 Gestion de la paie,PRIMES D'INTERESSEMENT,616676
+745,invalid_required_fields,6638200,93.1.5.3.1 Bureau formation,PRIMES D'INTERESSEMENT,None
+746,missing_centre_after_93to94,6638200,93.1.5.3.2 Gestion des carrières et des compétences,PRIMES D'INTERESSEMENT,616676
+747,invalid_required_fields,6638200,93.1.5.3.3 CHST,PRIMES D'INTERESSEMENT,None
+748,missing_centre_after_93to94,6638200,"93.1. 12.2 Division génie-civil (infrastructures, etc)",PRIMES D'INTERESSEMENT,3019675
+749,missing_centre_after_93to94,6638200,93.1. 12.3 Division biomédicale,PRIMES D'INTERESSEMENT,5032792
+750,missing_centre_after_93to94,6638200,93.1. 12.4 Cellule informatique et télécoms,PRIMES D'INTERESSEMENT,3019675
+751,missing_centre_after_93to94,6638200,93.1. 12.5 magasin STM,PRIMES D'INTERESSEMENT,9059025
+752,missing_centre_after_93to94,6638200,93.1. 13.1 Division hygiène,PRIMES D'INTERESSEMENT,5101768
+753,missing_centre_after_93to94,6638200,93.1. 13.2 Division sécurité,PRIMES D'INTERESSEMENT,5101768
+761,invalid_required_fields,6638300,93.3.8.3 endoscopie,MOTIVATION NATIONALE,None
+767,invalid_required_fields,6638300,93.3.11.3 actes Pédiatrie,MOTIVATION NATIONALE,None
+771,missing_centre_after_93to94,6638300,93. 3.17.4 Actes Gynécologie Obstétrique,MOTIVATION NATIONALE,3600000
+773,invalid_required_fields,6638300,93.3.20.2 Hospitalisations Ophtalmologie,MOTIVATION NATIONALE,None
+776,invalid_required_fields,6638300,93.3.13.2 Actes chirurgicaux Odontologie,MOTIVATION NATIONALE,None
+778,missing_centre_after_93to94,6638300,93.2.3.2Radio standard,MOTIVATION NATIONALE,0
+799,missing_centre_after_93to94,6638300,93.3.2.3 hospitalisation Anesthesie Réanimation,MOTIVATION NATIONALE,1800000
+805,missing_centre_after_93to94,6638300,93.3.7.3 Actes Dermatologie,MOTIVATION NATIONALE,0
+810,missing_centre_after_93to94,6638300,93.3.6.5 Echocoeur,MOTIVATION NATIONALE,0
+817,invalid_required_fields,6638300,93.3.12.3 Dialyse,MOTIVATION NATIONALE,None
+822,missing_centre_after_93to94,6638300,93.1.1.2.1 CA,MOTIVATION NATIONALE,0
+824,missing_centre_after_93to94,6638300,93.1.1.2.3 CTE,MOTIVATION NATIONALE,0
+826,missing_centre_after_93to94,6638300,93.1.2.2.1 Bureau de la facturation,MOTIVATION NATIONALE,3300000
+827,missing_centre_after_93to94,6638300,93.1.2.2.2 Bureau des entrées,MOTIVATION NATIONALE,3300000
+832,missing_centre_after_93to94,6638300,93.1.6.2.1 Caisse dépenses,MOTIVATION NATIONALE,1200000
+833,missing_centre_after_93to94,6638300,93.1.6.2.2 Caisse recettes (caisse principale),MOTIVATION NATIONALE,2400000
+834,missing_centre_after_93to94,6638300,93.1.6.3 Division recouvrement,MOTIVATION NATIONALE,600000
+842,missing_centre_after_93to94,6638300,93.1.11.4.1 CLIN,MOTIVATION NATIONALE,0
+843,missing_centre_after_93to94,6638300,93.1.11.4.2 Comité 5S,MOTIVATION NATIONALE,0
+846,missing_centre_after_93to94,6638300,93.1.9.3 Division accueil et orientation,MOTIVATION NATIONALE,1800000
+847,missing_centre_after_93to94,6638300,93.1.9.4 Prise en charge des Cas sociaux,MOTIVATION NATIONALE,0
+848,missing_centre_after_93to94,6638300,93.1.9.5 MAGAL,MOTIVATION NATIONALE,0
+850,missing_centre_after_93to94,6638300,93.1.5.2.1 Administration du personnel,MOTIVATION NATIONALE,600000
+851,missing_centre_after_93to94,6638300,93.1.5.2.2 Gestion de la paie,MOTIVATION NATIONALE,0
+852,missing_centre_after_93to94,6638300,93.1.5.3.1 Bureau formation,MOTIVATION NATIONALE,0
+853,invalid_required_fields,6638300,93.1.5.3.2 Gestion des carrières et des compétences,MOTIVATION NATIONALE,None
+854,missing_centre_after_93to94,6638300,93.1.5.3.3 CHST,MOTIVATION NATIONALE,0
+855,missing_centre_after_93to94,6638300,"93.1. 12.2 Division génie-civil (infrastructures, etc)",MOTIVATION NATIONALE,600000
+856,missing_centre_after_93to94,6638300,93.1. 12.3 Division biomédicale,MOTIVATION NATIONALE,60000
+857,missing_centre_after_93to94,6638300,93.1. 12.4 Cellule informatique et télécoms,MOTIVATION NATIONALE,0
+858,missing_centre_after_93to94,6638300,93.1. 12.5 magasin STM,MOTIVATION NATIONALE,1200000
+859,missing_centre_after_93to94,6638300,93.1. 13.1 Division hygiène,MOTIVATION NATIONALE,600000
+860,missing_centre_after_93to94,6638300,93.1. 13.2 Division sécurité,MOTIVATION NATIONALE,1200000
+868,invalid_required_fields,6638100,93.3.8.3 endoscopie,AUTRES INDEMNITES,None
+878,missing_centre_after_93to94,6638100,93. 3.17.4 Actes Gynécologie Obstétrique,AUTRES INDEMNITES,1567975
+880,invalid_required_fields,6638100,93.3.20.2 Hospitalisations Ophtalmologie,AUTRES INDEMNITES,None
+885,missing_centre_after_93to94,6638100,93.2.3.2Radio standard,AUTRES INDEMNITES,0
+902,invalid_required_fields,6638100,93.1.14.1 Pharmacie IB,AUTRES INDEMNITES,None
+906,missing_centre_after_93to94,6638100,93.3.2.3 hospitalisation Anesthesie Réanimation,AUTRES INDEMNITES,312698
+912,missing_centre_after_93to94,6638100,93.3.7.3 Actes Dermatologie,AUTRES INDEMNITES,0
+917,missing_centre_after_93to94,6638100,93.3.6.5 Echocoeur,AUTRES INDEMNITES,1598713
+923,invalid_required_fields,6638100,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,AUTRES INDEMNITES,None
+930,missing_centre_after_93to94,6638100,93.1.1.2.1 CA,AUTRES INDEMNITES,0
+931,missing_centre_after_93to94,6638100,93.1.1.2.3 CTE,AUTRES INDEMNITES,0
+932,missing_centre_after_93to94,6638100,93.1.1.2.4 Commission de passation des marchés,AUTRES INDEMNITES,0
+934,missing_centre_after_93to94,6638100,93.1.2.2.1 Bureau de la facturation,AUTRES INDEMNITES,521760
+935,missing_centre_after_93to94,6638100,93.1.2.2.2 Bureau des entrées,AUTRES INDEMNITES,521760
+940,missing_centre_after_93to94,6638100,93.1.6.2.1 Caisse dépenses,AUTRES INDEMNITES,1599840
+941,missing_centre_after_93to94,6638100,93.1.6.2.2 Caisse recettes (caisse principale),AUTRES INDEMNITES,3199680
+942,missing_centre_after_93to94,6638100,93.1.6.3 Division recouvrement,AUTRES INDEMNITES,800640
+950,missing_centre_after_93to94,6638100,93.1.11.4.1 CLIN,AUTRES INDEMNITES,0
+951,missing_centre_after_93to94,6638100,93.1.11.4.2 Comité 5S,AUTRES INDEMNITES,0
+954,missing_centre_after_93to94,6638100,93.1.9.3 Division accueil et orientation,AUTRES INDEMNITES,0
+955,missing_centre_after_93to94,6638100,93.1.9.4 Prise en charge des Cas sociaux,AUTRES INDEMNITES,0
+956,missing_centre_after_93to94,6638100,93.1.9.5 MAGAL,AUTRES INDEMNITES,0
+958,missing_centre_after_93to94,6638100,93.1.5.2.1 Administration du personnel,AUTRES INDEMNITES,0
+959,missing_centre_after_93to94,6638100,93.1.5.2.2 Gestion de la paie,AUTRES INDEMNITES,0
+960,missing_centre_after_93to94,6638100,93.1.5.3.1 Bureau formation,AUTRES INDEMNITES,0
+961,missing_centre_after_93to94,6638100,93.1.5.3.2 Gestion des carrières et des compétences,AUTRES INDEMNITES,0
+962,missing_centre_after_93to94,6638100,93.1.5.3.3 CHST,AUTRES INDEMNITES,0
+963,missing_centre_after_93to94,6638100,"93.1. 12.2 Division génie-civil (infrastructures, etc)",AUTRES INDEMNITES,0
+964,missing_centre_after_93to94,6638100,93.1. 12.3 Division biomédicale,AUTRES INDEMNITES,0
+965,missing_centre_after_93to94,6638100,93.1. 12.4 Cellule informatique et télécoms,AUTRES INDEMNITES,0
+966,missing_centre_after_93to94,6638100,93.1. 12.5 magasin STM,AUTRES INDEMNITES,0
+967,missing_centre_after_93to94,6638100,93.1. 13.1 Division hygiène,AUTRES INDEMNITES,0
+968,missing_centre_after_93to94,6638100,93.1. 13.2 Division sécurité,AUTRES INDEMNITES,0
+986,missing_centre_after_93to94,6052000,93. 3.17.4 Actes Gynécologie Obstétrique,FOURNITURES NON STOCKABLES - ELECTRICITE,996929
+988,invalid_required_fields,6052000,93.3.20.2 Hospitalisations Ophtalmologie,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+993,missing_centre_after_93to94,6052000,93.2.3.2Radio standard,FOURNITURES NON STOCKABLES - ELECTRICITE,10766276
+1010,invalid_required_fields,6052000,93.1.14.1 Pharmacie IB,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1014,missing_centre_after_93to94,6052000,93.3.2.3 hospitalisation Anesthesie Réanimation,FOURNITURES NON STOCKABLES - ELECTRICITE,196801
+1016,invalid_required_fields,6052000,93.3.3.2 Mise en Observations Consultations externes,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1020,missing_centre_after_93to94,6052000,93.3.7.3 Actes Dermatologie,FOURNITURES NON STOCKABLES - ELECTRICITE,56295
+1025,missing_centre_after_93to94,6052000,93.3.6.5 Echocoeur,FOURNITURES NON STOCKABLES - ELECTRICITE,166453
+1031,invalid_required_fields,6052000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1037,invalid_required_fields,6052000,93.1.1.2.1 CA,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1038,invalid_required_fields,6052000,93.1.1.2.2 CME,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1039,invalid_required_fields,6052000,93.1.1.2.3 CTE,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1040,invalid_required_fields,6052000,93.1.1.2.4 Commission de passation des marchés,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1042,missing_centre_after_93to94,6052000,93.1.2.2.1 Bureau de la facturation,FOURNITURES NON STOCKABLES - ELECTRICITE,526060
+1043,missing_centre_after_93to94,6052000,93.1.2.2.2 Bureau des entrées,FOURNITURES NON STOCKABLES - ELECTRICITE,526060
+1048,missing_centre_after_93to94,6052000,93.1.6.2.1 Caisse dépenses,FOURNITURES NON STOCKABLES - ELECTRICITE,537675
+1049,missing_centre_after_93to94,6052000,93.1.6.2.2 Caisse recettes (caisse principale),FOURNITURES NON STOCKABLES - ELECTRICITE,1075350
+1050,missing_centre_after_93to94,6052000,93.1.6.3 Division recouvrement,FOURNITURES NON STOCKABLES - ELECTRICITE,269079
+1055,invalid_required_fields,6052000,93.1.11.1 Brancardage,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1056,invalid_required_fields,6052000,93.1.11.2 Division qualité ,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1058,invalid_required_fields,6052000,93.1.11.4.1 CLIN,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1059,invalid_required_fields,6052000,93.1.11.4.2 Comité 5S,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1061,invalid_required_fields,6052000,93.1.9.2 Cellule de communication,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1062,missing_centre_after_93to94,6052000,93.1.9.3 Division accueil et orientation,FOURNITURES NON STOCKABLES - ELECTRICITE,1185692
+1063,invalid_required_fields,6052000,93.1.9.4 Prise en charge des Cas sociaux,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1064,invalid_required_fields,6052000,93.1.9.5 MAGAL,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1066,missing_centre_after_93to94,6052000,93.1.5.2.1 Administration du personnel,FOURNITURES NON STOCKABLES - ELECTRICITE,241978
+1067,missing_centre_after_93to94,6052000,93.1.5.2.2 Gestion de la paie,FOURNITURES NON STOCKABLES - ELECTRICITE,362967
+1068,invalid_required_fields,6052000,93.1.5.3.1 Bureau formation,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1069,missing_centre_after_93to94,6052000,93.1.5.3.2 Gestion des carrières et des compétences,FOURNITURES NON STOCKABLES - ELECTRICITE,362967
+1070,invalid_required_fields,6052000,93.1.5.3.3 CHST,FOURNITURES NON STOCKABLES - ELECTRICITE,None
+1071,missing_centre_after_93to94,6052000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",FOURNITURES NON STOCKABLES - ELECTRICITE,503491
+1072,missing_centre_after_93to94,6052000,93.1. 12.3 Division biomédicale,FOURNITURES NON STOCKABLES - ELECTRICITE,302095
+1073,missing_centre_after_93to94,6052000,93.1. 12.4 Cellule informatique et télécoms,FOURNITURES NON STOCKABLES - ELECTRICITE,302095
+1074,missing_centre_after_93to94,6052000,93.1. 12.5 magasin STM,FOURNITURES NON STOCKABLES - ELECTRICITE,906284
+1075,missing_centre_after_93to94,6052000,93.1. 13.1 Division hygiène,FOURNITURES NON STOCKABLES - ELECTRICITE,1006983
+1076,missing_centre_after_93to94,6052000,93.1. 13.2 Division sécurité,FOURNITURES NON STOCKABLES - ELECTRICITE,1006983
+1094,missing_centre_after_93to94,6043000,93. 3.17.4 Actes Gynécologie Obstétrique,PRODUITS D'ENTRETIEN,156000
+1096,invalid_required_fields,6043000,93.3.20.2 Hospitalisations Ophtalmologie,PRODUITS D'ENTRETIEN,None
+1101,missing_centre_after_93to94,6043000,93.2.3.2Radio standard,PRODUITS D'ENTRETIEN,235125
+1118,invalid_required_fields,6043000,93.1.14.1 Pharmacie IB,PRODUITS D'ENTRETIEN,None
+1119,invalid_required_fields,6043000,93.1.14.2 Pharmacie centrale ,PRODUITS D'ENTRETIEN,None
+1122,missing_centre_after_93to94,6043000,93.3.2.3 hospitalisation Anesthesie Réanimation,PRODUITS D'ENTRETIEN,52865
+1124,invalid_required_fields,6043000,93.3.3.2 Mise en Observations Consultations externes,PRODUITS D'ENTRETIEN,None
+1128,missing_centre_after_93to94,6043000,93.3.7.3 Actes Dermatologie,PRODUITS D'ENTRETIEN,1350
+1132,invalid_required_fields,6043000,93.3.6.4 MAPA,PRODUITS D'ENTRETIEN,None
+1133,invalid_required_fields,6043000,93.3.6.5 Echocoeur,PRODUITS D'ENTRETIEN,None
+1134,invalid_required_fields,6043000,93.3.6.6 Holter,PRODUITS D'ENTRETIEN,None
+1139,invalid_required_fields,6043000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,PRODUITS D'ENTRETIEN,None
+1145,invalid_required_fields,6043000,93.1.1.2.1 CA,PRODUITS D'ENTRETIEN,None
+1146,invalid_required_fields,6043000,93.1.1.2.2 CME,PRODUITS D'ENTRETIEN,None
+1147,invalid_required_fields,6043000,93.1.1.2.3 CTE,PRODUITS D'ENTRETIEN,None
+1148,invalid_required_fields,6043000,93.1.1.2.4 Commission de passation des marchés,PRODUITS D'ENTRETIEN,None
+1150,missing_centre_after_93to94,6043000,93.1.2.2.1 Bureau de la facturation,PRODUITS D'ENTRETIEN,258975
+1151,missing_centre_after_93to94,6043000,93.1.2.2.2 Bureau des entrées,PRODUITS D'ENTRETIEN,258975
+1156,missing_centre_after_93to94,6043000,93.1.6.2.1 Caisse dépenses,PRODUITS D'ENTRETIEN,9859
+1157,missing_centre_after_93to94,6043000,93.1.6.2.2 Caisse recettes (caisse principale),PRODUITS D'ENTRETIEN,159257
+1158,missing_centre_after_93to94,6043000,93.1.6.3 Division recouvrement,PRODUITS D'ENTRETIEN,22578
+1160,invalid_required_fields,6043000,93.1.3.2 division Comptabilité analytique,PRODUITS D'ENTRETIEN,None
+1161,invalid_required_fields,6043000,93.1.3.3 division suivi budgétaire,PRODUITS D'ENTRETIEN,None
+1163,invalid_required_fields,6043000,93.1.11.1 Brancardage,PRODUITS D'ENTRETIEN,None
+1164,invalid_required_fields,6043000,93.1.11.2 Division qualité ,PRODUITS D'ENTRETIEN,None
+1166,invalid_required_fields,6043000,93.1.11.4.1 CLIN,PRODUITS D'ENTRETIEN,None
+1167,invalid_required_fields,6043000,93.1.11.4.2 Comité 5S,PRODUITS D'ENTRETIEN,None
+1168,invalid_required_fields,6043000,93.1.9.1 Secrétariat SS,PRODUITS D'ENTRETIEN,None
+1169,invalid_required_fields,6043000,93.1.9.2 Cellule de communication,PRODUITS D'ENTRETIEN,None
+1170,invalid_required_fields,6043000,93.1.9.3 Division accueil et orientation,PRODUITS D'ENTRETIEN,None
+1171,invalid_required_fields,6043000,93.1.9.4 Prise en charge des Cas sociaux,PRODUITS D'ENTRETIEN,None
+1172,invalid_required_fields,6043000,93.1.9.5 MAGAL,PRODUITS D'ENTRETIEN,None
+1174,missing_centre_after_93to94,6043000,93.1.5.2.1 Administration du personnel,PRODUITS D'ENTRETIEN,8005
+1175,missing_centre_after_93to94,6043000,93.1.5.2.2 Gestion de la paie,PRODUITS D'ENTRETIEN,10627
+1176,invalid_required_fields,6043000,93.1.5.3.1 Bureau formation,PRODUITS D'ENTRETIEN,None
+1177,missing_centre_after_93to94,6043000,93.1.5.3.2 Gestion des carrières et des compétences,PRODUITS D'ENTRETIEN,8005
+1178,invalid_required_fields,6043000,93.1.5.3.3 CHST,PRODUITS D'ENTRETIEN,None
+1179,invalid_required_fields,6043000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",PRODUITS D'ENTRETIEN,None
+1180,invalid_required_fields,6043000,93.1. 12.3 Division biomédicale,PRODUITS D'ENTRETIEN,None
+1181,invalid_required_fields,6043000,93.1. 12.4 Cellule informatique et télécoms,PRODUITS D'ENTRETIEN,None
+1182,invalid_required_fields,6043000,93.1. 12.5 magasin STM,PRODUITS D'ENTRETIEN,None
+1183,missing_centre_after_93to94,6043000,93.1. 13.1 Division hygiène,PRODUITS D'ENTRETIEN,39856
+1184,missing_centre_after_93to94,6043000,93.1. 13.2 Division sécurité,PRODUITS D'ENTRETIEN,39854
+1185,invalid_required_fields,6043000,93.1.7.1 Magasin CM,PRODUITS D'ENTRETIEN,None
+1186,invalid_required_fields,6043000,93.1.7.2 Comptabilité des matières S,PRODUITS D'ENTRETIEN,None
+1202,missing_centre_after_93to94,6047000,93. 3.17.4 Actes Gynécologie Obstétrique,FOURNITURES DE BUREAU,62580
+1204,invalid_required_fields,6047000,93.3.20.2 Hospitalisations Ophtalmologie,FOURNITURES DE BUREAU,None
+1209,missing_centre_after_93to94,6047000,93.2.3.2Radio standard,FOURNITURES DE BUREAU,41853
+1226,invalid_required_fields,6047000,93.1.14.1 Pharmacie IB,FOURNITURES DE BUREAU,None
+1230,missing_centre_after_93to94,6047000,93.3.2.3 hospitalisation Anesthesie Réanimation,FOURNITURES DE BUREAU,12587
+1232,invalid_required_fields,6047000,93.3.3.2 Mise en Observations Consultations externes,FOURNITURES DE BUREAU,None
+1236,missing_centre_after_93to94,6047000,93.3.7.3 Actes Dermatologie,FOURNITURES DE BUREAU,15878
+1241,missing_centre_after_93to94,6047000,93.3.6.5 Echocoeur,FOURNITURES DE BUREAU,28775
+1247,invalid_required_fields,6047000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,FOURNITURES DE BUREAU,None
+1253,invalid_required_fields,6047000,93.1.1.2.1 CA,FOURNITURES DE BUREAU,None
+1254,invalid_required_fields,6047000,93.1.1.2.2 CME,FOURNITURES DE BUREAU,None
+1255,invalid_required_fields,6047000,93.1.1.2.3 CTE,FOURNITURES DE BUREAU,None
+1256,invalid_required_fields,6047000,93.1.1.2.4 Commission de passation des marchés,FOURNITURES DE BUREAU,None
+1258,missing_centre_after_93to94,6047000,93.1.2.2.1 Bureau de la facturation,FOURNITURES DE BUREAU,125887
+1259,missing_centre_after_93to94,6047000,93.1.2.2.2 Bureau des entrées,FOURNITURES DE BUREAU,125887
+1264,missing_centre_after_93to94,6047000,93.1.6.2.1 Caisse dépenses,FOURNITURES DE BUREAU,132800
+1265,missing_centre_after_93to94,6047000,93.1.6.2.2 Caisse recettes (caisse principale),FOURNITURES DE BUREAU,357000
+1266,missing_centre_after_93to94,6047000,93.1.6.3 Division recouvrement,FOURNITURES DE BUREAU,99874
+1269,invalid_required_fields,6047000,93.1.3.3 division suivi budgétaire,FOURNITURES DE BUREAU,None
+1271,invalid_required_fields,6047000,93.1.11.1 Brancardage,FOURNITURES DE BUREAU,None
+1272,invalid_required_fields,6047000,93.1.11.2 Division qualité ,FOURNITURES DE BUREAU,None
+1274,invalid_required_fields,6047000,93.1.11.4.1 CLIN,FOURNITURES DE BUREAU,None
+1275,invalid_required_fields,6047000,93.1.11.4.2 Comité 5S,FOURNITURES DE BUREAU,None
+1277,invalid_required_fields,6047000,93.1.9.2 Cellule de communication,FOURNITURES DE BUREAU,None
+1278,missing_centre_after_93to94,6047000,93.1.9.3 Division accueil et orientation,FOURNITURES DE BUREAU,72154
+1279,missing_centre_after_93to94,6047000,93.1.9.4 Prise en charge des Cas sociaux,FOURNITURES DE BUREAU,0
+1280,missing_centre_after_93to94,6047000,93.1.9.5 MAGAL,FOURNITURES DE BUREAU,0
+1282,missing_centre_after_93to94,6047000,93.1.5.2.1 Administration du personnel,FOURNITURES DE BUREAU,18547
+1283,missing_centre_after_93to94,6047000,93.1.5.2.2 Gestion de la paie,FOURNITURES DE BUREAU,14785
+1284,invalid_required_fields,6047000,93.1.5.3.1 Bureau formation,FOURNITURES DE BUREAU,None
+1285,missing_centre_after_93to94,6047000,93.1.5.3.2 Gestion des carrières et des compétences,FOURNITURES DE BUREAU,14785
+1286,missing_centre_after_93to94,6047000,93.1.5.3.3 CHST,FOURNITURES DE BUREAU,0
+1287,missing_centre_after_93to94,6047000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",FOURNITURES DE BUREAU,32587
+1288,missing_centre_after_93to94,6047000,93.1. 12.3 Division biomédicale,FOURNITURES DE BUREAU,22450
+1289,missing_centre_after_93to94,6047000,93.1. 12.4 Cellule informatique et télécoms,FOURNITURES DE BUREAU,22450
+1290,missing_centre_after_93to94,6047000,93.1. 12.5 magasin STM,FOURNITURES DE BUREAU,58701
+1291,missing_centre_after_93to94,6047000,93.1. 13.1 Division hygiène,FOURNITURES DE BUREAU,19850
+1292,missing_centre_after_93to94,6047000,93.1. 13.2 Division sécurité,FOURNITURES DE BUREAU,19850
+1309,missing_centre_after_93to94,6047100,93. 3.17.4 Actes Gynécologie Obstétrique,CONSOMMABLES INFORMATIQUES,88455
+1311,invalid_required_fields,6047100,93.3.20.2 Hospitalisations Ophtalmologie,CONSOMMABLES INFORMATIQUES,None
+1316,missing_centre_after_93to94,6047100,93.2.3.2Radio standard,CONSOMMABLES INFORMATIQUES,98145
+1336,missing_centre_after_93to94,6047100,93.3.2.3 hospitalisation Anesthesie Réanimation,CONSOMMABLES INFORMATIQUES,0
+1342,missing_centre_after_93to94,6047100,93.3.7.3 Actes Dermatologie,CONSOMMABLES INFORMATIQUES,0
+1347,missing_centre_after_93to94,6047100,93.3.6.5 Echocoeur,CONSOMMABLES INFORMATIQUES,0
+1349,invalid_required_fields,6047100,93.3.19.1 Consultations ORL,CONSOMMABLES INFORMATIQUES,None
+1359,invalid_required_fields,6047100,93.1.1.2.1 CA,CONSOMMABLES INFORMATIQUES,None
+1360,invalid_required_fields,6047100,93.1.1.2.2 CME,CONSOMMABLES INFORMATIQUES,None
+1361,invalid_required_fields,6047100,93.1.1.2.3 CTE,CONSOMMABLES INFORMATIQUES,None
+1362,invalid_required_fields,6047100,93.1.1.2.4 Commission de passation des marchés,CONSOMMABLES INFORMATIQUES,None
+1364,missing_centre_after_93to94,6047100,93.1.2.2.2 Bureau des entrées,CONSOMMABLES INFORMATIQUES,588262
+1369,missing_centre_after_93to94,6047100,93.1.6.2.1 Caisse dépenses,CONSOMMABLES INFORMATIQUES,258222
+1370,missing_centre_after_93to94,6047100,93.1.6.2.2 Caisse recettes (caisse principale),CONSOMMABLES INFORMATIQUES,879450
+1371,missing_centre_after_93to94,6047100,93.1.6.3 Division recouvrement,CONSOMMABLES INFORMATIQUES,235874
+1379,missing_centre_after_93to94,6047100,93.1.11.4.1 CLIN,CONSOMMABLES INFORMATIQUES,0
+1380,missing_centre_after_93to94,6047100,93.1.11.4.2 Comité 5S,CONSOMMABLES INFORMATIQUES,0
+1383,missing_centre_after_93to94,6047100,93.1.9.3 Division accueil et orientation,CONSOMMABLES INFORMATIQUES,9500
+1384,missing_centre_after_93to94,6047100,93.1.9.4 Prise en charge des Cas sociaux,CONSOMMABLES INFORMATIQUES,0
+1385,missing_centre_after_93to94,6047100,93.1.9.5 MAGAL,CONSOMMABLES INFORMATIQUES,0
+1387,missing_centre_after_93to94,6047100,93.1.5.2.1 Administration du personnel,CONSOMMABLES INFORMATIQUES,2587
+1388,missing_centre_after_93to94,6047100,93.1.5.2.2 Gestion de la paie,CONSOMMABLES INFORMATIQUES,4874
+1389,missing_centre_after_93to94,6047100,93.1.5.3.2 Gestion des carrières et des compétences,CONSOMMABLES INFORMATIQUES,5002
+1390,missing_centre_after_93to94,6047100,93.1.5.3.3 CHST,CONSOMMABLES INFORMATIQUES,0
+1391,missing_centre_after_93to94,6047100,"93.1. 12.2 Division génie-civil (infrastructures, etc)",CONSOMMABLES INFORMATIQUES,0
+1392,missing_centre_after_93to94,6047100,93.1. 12.3 Division biomédicale,CONSOMMABLES INFORMATIQUES,0
+1393,missing_centre_after_93to94,6047100,93.1. 12.4 Cellule informatique et télécoms,CONSOMMABLES INFORMATIQUES,0
+1394,missing_centre_after_93to94,6047100,93.1. 12.5 magasin STM,CONSOMMABLES INFORMATIQUES,0
+1395,missing_centre_after_93to94,6047100,93.1. 13.1 Division hygiène,CONSOMMABLES INFORMATIQUES,0
+1396,missing_centre_after_93to94,6047100,93.1. 13.2 Division sécurité,CONSOMMABLES INFORMATIQUES,0
+1414,missing_centre_after_93to94,6048000,93. 3.17.4 Actes Gynécologie Obstétrique,IMPRIMES,89225
+1421,missing_centre_after_93to94,6048000,93.2.3.2Radio standard,IMPRIMES,28650
+1442,missing_centre_after_93to94,6048000,93.3.2.3 hospitalisation Anesthesie Réanimation,IMPRIMES,7124
+1448,missing_centre_after_93to94,6048000,93.3.7.3 Actes Dermatologie,IMPRIMES,22500
+1453,missing_centre_after_93to94,6048000,93.3.6.5 Echocoeur,IMPRIMES,52700
+1465,missing_centre_after_93to94,6048000,93.1.1.2.1 CA,IMPRIMES,0
+1467,missing_centre_after_93to94,6048000,93.1.1.2.3 CTE,IMPRIMES,0
+1468,missing_centre_after_93to94,6048000,93.1.1.2.4 Commission de passation des marchés,IMPRIMES,0
+1470,missing_centre_after_93to94,6048000,93.1.2.2.1 Bureau de la facturation,IMPRIMES,215305
+1471,missing_centre_after_93to94,6048000,93.1.2.2.2 Bureau des entrées,IMPRIMES,115305
+1476,missing_centre_after_93to94,6048000,93.1.6.2.1 Caisse dépenses,IMPRIMES,221580
+1477,missing_centre_after_93to94,6048000,93.1.6.2.2 Caisse recettes (caisse principale),IMPRIMES,398500
+1478,missing_centre_after_93to94,6048000,93.1.6.3 Division recouvrement,IMPRIMES,198066
+1486,missing_centre_after_93to94,6048000,93.1.11.4.1 CLIN,IMPRIMES,0
+1487,missing_centre_after_93to94,6048000,93.1.11.4.2 Comité 5S,IMPRIMES,0
+1490,missing_centre_after_93to94,6048000,93.1.9.3 Division accueil et orientation,IMPRIMES,0
+1491,missing_centre_after_93to94,6048000,93.1.9.4 Prise en charge des Cas sociaux,IMPRIMES,0
+1492,missing_centre_after_93to94,6048000,93.1.9.5 MAGAL,IMPRIMES,0
+1494,missing_centre_after_93to94,6048000,93.1.5.2.1 Administration du personnel,IMPRIMES,0
+1495,missing_centre_after_93to94,6048000,93.1.5.2.2 Gestion de la paie,IMPRIMES,0
+1496,missing_centre_after_93to94,6048000,93.1.5.3.1 Bureau formation,IMPRIMES,0
+1497,missing_centre_after_93to94,6048000,93.1.5.3.2 Gestion des carrières et des compétences,IMPRIMES,0
+1498,missing_centre_after_93to94,6048000,93.1.5.3.3 CHST,IMPRIMES,0
+1499,missing_centre_after_93to94,6048000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",IMPRIMES,0
+1500,missing_centre_after_93to94,6048000,93.1. 12.3 Division biomédicale,IMPRIMES,0
+1501,missing_centre_after_93to94,6048000,93.1. 12.4 Cellule informatique et télécoms,IMPRIMES,0
+1502,missing_centre_after_93to94,6048000,93.1. 12.5 magasin STM,IMPRIMES,0
+1503,missing_centre_after_93to94,6048000,93.1. 13.1 Division hygiène,IMPRIMES,0
+1504,missing_centre_after_93to94,6048000,93.1. 13.2 Division sécurité,IMPRIMES,0
+1511,missing_centre_after_93to94,6080000,93.1.2.2.1 Bureau de la facturation,ACHATS D'EMBALLAGES,304360
+1512,missing_centre_after_93to94,6080000,93.1.2.2.2 Bureau des entrées,ACHATS D'EMBALLAGES,304360
+1516,missing_centre_after_93to94,6080000,93.1. 13.1 Division hygiène,ACHATS D'EMBALLAGES,1938268
+1517,missing_centre_after_93to94,6080000,93.1. 13.2 Division sécurité,ACHATS D'EMBALLAGES,1938268
+1518,invalid_required_fields,6080000,93.1.14.1 Pharmacie IB,ACHATS D'EMBALLAGES,None
+1521,missing_centre_after_93to94,6242000,93.1.2.2.1 Bureau de la facturation,ENTRETIEN ET REPARATION DES BIENS MOBILIERS,3797730
+1522,missing_centre_after_93to94,6242000,93.1.2.2.2 Bureau des entrées,ENTRETIEN ET REPARATION DES BIENS MOBILIERS,3797730
+1528,missing_centre_after_93to94,6241000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",ENTRETIEN ET REPARATION DES BIENS IMMOBILIERS,13047665
+1529,missing_centre_after_93to94,6241000,93.1. 12.3 Division biomédicale,ENTRETIEN ET REPARATION DES BIENS IMMOBILIERS,7828599
+1530,missing_centre_after_93to94,6241000,93.1. 12.4 Cellule informatique et télécoms,ENTRETIEN ET REPARATION DES BIENS IMMOBILIERS,7828599
+1531,missing_centre_after_93to94,6241000,93.1. 12.5 magasin STM,ENTRETIEN ET REPARATION DES BIENS IMMOBILIERS,23485797
+1532,missing_centre_after_93to94,6241000,93.1. 13.1 Division hygiène,ENTRETIEN ET REPARATION DES BIENS IMMOBILIERS,13887420
+1533,missing_centre_after_93to94,6241000,93.1. 13.2 Division sécurité,ENTRETIEN ET REPARATION DES BIENS IMMOBILIERS,13887420
+1535,missing_centre_after_93to94,6280000,93.1.2.2.1 Bureau de la facturation,FRAIS DE  TELECOMMUNICATIONS,801445
+1536,missing_centre_after_93to94,6280000,93.1.2.2.2 Bureau des entrées,FRAIS DE  TELECOMMUNICATIONS,801445
+1541,missing_centre_after_93to94,6581000,93.1.1.2.1 CA,FONCTIONNEMENT DU CA ET AUTRES ORGANES,7980000
+1552,missing_centre_after_93to94,6581000,93.1.6.3 Division recouvrement,FONCTIONNEMENT DU CA ET AUTRES ORGANES,100000
+1553,missing_centre_after_93to94,6581000,93.1. 12.5 magasin STM,FONCTIONNEMENT DU CA ET AUTRES ORGANES,300000
+1555,invalid_required_fields,6581000,93.1.2.3.3 Parc automobile,FONCTIONNEMENT DU CA ET AUTRES ORGANES,None
+1558,invalid_required_fields,6581000,93.3.21.1 Stérilisation Bloc,FONCTIONNEMENT DU CA ET AUTRES ORGANES,None
+1561,missing_centre_after_93to94,6222000,93.1. 12.5 magasin STM,LOCATIONS DE BATIMENTS,700000
+1564,missing_centre_after_93to94,6582000,93.1.9.3 Division accueil et orientation,DONS (APPUIS),1308000
+1565,invalid_required_fields,6582000,93.1.1.1 Secrétariat Direction,DONS (APPUIS),None
+1567,invalid_required_fields,6582000,93.3.10.2 hospitalisations Pédiatrie,DONS (APPUIS),None
+1569,invalid_required_fields,6582000,93.3.10.3 actes Pédiatrie,DONS (APPUIS),None
+1571,invalid_required_fields,6582000,93.3.19.2 Hospitalisations ORL,DONS (APPUIS),None
+1572,invalid_required_fields,6582000,93.3.19.3 actes ORL,DONS (APPUIS),None
+1573,missing_centre_after_93to94,6383000,93.1.9.5 MAGAL,FRAIS D'ORGANISATION DU GRAND MAGAL,68266408
+1575,invalid_required_fields,6270000,93.1.15 Banque de sang,"PUBLICITES, PUBLICATIONS ET RELATIONS PUBLIQUES",None
+1580,invalid_required_fields,6330000,93.3.10.1 consultations Pédiatrie,FRAIS DE FORMATION DU PERSONNEL,None
+1581,missing_centre_after_93to94,6330000,93.1.5.2.1 Administration du personnel,FRAIS DE FORMATION DU PERSONNEL,360000
+1582,invalid_required_fields,6330000,93.1.1.1 Secrétariat Direction,FRAIS DE FORMATION DU PERSONNEL,None
+1589,missing_centre_after_93to94,6330000,93. 3.17.4 Actes Gynécologie Obstétrique,FRAIS DE FORMATION DU PERSONNEL,139737
+1592,missing_centre_after_93to94,6330000,93.3.2.3 hospitalisation Anesthesie Réanimation,FRAIS DE FORMATION DU PERSONNEL,422468
+1594,missing_centre_after_93to94,6330000,93.2.3.2Radio standard,FRAIS DE FORMATION DU PERSONNEL,120000
+1598,missing_centre_after_93to94,6330000,93.1.9.3 Division accueil et orientation,FRAIS DE FORMATION DU PERSONNEL,80000
+1602,invalid_required_fields,6330000,93.1.3.1 Secrétaire CG,FRAIS DE FORMATION DU PERSONNEL,None
+1604,invalid_required_fields,6330000,93.1.3.3 division suivi budgétaire,FRAIS DE FORMATION DU PERSONNEL,None
+1612,missing_centre_after_93to94,6330000,93.1.2.2.1 Bureau de la facturation,FRAIS DE FORMATION DU PERSONNEL,54350
+1613,missing_centre_after_93to94,6330000,93.1.2.2.2 Bureau des entrées,FRAIS DE FORMATION DU PERSONNEL,54350
+1619,invalid_required_fields,6810000,93.3.8.3 endoscopie,DOTATION AUX AMORTISSEMENTS,None
+1629,missing_centre_after_93to94,6810000,93. 3.17.4 Actes Gynécologie Obstétrique,DOTATION AUX AMORTISSEMENTS,1051319
+1631,invalid_required_fields,6810000,93.3.20.2 Hospitalisations Ophtalmologie,DOTATION AUX AMORTISSEMENTS,None
+1636,missing_centre_after_93to94,6810000,93.2.3.2Radio standard,DOTATION AUX AMORTISSEMENTS,1777201
+1653,invalid_required_fields,6810000,93.1.14.1 Pharmacie IB,DOTATION AUX AMORTISSEMENTS,None
+1657,missing_centre_after_93to94,6810000,93.3.2.3 hospitalisation Anesthesie Réanimation,DOTATION AUX AMORTISSEMENTS,404139
+1659,invalid_required_fields,6810000,93.3.3.2 Mise en Observations Consultations externes,DOTATION AUX AMORTISSEMENTS,None
+1663,missing_centre_after_93to94,6810000,93.3.7.3 Actes Dermatologie,DOTATION AUX AMORTISSEMENTS,0
+1668,missing_centre_after_93to94,6810000,93.3.6.5 Echocoeur,DOTATION AUX AMORTISSEMENTS,1865950
+1674,invalid_required_fields,6810000,93.3.12.2 Hospitalisations de jour Néphrologie Hémodialyse,DOTATION AUX AMORTISSEMENTS,None
+1680,missing_centre_after_93to94,6810000,93.1.1.2.1 CA,DOTATION AUX AMORTISSEMENTS,0
+1682,missing_centre_after_93to94,6810000,93.1.1.2.3 CTE,DOTATION AUX AMORTISSEMENTS,0
+1683,missing_centre_after_93to94,6810000,93.1.1.2.4 Commission de passation des marchés,DOTATION AUX AMORTISSEMENTS,0
+1685,missing_centre_after_93to94,6810000,93.1.2.2.1 Bureau de la facturation,DOTATION AUX AMORTISSEMENTS,90507
+1686,missing_centre_after_93to94,6810000,93.1.2.2.2 Bureau des entrées,DOTATION AUX AMORTISSEMENTS,90507
+1687,invalid_required_fields,None,93.1.2.3.2 Buanderie,None,None
+1691,missing_centre_after_93to94,6810000,93.1.6.2.1 Caisse dépenses,DOTATION AUX AMORTISSEMENTS,887910
+1692,missing_centre_after_93to94,6810000,93.1.6.2.2 Caisse recettes (caisse principale),DOTATION AUX AMORTISSEMENTS,1775820
+1693,missing_centre_after_93to94,6810000,93.1.6.3 Division recouvrement,DOTATION AUX AMORTISSEMENTS,444355
+1698,invalid_required_fields,6810000,93.1.11.1 Brancardage,DOTATION AUX AMORTISSEMENTS,None
+1699,invalid_required_fields,6810000,93.1.11.2 Division qualité ,DOTATION AUX AMORTISSEMENTS,None
+1701,invalid_required_fields,6810000,93.1.11.4.1 CLIN,DOTATION AUX AMORTISSEMENTS,None
+1702,invalid_required_fields,6810000,93.1.11.4.2 Comité 5S,DOTATION AUX AMORTISSEMENTS,None
+1704,invalid_required_fields,6810000,93.1.9.2 Cellule de communication,DOTATION AUX AMORTISSEMENTS,None
+1705,missing_centre_after_93to94,6810000,93.1.9.3 Division accueil et orientation,DOTATION AUX AMORTISSEMENTS,124895
+1706,invalid_required_fields,6810000,93.1.9.4 Prise en charge des Cas sociaux,DOTATION AUX AMORTISSEMENTS,None
+1707,invalid_required_fields,6810000,93.1.9.5 MAGAL,DOTATION AUX AMORTISSEMENTS,None
+1709,missing_centre_after_93to94,6810000,93.1.5.2.1 Administration du personnel,DOTATION AUX AMORTISSEMENTS,41632
+1710,missing_centre_after_93to94,6810000,93.1.5.2.2 Gestion de la paie,DOTATION AUX AMORTISSEMENTS,62447
+1711,invalid_required_fields,6810000,93.1.5.3.1 Bureau formation,DOTATION AUX AMORTISSEMENTS,None
+1712,missing_centre_after_93to94,6810000,93.1.5.3.2 Gestion des carrières et des compétences,DOTATION AUX AMORTISSEMENTS,62447
+1713,invalid_required_fields,6810000,93.1.5.3.3 CHST,DOTATION AUX AMORTISSEMENTS,None
+1714,missing_centre_after_93to94,6810000,"93.1. 12.2 Division génie-civil (infrastructures, etc)",DOTATION AUX AMORTISSEMENTS,104079
+1715,missing_centre_after_93to94,6810000,93.1. 12.5 magasin STM,DOTATION AUX AMORTISSEMENTS,187342
+1716,missing_centre_after_93to94,6810000,93.1. 12.3 Division biomédicale,DOTATION AUX AMORTISSEMENTS,62447
+1717,missing_centre_after_93to94,6810000,93.1. 12.4 Cellule informatique et télécoms,DOTATION AUX AMORTISSEMENTS,62447
+1718,missing_centre_after_93to94,6810000,93.1. 13.1 Division hygiène,DOTATION AUX AMORTISSEMENTS,208158
+1719,missing_centre_after_93to94,6810000,93.1. 13.2 Division sécurité,DOTATION AUX AMORTISSEMENTS,208158
+1725,missing_centre_after_93to94,6371300,93.1.2.2.1 Bureau de la facturation,RENUMERATION PRESTATION CULINAIRE,341825
+1728,missing_centre_after_93to94,6371300,93.1.2.2.2 Bureau des entrées,RENUMERATION PRESTATION CULINAIRE,341825
+1737,missing_centre_after_93to94,6371300,93.2.3.2Radio standard,RENUMERATION PRESTATION CULINAIRE,223190
+1760,missing_centre_after_93to94,6371300,93.3.7.3 Actes Dermatologie,RENUMERATION PRESTATION CULINAIRE,9763
+1765,missing_centre_after_93to94,6371300,93.3.6.5 Echocoeur,RENUMERATION PRESTATION CULINAIRE,1350208
+1773,missing_centre_after_93to94,6371300,93. 3.17.4 Actes Gynécologie Obstétrique,RENUMERATION PRESTATION CULINAIRE,4908036
+1778,missing_centre_after_93to94,6371300,93.3.2.3 hospitalisation Anesthesie Réanimation,RENUMERATION PRESTATION CULINAIRE,397029
+1780,missing_centre_after_93to94,6371300,93.1.6.2.1 Caisse dépenses,RENUMERATION PRESTATION CULINAIRE,138108
+1781,missing_centre_after_93to94,6371300,93.1.6.2.2 Caisse recettes (caisse principale),RENUMERATION PRESTATION CULINAIRE,276217
+1782,missing_centre_after_93to94,6371300,93.1.6.3 Division recouvrement,RENUMERATION PRESTATION CULINAIRE,69116
+1784,missing_centre_after_93to94,6371300,"93.1. 12.2 Division génie-civil (infrastructures, etc)",RENUMERATION PRESTATION CULINAIRE,98903
+1785,missing_centre_after_93to94,6371300,93.1. 12.3 Division biomédicale,RENUMERATION PRESTATION CULINAIRE,164838
+1786,missing_centre_after_93to94,6371300,93.1. 12.4 Cellule informatique et télécoms,RENUMERATION PRESTATION CULINAIRE,98903
+1787,missing_centre_after_93to94,6371300,93.1. 12.5 magasin STM,RENUMERATION PRESTATION CULINAIRE,296708
+1788,missing_centre_after_93to94,6371300,93.1. 13.1 Division hygiène,RENUMERATION PRESTATION CULINAIRE,310075
+1789,missing_centre_after_93to94,6371300,93.1. 13.2 Division sécurité,RENUMERATION PRESTATION CULINAIRE,310075
+1901,invalid_required_fields,None,None,None,2612379784

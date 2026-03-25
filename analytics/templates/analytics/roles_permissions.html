@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASH - Rôles et Permissions</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f766e 0%, #0ea5a4 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header h1 { font-size: 1.35rem; }
+        .header-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        .container {
+            max-width: 1300px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        .toolbar {
+            display: flex;
+            gap: 0.75rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        .toolbar .form-group {
+            min-width: 220px;
+            flex: 1;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: #374151;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .form-control {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.92rem;
+            background: #fff;
+        }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 0.55rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .btn-primary { background: #0f766e; color: white; }
+        .btn-primary:hover { background: #0d6660; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #e5e7eb; color: #111827; }
+        .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.82rem; }
+        .table-scroll {
+            overflow: auto;
+            max-height: 65vh;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 0.7rem;
+            border-bottom: 1px solid #edf2f7;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        .badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            padding: 0.2rem 0.55rem;
+            margin: 0.15rem 0.15rem 0 0;
+        }
+        .badge-inactive {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .actions {
+            display: flex;
+            gap: 0.35rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.48);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            width: min(720px, 100%);
+            max-height: 92vh;
+            overflow: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.22);
+        }
+        .modal h3 {
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.75rem;
+            max-height: 280px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .perm-item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.88rem;
+            color: #374151;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0.8rem;
+        }
+        .alert {
+            border-radius: 8px;
+            padding: 0.7rem 0.9rem;
+            margin-bottom: 0.8rem;
+            display: none;
+            font-size: 0.9rem;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        .alert-success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+        @media (max-width: 880px) {
+            .form-row { grid-template-columns: 1fr; }
+            .permissions-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔐 Rôles et Permissions par Hôpital</h1>
+        <div class="header-actions">
+            <a href="/utilisateurs/" class="back-btn">← Utilisateurs</a>
+            <a href="/accueil/" class="back-btn">🏠 Accueil</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="card">
+            <div class="toolbar">
+                <div class="form-group">
+                    <label>Filtrer par hôpital</label>
+                    <select id="filtreHopital" class="form-control"></select>
+                </div>
+                <button class="btn btn-primary" id="btnNouveauRole">+ Nouveau rôle</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-scroll">
+                <table id="tableRoles">
+                    <thead>
+                        <tr>
+                            <th>Hôpital</th>
+                            <th>Code</th>
+                            <th>Libellé</th>
+                            <th>Permissions</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:1.2rem;">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalRole">
+        <div class="modal">
+            <h3 id="modalTitle">Nouveau rôle</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Hôpital</label>
+                    <select id="roleHopital" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label>Code rôle</label>
+                    <input id="roleCode" class="form-control" placeholder="ex: agent_saisie_bloc">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top:0.8rem;">
+                <label>Libellé</label>
+                <input id="roleLibelle" class="form-control" placeholder="ex: Agent de saisie du bloc">
+            </div>
+
+            <div class="form-group" style="margin-top:0.8rem;">
+                <label>Permissions</label>
+                <div id="permissionsGrid" class="permissions-grid"></div>
+            </div>
+
+            <div class="form-group" style="margin-top:0.8rem;">
+                <label>
+                    <input type="checkbox" id="roleActif" checked style="margin-right:0.45rem;">
+                    Rôle actif
+                </label>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnAnnuler">Annuler</button>
+                <button class="btn btn-primary" id="btnEnregistrer">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let rolesCache = [];
+        let hopitauxCache = [];
+        let permissionCatalog = [];
+        let editingRoleId = null;
+        let sessionInfo = { is_superuser: false, hopital_id: null };
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i += 1) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function fetchAPI(url, options = {}) {
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin',
+                ...options
+            });
+
+            if (response.status === 204) return { success: true };
+
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const rawText = await response.text();
+                const preview = String(rawText || '').slice(0, 120).replace(/\s+/g, ' ').trim();
+                throw new Error(`Réponse non JSON reçue (${response.status}). Vérifiez la session et la route API. Détail: ${preview}`);
+            }
+
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(typeof payload === 'string' ? payload : JSON.stringify(payload));
+            }
+            return payload;
+        }
+
+        function showAlert(message, type = 'error') {
+            const box = document.getElementById('alertBox');
+            box.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+            box.textContent = message;
+            box.style.display = 'block';
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 4500);
+        }
+
+        async function chargerContexteSession() {
+            sessionInfo = await fetchAPI('/api/info-session/');
+        }
+
+        function toggleModal(open) {
+            document.getElementById('modalRole').classList.toggle('active', open);
+        }
+
+        function normalizeCode(value) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+        }
+
+        function renderPermissionsGrid(selectedPermissions = []) {
+            const selectedSet = new Set(selectedPermissions);
+            const html = permissionCatalog.map(item => `
+                <label class="perm-item">
+                    <input type="checkbox" value="${item.code}" ${selectedSet.has(item.code) ? 'checked' : ''}>
+                    <span>${item.libelle}</span>
+                </label>
+            `).join('');
+            document.getElementById('permissionsGrid').innerHTML = html || '<span style="color:#94a3b8;">Aucune permission disponible.</span>';
+        }
+
+        function getCheckedPermissions() {
+            return Array.from(document.querySelectorAll('#permissionsGrid input[type="checkbox"]:checked'))
+                .map(input => input.value)
+                .sort();
+        }
+
+        function fillHopitalSelects() {
+            const superuserOptions = '<option value="">Tous les hôpitaux</option>' +
+                hopitauxCache.map(h => `<option value="${h.id}">${h.code} - ${h.nom}</option>`).join('');
+            const localOptions = hopitauxCache.map(h => `<option value="${h.id}">${h.code} - ${h.nom}</option>`).join('');
+
+            if (sessionInfo.is_superuser) {
+                document.getElementById('filtreHopital').innerHTML = superuserOptions;
+                document.getElementById('roleHopital').innerHTML = superuserOptions.replace('Tous les hôpitaux', 'Sélectionner un hôpital');
+                document.getElementById('filtreHopital').disabled = false;
+                document.getElementById('roleHopital').disabled = false;
+            } else {
+                document.getElementById('filtreHopital').innerHTML = localOptions;
+                document.getElementById('roleHopital').innerHTML = localOptions;
+                document.getElementById('filtreHopital').value = sessionInfo.hopital_id ? String(sessionInfo.hopital_id) : '';
+                document.getElementById('roleHopital').value = sessionInfo.hopital_id ? String(sessionInfo.hopital_id) : '';
+                document.getElementById('filtreHopital').disabled = true;
+                document.getElementById('roleHopital').disabled = true;
+            }
+        }
+
+        async function chargerHopitaux() {
+            const data = await fetchAPI(`${API_URL}/hopitaux/`);
+            hopitauxCache = data.results || data;
+            fillHopitalSelects();
+        }
+
+        async function chargerPermissionCatalog() {
+            permissionCatalog = await fetchAPI(`${API_URL}/hopital-roles/permission_catalog/`);
+            renderPermissionsGrid();
+        }
+
+        async function chargerRoles() {
+            const hopitalId = sessionInfo.is_superuser
+                ? document.getElementById('filtreHopital').value
+                : (sessionInfo.hopital_id || '');
+            const query = hopitalId ? `?hopital=${hopitalId}` : '';
+            const data = await fetchAPI(`${API_URL}/hopital-roles/${query}`);
+            rolesCache = data.results || data;
+            const tbody = document.querySelector('#tableRoles tbody');
+
+            if (!rolesCache.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:1.2rem;">Aucun rôle trouvé.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rolesCache.map(role => {
+                const permissionsHtml = (role.permissions || []).length
+                    ? role.permissions.map(code => {
+                        const label = permissionCatalog.find(p => p.code === code)?.libelle || code;
+                        return `<span class="badge">${label}</span>`;
+                    }).join('')
+                    : '<span style="color:#94a3b8;">Aucune</span>';
+
+                return `
+                    <tr>
+                        <td>${role.hopital_nom || '-'}</td>
+                        <td><strong>${role.code}</strong></td>
+                        <td>${role.libelle}</td>
+                        <td>${permissionsHtml}</td>
+                        <td>${role.est_actif ? '<span class="badge">Actif</span>' : '<span class="badge badge-inactive">Inactif</span>'}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-warning btn-sm" onclick="openEditRole(${role.id})">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteRole(${role.id})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openCreateRole() {
+            editingRoleId = null;
+            document.getElementById('modalTitle').textContent = 'Nouveau rôle';
+            document.getElementById('roleHopital').value = sessionInfo.is_superuser
+                ? ''
+                : (sessionInfo.hopital_id ? String(sessionInfo.hopital_id) : '');
+            document.getElementById('roleCode').value = '';
+            document.getElementById('roleLibelle').value = '';
+            document.getElementById('roleActif').checked = true;
+            renderPermissionsGrid([]);
+            toggleModal(true);
+        }
+
+        function openEditRole(roleId) {
+            const role = rolesCache.find(item => item.id === roleId);
+            if (!role) {
+                showAlert('Rôle introuvable.');
+                return;
+            }
+
+            editingRoleId = role.id;
+            document.getElementById('modalTitle').textContent = `Modifier rôle ${role.libelle}`;
+            document.getElementById('roleHopital').value = role.hopital || '';
+            document.getElementById('roleCode').value = role.code || '';
+            document.getElementById('roleLibelle').value = role.libelle || '';
+            document.getElementById('roleActif').checked = role.est_actif !== false;
+            renderPermissionsGrid(role.permissions || []);
+            toggleModal(true);
+        }
+
+        async function saveRole() {
+            const hopital = parseInt(document.getElementById('roleHopital').value, 10);
+            const libelle = document.getElementById('roleLibelle').value.trim();
+            const rawCode = document.getElementById('roleCode').value;
+            const code = normalizeCode(rawCode || libelle);
+
+            if (!hopital) {
+                showAlert('Veuillez sélectionner un hôpital.');
+                return;
+            }
+            if (!libelle) {
+                showAlert('Le libellé est obligatoire.');
+                return;
+            }
+            if (!code) {
+                showAlert('Le code du rôle est obligatoire.');
+                return;
+            }
+
+            const payload = {
+                hopital,
+                code,
+                libelle,
+                permissions: getCheckedPermissions(),
+                est_actif: document.getElementById('roleActif').checked
+            };
+
+            try {
+                if (!sessionInfo.is_superuser && sessionInfo.hopital_id) {
+                    payload.hopital = sessionInfo.hopital_id;
+                }
+
+                if (editingRoleId) {
+                    await fetchAPI(`${API_URL}/hopital-roles/${editingRoleId}/`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(payload)
+                    });
+                    showAlert('Rôle modifié avec succès.', 'success');
+                } else {
+                    await fetchAPI(`${API_URL}/hopital-roles/`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    showAlert('Rôle créé avec succès.', 'success');
+                }
+
+                toggleModal(false);
+                await chargerRoles();
+            } catch (e) {
+                showAlert(`Erreur enregistrement rôle: ${e.message}`);
+            }
+        }
+
+        async function deleteRole(roleId) {
+            const role = rolesCache.find(item => item.id === roleId);
+            if (!role) return;
+            if (!confirm(`Supprimer le rôle "${role.libelle}" ?`)) return;
+
+            try {
+                await fetchAPI(`${API_URL}/hopital-roles/${roleId}/`, { method: 'DELETE' });
+                showAlert('Rôle supprimé.', 'success');
+                await chargerRoles();
+            } catch (e) {
+                showAlert(`Erreur suppression: ${e.message}`);
+            }
+        }
+
+        document.getElementById('btnNouveauRole').addEventListener('click', openCreateRole);
+        document.getElementById('btnAnnuler').addEventListener('click', () => toggleModal(false));
+        document.getElementById('btnEnregistrer').addEventListener('click', saveRole);
+        document.getElementById('filtreHopital').addEventListener('change', chargerRoles);
+        document.getElementById('modalRole').addEventListener('click', (event) => {
+            if (event.target.id === 'modalRole') toggleModal(false);
+        });
+
+        (async function init() {
+            try {
+                await chargerContexteSession();
+                await chargerHopitaux();
+                await chargerPermissionCatalog();
+                await chargerRoles();
+            } catch (e) {
+                showAlert(`Erreur initialisation: ${e.message}`);
+            }
+        })();
+    </script>
+</body>
+</html>

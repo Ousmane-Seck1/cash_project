@@ -1,0 +1,659 @@
+
+# Création d'une interface simple HTML/JS pour démonstration
+# et du script de démarrage
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comptabilité Analytique Hospitalière - CASH</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 1.5rem; }
+        .header p { opacity: 0.9; font-size: 0.9rem; }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .nav-tab:hover { color: #667eea; }
+        .nav-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #444;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover { background: #5a6fd6; }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-success:hover { background: #059669; }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        tr:hover { background: #f8f9fa; }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-orange { background: #fff3e0; color: #e65100; }
+        .badge-pink { background: #fce4ec; color: #c2185b; }
+        .badge-blue { background: #e3f2fd; color: #1565c0; }
+        .badge-green { background: #e8f5e9; color: #2e7d32; }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .alert-info {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            color: #1565c0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .hidden { display: none; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .nav-tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 Comptabilité Analytique Hospitalière - CASH</h1>
+        <p>Ministère de la Santé </p>
+    </div>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('saisie')">📥 Saisie des Charges</button>
+            <button class="nav-tab" onclick="showTab('cles')">🔑 Clés de Répartition</button>
+            <button class="nav-tab" onclick="showTab('calcul')">🧮 Lancer le Calcul</button>
+            <button class="nav-tab" onclick="showTab('resultats')">📊 Résultats Analytiques</button>
+            <button class="nav-tab" onclick="showTab('dashboard')">📈 Dashboard</button>
+        </div>
+        
+        <!-- Onglet Saisie -->
+        <div id="saisie" class="tab-content">
+            <div class="card">
+                <h2>Nouvelle Charge</h2>
+                <form id="chargeForm">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" class="form-control" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>N° BE/BC</label>
+                            <input type="text" class="form-control" name="numero_be_bc">
+                        </div>
+                        <div class="form-group">
+                            <label>N° OP</label>
+                            <input type="text" class="form-control" name="numero_op">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Désignation</label>
+                        <input type="text" class="form-control" name="designation" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label>Compte</label>
+                            <select class="form-control" name="compte" required>
+                                <option value="">Sélectionner...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Montant</label>
+                            <input type="number" class="form-control" name="montant" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Centre de Coût</label>
+                            <select class="form-control" name="centre_cout" required>
+                                <option value="">Sélectionner...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>Dernières Charges Saisies</h2>
+                <div class="table-container">
+                    <table id="chargesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Compte</th>
+                                <th>Désignation</th>
+                                <th>Centre</th>
+                                <th>Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Onglet Clés -->
+        <div id="cles" class="tab-content hidden">
+            <div class="card">
+                <h2>Configuration des Clés de Répartition (NT_UO)</h2>
+                <div class="alert alert-info">
+                    💡 Les clés de répartition permettent de ventiler les charges des centres non tarifaires 
+                    (Cuisine, Buanderie, etc.) vers les autres centres selon des pourcentages.
+                    Le total doit faire 100% pour chaque centre source.
+                </div>
+                <div id="clesContainer">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Onglet Calcul -->
+        <div id="calcul" class="tab-content hidden">
+            <div class="card">
+                <h2>Lancer le Calcul Analytique</h2>
+                <p>Cette opération va exécuter :</p>
+                <ol style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Répartition primaire (agrégation des charges)</li>
+                    <li>Répartition secondaire 1 (NT_UO → clés de répartition)</li>
+                    <li>Répartition secondaire 2 (NT_TF → méthode cascade)</li>
+                    <li>Calcul des coûts de revient et résultats</li>
+                </ol>
+                <button class="btn btn-success" onclick="lancerCalcul()">
+                    🚀 Lancer le Calcul
+                </button>
+                <div id="calculResult" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+        
+        <!-- Onglet Résultats -->
+        <div id="resultats" class="tab-content hidden">
+            <div class="card">
+                <h2>Tableau d'Analyse</h2>
+                <div class="table-container">
+                    <table id="resultatsTable">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Libellé</th>
+                                <th>Type</th>
+                                <th>Charges Directes</th>
+                                <th>Charges Indirectes</th>
+                                <th>Charges Totales</th>
+                                <th>Produits</th>
+                                <th>Résultat</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Onglet Dashboard -->
+        <div id="dashboard" class="tab-content hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCharges">-</div>
+                    <div class="stat-label">Total Charges</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalProduits">-</div>
+                    <div class="stat-label">Total Produits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="resultatGlobal">-</div>
+                    <div class="stat-label">Résultat Global</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Centres les Plus Rentables</h2>
+                <div id="topRentables"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Centres les Plus Déficitaires</h2>
+                <div id="topDeficitaires"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Configuration API
+    const API_URL = '/api';
+    let currentExercice = 1;
+    let csrfToken = '';
+    
+    // Récupérer le CSRF token au chargement
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    csrfToken = getCookie('csrftoken');
+    
+    // Navigation
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        event.target.classList.add('active');
+        
+        if (tabId === 'resultats') chargerResultats();
+        if (tabId === 'dashboard') chargerDashboard();
+        if (tabId === 'cles') chargerCles();
+    }
+    
+    // Chargement initial
+    async function init() {
+        await chargerExercices();
+        await chargerComptes();
+        await chargerCentres();
+        await chargerCharges();
+        await chargerClesConfig();
+    }
+    
+    async function fetchAPI(url, options = {}) {
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                ...options.headers
+            },
+            credentials: 'same-origin'
+        };
+        const response = await fetch(url, {...defaultOptions, ...options});
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error);
+        }
+        return response.json();
+    }
+    
+    async function chargerExercices() {
+        try {
+            const exercices = await fetchAPI(`${API_URL}/exercices/`);
+            const actif = exercices.find(e => e.est_actif);
+            if (actif) {
+                currentExercice = actif.id;
+                console.log('Exercice actif:', actif.annee);
+            }
+        } catch (e) {
+            console.error('Erreur chargement exercices:', e);
+        }
+    }
+    
+    async function chargerComptes() {
+        try {
+            const comptes = await fetchAPI(`${API_URL}/comptes-charges/`);
+            const select = document.querySelector('select[name="compte"]');
+            select.innerHTML = '<option value="">Sélectionner...</option>';
+            comptes.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.numero} - ${c.libelle}</option>`;
+            });
+        } catch (e) {
+            console.error('Erreur chargement comptes:', e);
+        }
+    }
+    
+    async function chargerCentres() {
+        try {
+            const centres = await fetchAPI(`${API_URL}/centres-couts/`);
+            const select = document.querySelector('select[name="centre_cout"]');
+            select.innerHTML = '<option value="">Sélectionner...</option>';
+            centres.forEach(c => {
+                const typeLabel = {
+                    'NT_UO': 'Non tarifaire UO',
+                    'NT_TF': 'Non tarifaire TF',
+                    'CT_MT': 'Médico-technique',
+                    'CT_CL': 'Clinique'
+                }[c.type_centre] || c.type_centre;
+                select.innerHTML += `<option value="${c.id}">${c.code} - ${c.libelle} (${typeLabel})</option>`;
+            });
+        } catch (e) {
+            console.error('Erreur chargement centres:', e);
+        }
+    }
+    
+    async function chargerCharges() {
+        try {
+            const charges = await fetchAPI(`${API_URL}/charges/?exercice=${currentExercice}`);
+            const tbody = document.querySelector('#chargesTable tbody');
+            tbody.innerHTML = '';
+            charges.slice(0, 10).forEach(c => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${c.date}</td>
+                        <td>${c.compte_numero || '-'}</td>
+                        <td>${c.designation}</td>
+                        <td>${c.centre_cout_code || '-'}</td>
+                        <td>${parseFloat(c.montant).toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error('Erreur chargement charges:', e);
+        }
+    }
+    
+    async function chargerClesConfig() {
+        try {
+            const cles = await fetchAPI(`${API_URL}/cles-repartition/?exercice=${currentExercice}`);
+            const container = document.getElementById('clesContainer');
+            
+            // Grouper par centre source
+            const parSource = {};
+            cles.forEach(c => {
+                if (!parSource[c.centre_source]) {
+                    parSource[c.centre_source] = {
+                        nom: c.centre_source_code,
+                        cles: []
+                    };
+                }
+                parSource[c.centre_source].cles.push(c);
+            });
+            
+            let html = '';
+            for (const [sourceId, data] of Object.entries(parSource)) {
+                const total = data.cles.reduce((sum, c) => sum + parseFloat(c.pourcentage), 0);
+                const alertClass = total === 100 ? 'green' : 'red';
+                
+                html += `
+                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <h4>${data.nom} <span style="color: ${alertClass}; font-size: 0.9rem;">(Total: ${total}%)</span></h4>
+                        <table style="width: 100%; margin-top: 0.5rem;">
+                            <tr>
+                                <th>Destination</th>
+                                <th>Pourcentage</th>
+                            </tr>
+                            ${data.cles.map(c => `
+                                <tr>
+                                    <td>${c.centre_destination_code}</td>
+                                    <td>${c.pourcentage}%</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    </div>
+                `;
+            }
+            container.innerHTML = html || '<p>Aucune clé de répartition configurée.</p>';
+        } catch (e) {
+            console.error('Erreur chargement clés:', e);
+        }
+    }
+    
+    async function lancerCalcul() {
+        const btn = document.querySelector('#calcul button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Calcul en cours...';
+        btn.disabled = true;
+        
+        try {
+            const resultat = await fetchAPI(`${API_URL}/calcul/lancer_calcul/`, {
+                method: 'POST',
+                body: JSON.stringify({exercice: currentExercice})
+            });
+            
+            document.getElementById('calculResult').innerHTML = 
+                `<div class="alert alert-info">✅ ${resultat.message} (${resultat.nb_centres} centres calculés)</div>`;
+        } catch (e) {
+            document.getElementById('calculResult').innerHTML = 
+                `<div class="alert alert-info" style="background: #ffebee; color: #c62828;">❌ Erreur: ${e.message}</div>`;
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+    
+    async function chargerResultats() {
+        try {
+            const resultats = await fetchAPI(`${API_URL}/calcul/resultats/?exercice=${currentExercice}`);
+            const tbody = document.querySelector('#resultatsTable tbody');
+            tbody.innerHTML = '';
+            
+            resultats.forEach(r => {
+                const typeColors = {
+                    'NT_UO': 'badge-orange',
+                    'NT_TF': 'badge-pink',
+                    'CT_MT': 'badge-blue',
+                    'CT_CL': 'badge-green'
+                };
+                const badgeClass = typeColors[r.centre_cout_type_centre] || 'badge-blue';
+                const typeLabels = {
+                    'NT_UO': 'Non tarifaire UO',
+                    'NT_TF': 'Non tarifaire TF',
+                    'CT_MT': 'Médico-tech',
+                    'CT_CL': 'Clinique'
+                };
+                
+                const resultat = r.resultat_analytique;
+                const resultatColor = resultat > 0 ? 'green' : resultat < 0 ? 'red' : 'gray';
+                const resultatSign = resultat > 0 ? '+' : '';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${r.centre_cout_code}</td>
+                        <td>${r.centre_cout_libelle}</td>
+                        <td><span class="badge ${badgeClass}">${typeLabels[r.centre_cout_type_centre] || r.centre_cout_type_centre}</span></td>
+                        <td>${parseFloat(r.charges_directes).toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                        <td>${parseFloat(r.charges_indirectes).toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                        <td><strong>${parseFloat(r.charges_totales).toLocaleString('fr-FR', {minimumFractionDigits: 2})}</strong></td>
+                        <td>${r.produits ? parseFloat(r.produits).toLocaleString('fr-FR', {minimumFractionDigits: 2}) : '-'}</td>
+                        <td style="color: ${resultatColor}; font-weight: bold;">
+                            ${resultat ? resultatSign + parseFloat(resultat).toLocaleString('fr-FR', {minimumFractionDigits: 2}) : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error('Erreur chargement résultats:', e);
+        }
+    }
+    
+    async function chargerDashboard() {
+        try {
+            const data = await fetchAPI(`${API_URL}/calcul/dashboard/?exercice=${currentExercice}`);
+            
+            document.getElementById('totalCharges').textContent = 
+                parseFloat(data.statistiques.total_charges).toLocaleString('fr-FR', {minimumFractionDigits: 0});
+            document.getElementById('totalProduits').textContent = 
+                parseFloat(data.statistiques.total_produits).toLocaleString('fr-FR', {minimumFractionDigits: 0});
+            
+            const resultat = data.statistiques.resultat_global;
+            const resultatEl = document.getElementById('resultatGlobal');
+            resultatEl.textContent = (resultat >= 0 ? '+' : '') + parseFloat(resultat).toLocaleString('fr-FR', {minimumFractionDigits: 0});
+            resultatEl.style.color = resultat >= 0 ? '#10b981' : '#ef4444';
+            
+            // Top rentables
+            const rentablesDiv = document.getElementById('topRentables');
+            rentablesDiv.innerHTML = data.centres_rentables.map(c => `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #e8f5e9; margin: 0.25rem 0; border-radius: 4px;">
+                    <span>${c.centre_cout_code} - ${c.centre_cout_libelle}</span>
+                    <span style="color: green; font-weight: bold;">+${parseFloat(c.resultat_analytique).toLocaleString('fr-FR')}</span>
+                </div>
+            `).join('') || '<p>Aucun centre rentable</p>';
+            
+            // Top déficitaires
+            const deficitairesDiv = document.getElementById('topDeficitaires');
+            deficitairesDiv.innerHTML = data.centres_deficitaires.map(c => `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #ffebee; margin: 0.25rem 0; border-radius: 4px;">
+                    <span>${c.centre_cout_code} - ${c.centre_cout_libelle}</span>
+                    <span style="color: red; font-weight: bold;">${parseFloat(c.resultat_analytique).toLocaleString('fr-FR')}</span>
+                </div>
+            `).join('') || '<p>Aucun centre déficitaire</p>';
+            
+        } catch (e) {
+            console.error('Erreur chargement dashboard:', e);
+        }
+    }
+    
+    // Formulaire de saisie
+    document.getElementById('chargeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+        
+        try {
+            await fetchAPI(`${API_URL}/charges/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    ...data,
+                    exercice: currentExercice,
+                    montant: parseFloat(data.montant)
+                })
+            });
+            alert('✅ Charge enregistrée avec succès !');
+            e.target.reset();
+            chargerCharges();
+        } catch (err) {
+            alert('❌ Erreur: ' + err.message);
+        }
+    });
+    
+    // Initialisation
+    init();
+    </script>
+
+
+</body>
+</html>
+

@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASH - Saisie mensuelle</title>
+    <style>
+        /* Mêmes styles de base que configuration.html */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.5rem; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover, .back-btn:focus {
+            background: rgba(255,255,255,0.3);
+            outline: none;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        .tab:hover, .tab:focus {
+            outline: none;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .tab.active {
+            background: #10b981;
+            color: white;
+        }
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        select.form-control option {
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn:hover, .btn:focus {
+            outline: none;
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-primary:hover { background: #059669; }
+        .btn-success { background: #667eea; color: white; }
+        .btn-success:hover { background: #5568d3; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border: 1px solid #d7dce5;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #d7dce5;
+            font-size: 0.95rem;
+        }
+        th { background: #f8f9fa; font-weight: 600; }
+        table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f8f9fa;
+        }
+        .num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .row-total td {
+            background: #f8fafc;
+            font-weight: 700;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-card {
+            width: min(720px, 100%);
+            max-height: min(92vh, 860px);
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid #d7dce5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .modal-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1f2937;
+        }
+        .modal-body {
+            padding: 1rem 1.25rem 0.75rem;
+            overflow-y: auto;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        #editModalForm {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+            position: relative;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem 1.25rem;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+            position: sticky;
+            bottom: 0;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .modal-scroll-hint {
+            position: absolute;
+            right: 0.75rem;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.95);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 3;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .modal-scroll-hint.top {
+            top: 4.4rem;
+        }
+        .modal-scroll-hint.bottom {
+            bottom: 5.4rem;
+        }
+        .modal-scroll-hint:hover {
+            background: #059669;
+        }
+        .card h3 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .hidden { display: none; }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s ease;
+        }
+        .hidden { display: none; }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .modal-card {
+                max-height: 94vh;
+            }
+            .modal-actions {
+                flex-wrap: wrap;
+            }
+        }
+        .hidden { display: none; }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📝 CASH - Saisie mensuelle des données</h1>
+        <a href="/accueil/" class="back-btn">← Retour à l'accueil</a>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('charges', this)">💰 Charges</button>
+            <button class="tab" onclick="showTab('cles', this)">🔑 Clés de Répartition</button>
+            <button class="tab" onclick="showTab('produits', this)">💵 Produits</button>
+            <button class="tab" onclick="showTab('activites', this)">📊 Activités</button>
+        </div>
+
+        <!-- Charges -->
+        <div id="charges" class="content">
+            <div class="card">
+                <h3>Saisie des charges</h3>
+                <form id="formCharge">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" class="form-control" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>N° BE/BC</label>
+                            <input type="text" class="form-control" name="numero_be_bc">
+                        </div>
+                        <div class="form-group">
+                            <label>N° OP</label>
+                            <input type="text" class="form-control" name="numero_op">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Désignation</label>
+                        <input type="text" class="form-control" name="designation" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Comptes de charges</label>
+                            <select class="form-control" name="compte" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Centre de Responsabilité</label>
+                            <select class="form-control" id="chargeRespFilter">
+                                <option value="">Sélectionner un centre de resp...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Centre de Coût</label>
+                            <select class="form-control" id="chargeCentreCout" name="centre_cout" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Montant</label>
+                            <input type="number" class="form-control" name="montant" step="0.01" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </form>
+            </div>
+            
+                <table id="tableCharges">
+                    <thead>
+                        <tr><th>Date</th><th>Comptes de charges</th><th>Désignation</th><th>Centre de coût</th><th>Montant</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            
+        </div>
+
+        <!-- Clés de Répartition -->
+        <div id="cles" class="content hidden">
+            <div class="card">
+                <h3>Saisie des Clés de répartition</h3>
+                <button onclick="chargerCentresClesRepartition()" style="margin-bottom: 1rem;">🔄 Recharger les centres</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Centre de Coût Source (NT_UO )</label>
+                        <select class="form-control" id="cleSource"></select>
+                    </div>
+                </div>
+                <div id="clesDetails" style="display: none;">
+                    <p>Sélectionnez un centre de Coût source, puis filtrez les destinations par centre de resp. (total doit faire 100%).</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressCles" style="width: 0%"></div>
+                    </div>
+                    <p id="totalCles">Total: 0%</p>
+                </div>
+                <div class="form-row" id="formCles" style="margin-top: 1rem; display: none;">
+                    <div class="form-group">
+                        <label>Filtre par Centre de Resp. (Destination)</label>
+                        <select class="form-control" id="cleDestinationResp">
+                            <option value="">Sélectionner un centre de resp....</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Centre de Coût de destination</label>
+                        <select class="form-control" id="cleDestination"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pourcentage</label>
+                        <input type="number" class="form-control" id="clePourcentage" step="0.01" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label></label>
+                        <button class="btn btn-success" onclick="ajouterCle()" style="margin-top: 1.5rem;">➕ Ajouter</button>
+                    </div>
+                </div>
+                <button id="finaliserClesBtn" class="btn btn-primary" onclick="finaliserRepartitionCentre()" style="display: none; margin-bottom: 0.75rem;">✅ Enregistrer la répartition</button>
+                <table id="tableCles">
+                    <thead>
+                        <tr><th>Centre de destination</th><th>Pourcentage</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Produits -->
+        <div id="produits" class="content hidden">
+            <div class="card">
+                <h3>Saisie des produits (Recettes)</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Centre de Responsabilité</label>
+                        <select class="form-control" id="produitRespFilter">
+                            <option value="">Sélectionner un centre de resp....</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Centre Tarifaire</label>
+                        <select class="form-control" id="produitCentre"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Montant</label>
+                        <input type="number" class="form-control" id="produitMontant" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Type de produit</label>
+                        <select class="form-control" id="produitType">
+                            <option value="ORDINAIRE">Produits ordinaires</option>
+                            <option value="SUPPLETIF">Produits suppletifs</option>
+                            <option value="AUTRE">Autres produits</option>
+                            <option value="SUBVENTION_EXP">Subvention d'exploitation</option>
+                            <option value="AUTRE_SUBVENTION">Autres subventions</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Période</label>
+                        <select class="form-control" id="produitPeriode">
+                            <option value="1">Janvier</option>
+                            <option value="2">Février</option>
+                            <option value="3">Mars</option>
+                            <option value="4">Avril</option>
+                            <option value="5">Mai</option>
+                            <option value="6">Juin</option>
+                            <option value="7">Juillet</option>
+                            <option value="8">Août</option>
+                            <option value="9">Septembre</option>
+                            <option value="10">Octobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Décembre</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="sauverProduit()">💾 Enregistrer</button>
+                <table id="tableProduits">
+                    <thead>
+                        <tr><th>Centre de Coût</th><th>Type</th><th>Période</th><th>Montant</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Activités -->
+        <div id="activites" class="content hidden">
+            <div class="card">
+                <h3>Saisie des activités</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Centre de Responsabilité</label>
+                        <select class="form-control" id="activiteRespFilter">
+                            <option value="">Sélectionner un centre de resp...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Centre Tarifaire</label>
+                        <select class="form-control" id="activiteCentre"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unité d'œuvre</label>
+                        <input type="text" class="form-control" id="activiteUnite" placeholder="Automatique selon le centre" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Volume des activités</label>
+                        <input type="number" class="form-control" id="activiteVolume" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Période</label>
+                        <select class="form-control" id="activitePeriode">
+                            <option value="1">Janvier</option>
+                            <option value="2">Février</option>
+                            <option value="3">Mars</option>
+                            <option value="4">Avril</option>
+                            <option value="5">Mai</option>
+                            <option value="6">Juin</option>
+                            <option value="7">Juillet</option>
+                            <option value="8">Août</option>
+                            <option value="9">Septembre</option>
+                            <option value="10">Octobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Décembre</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="sauverActivite()">💾 Enregistrer</button>
+                <table id="tableActivites">
+                    <thead>
+                        <tr><th>Centre de Coût</th><th>Unité d'œuvre</th><th>Volume des activités</th><th>Période</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h4 id="editModalTitle">Modifier</h4>
+                <button type="button" id="editModalClose" class="btn btn-secondary">Fermer</button>
+            </div>
+            <form id="editModalForm">
+                <div id="editModalFields" class="modal-body"></div>
+                <button type="button" id="modalScrollUp" class="modal-scroll-hint top hidden" aria-label="Monter" title="Monter">↑</button>
+                <button type="button" id="modalScrollDown" class="modal-scroll-hint bottom hidden" aria-label="Descendre" title="Descendre">↓</button>
+                <div class="modal-actions">
+                    <button type="button" id="editModalCancel" class="btn btn-secondary">Annuler</button>
+                    <button type="submit" id="editModalSave" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let csrfToken = '';
+        let centresTarifairesMap = {};
+        let centresCoutsCache = [];
+        let centresResponsabilitesCache = [];
+        let chargesById = {};
+        let clesById = {};
+        let produitsById = {};
+        let activitesById = {};
+        let editModalState = null;
+        let currentExerciceId = null;
+        const TYPE_PRODUIT_OPTIONS = [
+            { value: 'ORDINAIRE', label: 'Produits ordinaires' },
+            { value: 'SUPPLETIF', label: 'Produits suppletifs' },
+            { value: 'AUTRE', label: 'Autres produits' },
+            { value: 'SUBVENTION_EXP', label: "Subvention d'exploitation" },
+            { value: 'AUTRE_SUBVENTION', label: 'Autres subventions' }
+        ];
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        csrfToken = getCookie('csrftoken');
+
+        function tokenizeForNaturalSort(value) {
+            return String(value || '')
+                .trim()
+                .split(/(\d+)/)
+                .filter(Boolean)
+                .map(part => (/^\d+$/.test(part) ? Number(part) : part.toLowerCase()));
+        }
+
+        function compareCodeValues(left, right) {
+            const leftParts = tokenizeForNaturalSort(left);
+            const rightParts = tokenizeForNaturalSort(right);
+            const maxLength = Math.max(leftParts.length, rightParts.length);
+
+            for (let index = 0; index < maxLength; index += 1) {
+                if (index >= leftParts.length) return -1;
+                if (index >= rightParts.length) return 1;
+
+                const leftPart = leftParts[index];
+                const rightPart = rightParts[index];
+
+                if (leftPart === rightPart) continue;
+
+                if (typeof leftPart === 'number' && typeof rightPart === 'number') {
+                    return leftPart - rightPart;
+                }
+
+                return String(leftPart).localeCompare(String(rightPart), 'fr', { numeric: true, sensitivity: 'base' });
+            }
+
+            return 0;
+        }
+
+        function sortByCode(items, fieldName) {
+            return [...items].sort((firstItem, secondItem) => compareCodeValues(firstItem[fieldName], secondItem[fieldName]));
+        }
+
+        async function chargerContexteSession() {
+            try {
+                const sessionInfo = await fetchAPI('/api/info-session/');
+                currentExerciceId = sessionInfo?.exercice_id || null;
+            } catch (e) {
+                console.error('Erreur chargement session:', e);
+                currentExerciceId = null;
+            }
+        }
+        function formatMontantCfa(value) {
+            const montant = parseFloat(value || 0);
+            return montant.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function getPeriodeOptions() {
+            return [
+                { value: '1', label: 'Janvier' },
+                { value: '2', label: 'Fevrier' },
+                { value: '3', label: 'Mars' },
+                { value: '4', label: 'Avril' },
+                { value: '5', label: 'Mai' },
+                { value: '6', label: 'Juin' },
+                { value: '7', label: 'Juillet' },
+                { value: '8', label: 'Aout' },
+                { value: '9', label: 'Septembre' },
+                { value: '10', label: 'Octobre' },
+                { value: '11', label: 'Novembre' },
+                { value: '12', label: 'Decembre' }
+            ];
+        }
+
+        function getSelectOptionsFromElement(selector) {
+            const element = document.querySelector(selector);
+            if (!element) return [];
+            return Array.from(element.options)
+                .filter(option => option.value !== '')
+                .map(option => ({ value: option.value, label: option.textContent }));
+        }
+
+        async function ensureCentresCoutsCache() {
+            if (centresCoutsCache.length) {
+                return;
+            }
+            centresCoutsCache = sortByCode(await fetchAllPages(`${API_URL}/centres-couts/`), 'code');
+        }
+
+        function updateModalScrollHints() {
+            const body = document.getElementById('editModalFields');
+            const up = document.getElementById('modalScrollUp');
+            const down = document.getElementById('modalScrollDown');
+
+            if (!body || !up || !down) {
+                return;
+            }
+
+            const canScroll = body.scrollHeight > body.clientHeight + 2;
+            if (!canScroll) {
+                up.classList.add('hidden');
+                down.classList.add('hidden');
+                return;
+            }
+
+            const nearTop = body.scrollTop <= 2;
+            const nearBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
+
+            up.classList.toggle('hidden', nearTop);
+            down.classList.toggle('hidden', nearBottom);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            const fieldsContainer = document.getElementById('editModalFields');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            if (fieldsContainer) {
+                fieldsContainer.innerHTML = '';
+            }
+            editModalState = null;
+            updateModalScrollHints();
+        }
+
+        function openEditModal(config) {
+            const modal = document.getElementById('editModal');
+            const titleElement = document.getElementById('editModalTitle');
+            const fieldsContainer = document.getElementById('editModalFields');
+            const saveButton = document.getElementById('editModalSave');
+
+            if (!modal || !titleElement || !fieldsContainer || !saveButton) {
+                return;
+            }
+
+            titleElement.textContent = config.title;
+            saveButton.textContent = config.saveLabel || 'Enregistrer';
+
+            fieldsContainer.innerHTML = config.fields.map(field => {
+                if (field.type === 'select') {
+                    const options = (field.options || []).map(option => {
+                        const isSelected = String(option.value) === String(field.value ?? '');
+                        return `<option value="${option.value}" ${isSelected ? 'selected' : ''}>${option.label}</option>`;
+                    }).join('');
+
+                    return `
+                        <div class="form-group" style="margin-bottom: 0.9rem;">
+                            <label for="${field.name}">${field.label}</label>
+                            <select id="${field.name}" name="${field.name}" class="form-control" ${field.required ? 'required' : ''}>${options}</select>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="form-group" style="margin-bottom: 0.9rem;">
+                        <label for="${field.name}">${field.label}</label>
+                        <input id="${field.name}" name="${field.name}" type="${field.type || 'text'}" class="form-control"
+                            value="${field.value ?? ''}" ${field.step ? `step="${field.step}"` : ''}
+                            ${field.min !== undefined ? `min="${field.min}"` : ''}
+                            ${field.max !== undefined ? `max="${field.max}"` : ''}
+                            ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            }).join('');
+
+            editModalState = config;
+            modal.classList.remove('hidden');
+            const fieldsBody = document.getElementById('editModalFields');
+            if (fieldsBody) {
+                fieldsBody.scrollTop = 0;
+            }
+            requestAnimationFrame(() => {
+                updateModalScrollHints();
+                setTimeout(updateModalScrollHints, 60);
+            });
+        }
+
+        async function saveEditModal(event) {
+            event.preventDefault();
+            if (!editModalState || typeof editModalState.onSave !== 'function') {
+                return;
+            }
+
+            const form = document.getElementById('editModalForm');
+            const formData = new FormData(form);
+            const payload = {};
+            const fields = editModalState.fields || [];
+
+            for (const field of fields) {
+                const rawValue = formData.get(field.name);
+
+                if (field.required && (!rawValue || String(rawValue).trim() === '')) {
+                    alert(`Le champ ${field.label} est obligatoire.`);
+                    return;
+                }
+
+                if (field.parse === 'int') {
+                    const parsed = parseInt(rawValue, 10);
+                    if (Number.isNaN(parsed)) {
+                        alert(`Le champ ${field.label} est invalide.`);
+                        return;
+                    }
+                    payload[field.name] = parsed;
+                } else if (field.parse === 'float') {
+                    const parsed = parseFloat(rawValue);
+                    if (Number.isNaN(parsed)) {
+                        alert(`Le champ ${field.label} est invalide.`);
+                        return;
+                    }
+                    payload[field.name] = parsed;
+                } else {
+                    payload[field.name] = rawValue;
+                }
+
+                if (field.min !== undefined && payload[field.name] < field.min) {
+                    alert(`Le champ ${field.label} doit etre >= ${field.min}.`);
+                    return;
+                }
+                if (field.max !== undefined && payload[field.name] > field.max) {
+                    alert(`Le champ ${field.label} doit etre <= ${field.max}.`);
+                    return;
+                }
+            }
+
+            try {
+                await editModalState.onSave(payload);
+                closeEditModal();
+            } catch (error) {
+                alert('Erreur modification: ' + error.message);
+            }
+        }
+        
+        function showTab(tabId, clickedElement) {
+            document.querySelectorAll('.content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            if (clickedElement) clickedElement.classList.add('active');
+            
+            if (tabId === 'produits') {
+                chargerCentresTarifairesSelect();
+                chargerProduits();
+            }
+            if (tabId === 'activites') {
+                chargerCentresTarifairesSelect();
+                chargerActivites();
+            }
+            if (tabId === 'cles') {
+                chargerCentresClesRepartition();
+            }
+        }
+        // Initialisation et chargement des données
+        async function init() {
+            console.log('Initialisation de la page saisie...');
+            await chargerContexteSession();
+            await chargerResponsabilitesSaisie();
+            await chargerComptes();
+            await chargerCentres();
+            await chargerCharges();
+            // Charger les listes déroulantes pour les autres onglets
+            await chargerCentresTarifairesSelect();
+            await chargerCentresClesRepartition();
+            console.log('Initialisation terminée');
+        }
+
+        
+        async function chargerComptes() {
+            try {
+                const comptes = sortByCode(await fetchAllPages(`${API_URL}/comptes-charges/`), 'numero');
+                const select = document.querySelector('select[name="compte"]');
+                select.innerHTML = '<option value="">Sélectionner...</option>';
+                comptes.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.numero} - ${c.libelle}</option>`;
+                });
+            } catch (e) {
+                console.error('Erreur chargement comptes:', e);
+            }
+        }
+        async function chargerCentres() {
+            try {
+                centresCoutsCache = sortByCode(await fetchAllPages(`${API_URL}/centres-couts/`), 'code');
+
+                const chargeRespFilter = document.getElementById('chargeRespFilter');
+                const respId = chargeRespFilter ? chargeRespFilter.value : '';
+                const select = document.getElementById('chargeCentreCout');
+
+                if (!select) {
+                    return;
+                }
+
+                const centresFiltres = centresCoutsCache.filter(c => String(c.centre_responsabilite || '') === String(respId || ''));
+                if (!respId) {
+                    select.innerHTML = '<option value="">Choisissez d\'abord un centre de responsabilité...</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">Sélectionner...</option>';
+                centresFiltres.forEach(c => {
+                    const typeLabel = {
+                        'NT_UO': 'Non tarifaire UO',
+                        'NT_TF': 'Non tarifaire TF',
+                        'CT_MT': 'Médico-technique',
+                        'CT_CL': 'Clinique'
+                    }[c.type_centre] || c.type_centre;
+                    select.innerHTML += `<option value="${c.id}">${c.code} - ${c.libelle} (${typeLabel})</option>`;
+                });
+            } catch (e) {
+                console.error('Erreur chargement centres:', e);
+            }
+        }
+
+        async function chargerResponsabilitesSaisie() {
+            try {
+                centresResponsabilitesCache = sortByCode(await fetchAllPages(`${API_URL}/centres-responsabilite/`), 'code');
+
+                const selects = [
+                    'chargeRespFilter',
+                    'cleDestinationResp',
+                    'produitRespFilter',
+                    'activiteRespFilter'
+                ];
+
+                selects.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    if (!select) {
+                        return;
+                    }
+                    select.innerHTML = '<option value="">Sélectionner un centre de responsabilité...</option>' +
+                        centresResponsabilitesCache.map(r => `<option value="${r.id}">${r.code} - ${r.libelle}</option>`).join('');
+                });
+            } catch (e) {
+                console.error('Erreur chargement responsabilités:', e);
+            }
+        }
+        async function chargerCharges() {
+            try {
+                const charges = await fetchAllPages(`${API_URL}/charges/`);
+                chargesById = Object.fromEntries(charges.map(c => [String(c.id), c]));
+                const tbody = document.querySelector('#tableCharges tbody');
+                const totalMontant = charges.reduce((sum, c) => sum + parseFloat(c.montant || 0), 0);
+                const lignesCharges = charges.map(c => `
+                    <tr>
+                        <td>${new Date(c.date).toLocaleDateString('fr-FR')}</td>
+                        <td>${c.compte_numero} - ${c.compte_libelle}</td>
+                        <td>${c.designation}</td>
+                        <td>${c.centre_cout_code} - ${c.centre_cout_libelle}</td>
+                        <td class="num">${formatMontantCfa(c.montant)}</td>
+                        <td>
+                            <button onclick="modifierCharge(${c.id})" class="btn btn-sm" style="background:#f59e0b;color:white;">✏️</button>
+                            <button onclick="supprimerCharge(${c.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                tbody.innerHTML = lignesCharges + `
+                    <tr class="row-total">
+                        <td colspan="4">TOTAL</td>
+                        <td class="num">${formatMontantCfa(totalMontant)}</td>
+                        <td></td>
+                    </tr>
+                `;
+            } catch (e) {
+                console.error('Erreur chargement charges:', e);
+            }
+        }
+        async function ajouterCle() {
+            if (!currentExerciceId) {
+                alert("Aucun exercice actif trouvé pour votre hôpital.");
+                return;
+            }
+
+            const centreSource = document.getElementById('cleSource').value;
+            const centreDestination = document.getElementById('cleDestination').value;
+            const pourcentage = parseFloat(document.getElementById('clePourcentage').value);
+            
+            if (!centreSource || !centreDestination || isNaN(pourcentage)) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+            
+            if (pourcentage <= 0 || pourcentage > 100) {
+                alert('Le pourcentage doit être entre 0 et 100');
+                return;
+            }
+            
+            const data = {
+                centre_source: parseInt(centreSource),
+                centre_destination: parseInt(centreDestination),
+                pourcentage: pourcentage,
+                exercice: currentExerciceId
+            };
+            
+            try {
+                await fetchAPI(`${API_URL}/cles-repartition/`, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                alert('✅ Clé de répartition ajoutée !');
+                document.getElementById('cleDestination').value = '';
+                document.getElementById('clePourcentage').value = '';
+                chargerClesCentre(centreSource);
+            } catch (e) {
+                alert('❌ Erreur: ' + e.message);
+            }
+        }
+        
+        function resetClesUI() {
+            document.getElementById('clesDetails').style.display = 'none';
+            document.getElementById('formCles').style.display = 'none';
+            document.getElementById('finaliserClesBtn').style.display = 'none';
+            document.getElementById('finaliserClesBtn').disabled = true;
+            document.getElementById('progressCles').style.width = '0%';
+            document.getElementById('totalCles').textContent = 'Total: 0%';
+            document.querySelector('#tableCles tbody').innerHTML = '';
+            document.getElementById('cleDestination').value = '';
+            document.getElementById('clePourcentage').value = '';
+        }
+
+        async function chargerClesCentre(centreSourceId) {
+            console.log('Chargement des clés pour le centre source:', centreSourceId);
+            resetClesUI();
+
+            if (!centreSourceId) {
+                console.log('Aucun centre source sélectionné, masquage des détails');
+                return;
+            }
+
+            try {
+                console.log('Appel API:', `${API_URL}/cles-repartition/?centre_source=${centreSourceId}`);
+                const cles = await fetchAllPages(`${API_URL}/cles-repartition/?centre_source=${centreSourceId}`);
+                console.log('Clés récupérées:', cles.length);
+                console.log('Détail des clés:', cles);
+                
+                // Afficher les détails
+                document.getElementById('clesDetails').style.display = 'block';
+                document.getElementById('formCles').style.display = 'flex';
+                
+                // Calculer le total
+                const total = cles.reduce((sum, cle) => sum + parseFloat(cle.pourcentage), 0);
+                console.log('Total calculé:', total);
+                document.getElementById('totalCles').textContent = `Total: ${total.toFixed(2)}%`;
+                document.getElementById('progressCles').style.width = `${Math.min(total, 100)}%`;
+
+                // bouton finaliser accessible uniquement à 100%
+                const btnFinaliser = document.getElementById('finaliserClesBtn');
+                btnFinaliser.style.display = 'inline-block';
+                btnFinaliser.disabled = total.toFixed(2) !== '100.00';
+                btnFinaliser.textContent = btnFinaliser.disabled ? '🟡 Clés à 100% pour enregistrer' : '✅ Enregistrer la répartition';
+
+                clesById = Object.fromEntries(cles.map(c => [String(c.id), c]));
+                
+                // Afficher le tableau
+                const tbody = document.querySelector('#tableCles tbody');
+                const html = cles.map(c => `
+                    <tr>
+                        <td>${c.centre_destination_code} - ${c.centre_destination_libelle}</td>
+                        <td>${parseFloat(c.pourcentage).toFixed(2)}%</td>
+                        <td>
+                            <button onclick="modifierCle(${c.id})" class="btn btn-sm" style="background:#f59e0b;color:white;">✏️</button>
+                            <button onclick="supprimerCle(${c.id}, ${centreSourceId})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+                console.log('HTML généré:', html);
+                tbody.innerHTML = html;
+                
+                console.log('Clés affichées avec succès');
+            } catch (e) {
+                console.error('Erreur chargement clés:', e);
+                alert('Erreur lors du chargement des clés: ' + e.message);
+            }
+        }
+        
+        async function supprimerCle(id, centreSourceId) {
+            if (!confirm('Supprimer cette clé de répartition ?')) return;
+            try {
+                await fetchAPI(`${API_URL}/cles-repartition/${id}/`, { method: 'DELETE' });
+                chargerClesCentre(centreSourceId);
+            } catch (e) {
+                alert('Erreur suppression: ' + e.message);
+            }
+        }
+
+        async function modifierCle(id) {
+            const cle = clesById[String(id)];
+            if (!cle) {
+                alert('Clé introuvable. Rechargez la liste.');
+                return;
+            }
+
+            const centresDestination = sortByCode(
+                centresCoutsCache.filter(c => c.type_centre !== 'NT_UO'),
+                'code'
+            ).map(c => ({ value: String(c.id), label: `${c.code} - ${c.libelle}` }));
+
+            openEditModal({
+                title: `Modifier clé de répartition (${cle.centre_source_code || ''})`,
+                fields: [
+                    {
+                        name: 'centre_destination',
+                        label: 'Centre de destination',
+                        type: 'select',
+                        required: true,
+                        parse: 'int',
+                        value: String(cle.centre_destination || ''),
+                        options: centresDestination
+                    },
+                    {
+                        name: 'pourcentage',
+                        label: 'Pourcentage',
+                        type: 'number',
+                        required: true,
+                        parse: 'float',
+                        min: 0.01,
+                        max: 100,
+                        step: '0.01',
+                        value: String(cle.pourcentage ?? '')
+                    }
+                ],
+                onSave: async (payload) => {
+                    await fetchAPI(`${API_URL}/cles-repartition/${id}/`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(payload)
+                    });
+                    await chargerClesCentre(cle.centre_source);
+                }
+            });
+        }
+
+        function finaliserRepartitionCentre() {
+            const centreSource = document.getElementById('cleSource').value;
+            if (!centreSource) {
+                return alert('Aucun centre source sélectionné.');
+            }
+            const total = parseFloat(document.getElementById('totalCles').textContent.replace('Total: ', '').replace('%', ''));
+            if (isNaN(total) || total.toFixed(2) !== '100.00') {
+                return alert('La répartition doit être à 100% pour être enregistrée.');
+            }
+
+            const btnFinaliser = document.getElementById('finaliserClesBtn');
+            btnFinaliser.textContent = '✅ Répartition enregistrée';
+            btnFinaliser.disabled = true;
+
+            document.getElementById('cleDestination').value = '';
+            document.getElementById('clePourcentage').value = '';
+
+            alert(`Répartition du centre source ${centreSource} bien enregistrée.`);
+        }
+
+        async function sauverProduit() { /* ... */ }
+        async function sauverActivite() { /* ... */ }
+        
+        document.getElementById('formCharge').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentExerciceId) {
+                alert("Aucun exercice actif trouvé pour votre hôpital.");
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const data = {
+                date: formData.get('date'),
+                numero_be_bc: formData.get('numero_be_bc'),
+                numero_op: formData.get('numero_op'),
+                designation: formData.get('designation'),
+                compte: parseInt(formData.get('compte')),
+                montant: parseFloat(formData.get('montant')),
+                centre_cout: parseInt(formData.get('centre_cout')),
+                exercice: currentExerciceId
+            };
+            
+            if (!data.date || !data.designation || !data.compte || !data.montant || !data.centre_cout) {
+                alert('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            try {
+                await fetchAPI(`${API_URL}/charges/`, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                alert('✅ Charge enregistrée !');
+                e.target.reset();
+                chargerCharges();
+            } catch (error) {
+                alert('❌ Erreur: ' + error.message);
+            }
+        });
+        
+        async function supprimerCharge(id) {
+            if (!confirm('Supprimer cette charge ?')) return;
+            try {
+                await fetchAPI(`${API_URL}/charges/${id}/`, { method: 'DELETE' });
+                chargerCharges();
+            } catch (e) {
+                alert('Erreur suppression: ' + e.message);
+            }
+        }
+
+        async function modifierCharge(id) {
+            const charge = chargesById[String(id)];
+            if (!charge) {
+                alert('Charge introuvable. Rechargez la liste.');
+                return;
+            }
+
+            await ensureCentresCoutsCache();
+
+            const compteOptions = getSelectOptionsFromElement('select[name="compte"]');
+            const centreOptions = centresCoutsCache.map(c => ({
+                value: String(c.id),
+                label: `${c.code} - ${c.libelle}`
+            }));
+
+            openEditModal({
+                title: `Modifier charge #${id}`,
+                fields: [
+                    { name: 'date', label: 'Date', type: 'date', required: true, value: charge.date || '' },
+                    { name: 'numero_be_bc', label: 'N° BE/BC', type: 'text', value: charge.numero_be_bc || '' },
+                    { name: 'numero_op', label: 'N° OP', type: 'text', value: charge.numero_op || '' },
+                    { name: 'designation', label: 'Designation', type: 'text', required: true, value: charge.designation || '' },
+                    {
+                        name: 'compte',
+                        label: 'Compte',
+                        type: 'select',
+                        required: true,
+                        parse: 'int',
+                        value: String(charge.compte || ''),
+                        options: compteOptions
+                    },
+                    {
+                        name: 'centre_cout',
+                        label: 'Centre de cout',
+                        type: 'select',
+                        required: true,
+                        parse: 'int',
+                        value: String(charge.centre_cout || ''),
+                        options: centreOptions
+                    },
+                    {
+                        name: 'montant',
+                        label: 'Montant',
+                        type: 'number',
+                        parse: 'float',
+                        required: true,
+                        min: 0.01,
+                        step: '0.01',
+                        value: String(charge.montant ?? '')
+                    }
+                ],
+                onSave: async (payload) => {
+                    payload.designation = String(payload.designation || '').trim();
+                    await fetchAPI(`${API_URL}/charges/${id}/`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(payload)
+                    });
+                    await chargerCharges();
+                }
+            });
+        }
+        
+        init();
+
+        // Événements pour les clés de répartition
+        document.getElementById('cleSource').addEventListener('change', (e) => {
+            console.log('Changement de centre source détecté, valeur:', e.target.value);
+            chargerClesCentre(e.target.value);
+        });
+        document.getElementById('chargeRespFilter').addEventListener('change', chargerCentres);
+        document.getElementById('produitRespFilter').addEventListener('change', chargerCentresTarifairesSelect);
+        document.getElementById('activiteRespFilter').addEventListener('change', chargerCentresTarifairesSelect);
+        document.getElementById('cleDestinationResp').addEventListener('change', () => {
+            chargerCentresClesRepartition();
+        });
+        document.getElementById('activiteCentre').addEventListener('change', updateActiviteUnite);
+
+        // ========== PRODUITS ==========
+async function chargerProduits() {
+    try {
+        const produits = sortByCode(await fetchAllPages(`${API_URL}/produits/`), 'centre_cout_code');
+        produitsById = Object.fromEntries(produits.map(p => [String(p.id), p]));
+        const tbody = document.querySelector('#tableProduits tbody');
+        const totalMontant = produits.reduce((sum, p) => sum + parseFloat(p.montant || 0), 0);
+        const lignesProduits = produits.map(p => `
+            <tr>
+                <td>${p.centre_cout_code} - ${p.centre_cout_libelle}</td>
+                <td>${p.type_produit_display || getProduitTypeLabel(p.type_produit)}</td>
+                <td>${getMoisLabel(p.periode)}</td>
+                <td class="num">${formatMontantCfa(p.montant)}</td>
+                <td>
+                    <button onclick="modifierProduit(${p.id})" class="btn btn-sm" style="background:#f59e0b;color:white;">✏️</button>
+                    <button onclick="supprimerProduit(${p.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+        tbody.innerHTML = lignesProduits + `
+            <tr class="row-total">
+                <td colspan="3">TOTAL</td>
+                <td class="num">${formatMontantCfa(totalMontant)}</td>
+                <td></td>
+            </tr>
+        `;
+    } catch (e) {
+        console.error('Erreur chargement produits:', e);
+    }
+}
+
+async function chargerCentresTarifairesSelect() {
+    try {
+        if (!centresCoutsCache.length) {
+            await chargerCentres();
+        }
+
+        const respProduit = document.getElementById('produitRespFilter')?.value || '';
+        const respActivite = document.getElementById('activiteRespFilter')?.value || '';
+
+        const centresTarifairesProduit = centresCoutsCache.filter(c =>
+            ['CT_MT', 'CT_CL'].includes(c.type_centre) && String(c.centre_responsabilite || '') === String(respProduit || '')
+        );
+        const centresTarifairesActivite = centresCoutsCache.filter(c =>
+            ['CT_MT', 'CT_CL'].includes(c.type_centre) && String(c.centre_responsabilite || '') === String(respActivite || '')
+        );
+
+        const centresTarifaires = centresCoutsCache.filter(c => ['CT_MT', 'CT_CL'].includes(c.type_centre));
+        centresTarifairesMap = Object.fromEntries(centresTarifaires.map(c => [String(c.id), c]));
+
+        const optionsProduit = !respProduit
+            ? '<option value="">Choisissez d\'abord un centre de responsabilité...</option>'
+            : '<option value="">Sélectionner un centre tarifaire...</option>' + centresTarifairesProduit.map(c => {
+                const typeLabel = c.type_centre === 'CT_MT' ? 'Tarifaire MT' : 'Tarifaire Clinique';
+                return `<option value="${c.id}">${c.code} - ${c.libelle} (${typeLabel})</option>`;
+            }).join('');
+
+        const optionsActivite = !respActivite
+            ? '<option value="">Choisissez d\'abord un centre de responsabilité...</option>'
+            : '<option value="">Sélectionner un centre tarifaire...</option>' + centresTarifairesActivite.map(c => {
+                const typeLabel = c.type_centre === 'CT_MT' ? 'Tarifaire MT' : 'Tarifaire Clinique';
+                return `<option value="${c.id}">${c.code} - ${c.libelle} (${typeLabel})</option>`;
+            }).join('');
+
+        const selectProduit = document.getElementById('produitCentre');
+        const selectActivite = document.getElementById('activiteCentre');
+
+        if (selectProduit) {
+            selectProduit.innerHTML = optionsProduit;
+        }
+
+        if (selectActivite) {
+            selectActivite.innerHTML = optionsActivite;
+        }
+
+        updateActiviteUnite();
+    } catch (e) {
+        console.error('Erreur chargement centres tarifaires:', e);
+    }
+}
+
+function getMoisLabel(periode) {
+    const moisLabels = {
+        1: 'Janvier',
+        2: 'Février',
+        3: 'Mars',
+        4: 'Avril',
+        5: 'Mai',
+        6: 'Juin',
+        7: 'Juillet',
+        8: 'Août',
+        9: 'Septembre',
+        10: 'Octobre',
+        11: 'Novembre',
+        12: 'Décembre'
+    };
+    return moisLabels[periode] || periode || '-';
+}
+
+function getProduitTypeLabel(typeProduit) {
+    return TYPE_PRODUIT_OPTIONS.find(option => option.value === typeProduit)?.label || typeProduit || '-';
+}
+
+function updateActiviteUnite() {
+    const centreId = document.getElementById('activiteCentre')?.value;
+    const uniteInput = document.getElementById('activiteUnite');
+    if (!uniteInput) {
+        return;
+    }
+
+    const centre = centresTarifairesMap[String(centreId)];
+    if (!centreId) {
+        uniteInput.value = '';
+        return;
+    }
+
+    uniteInput.value = centre?.unite_oeuvre || 'Non definie pour ce centre';
+}
+
+async function chargerCentresClesRepartition() {
+    try {
+        if (!centresCoutsCache.length) {
+            await chargerCentres();
+        }
+
+        const selectSource = document.getElementById('cleSource');
+        const selectDestination = document.getElementById('cleDestination');
+        const destinationRespId = document.getElementById('cleDestinationResp')?.value || '';
+        
+        if (!selectSource || !selectDestination) {
+            return;
+        }
+
+        const centresSource = centresCoutsCache.filter(c => c.type_centre === 'NT_UO');
+        const centresDestination = centresCoutsCache.filter(c =>
+            c.type_centre !== 'NT_UO' && String(c.centre_responsabilite || '') === String(destinationRespId || '')
+        );
+
+        const savedSourceId = selectSource.value;
+        selectSource.innerHTML = '<option value="">Sélectionner un centre source...</option>' +
+            centresSource.map(c => `<option value="${c.id}">${c.code} - ${c.libelle}</option>`).join('');
+        if (savedSourceId) selectSource.value = savedSourceId;
+
+        selectDestination.innerHTML = !destinationRespId
+            ? '<option value="">Choisissez d\'abord un centre de responsabilité...</option>'
+            : '<option value="">Sélectionner un centre destination...</option>' + centresDestination.map(c => {
+                const typeLabel = {
+                    'NT_TF': 'NT (Taux de Frais)',
+                    'CT_MT': 'Tarifaire MT',
+                    'CT_CL': 'Tarifaire Clinique'
+                }[c.type_centre] || c.type_centre;
+                return `<option value="${c.id}">${c.code} - ${c.libelle} (${typeLabel})</option>`;
+            }).join('');
+
+    } catch (e) {
+        console.error('Erreur chargement centres clés de répartition:', e);
+    }
+}
+
+async function sauverProduit() {
+    if (!currentExerciceId) {
+        alert("Aucun exercice actif trouvé pour votre hôpital.");
+        return;
+    }
+
+    const data = {
+        centre_cout: parseInt(document.getElementById('produitCentre').value),
+        periode: parseInt(document.getElementById('produitPeriode').value),
+        type_produit: document.getElementById('produitType').value,
+        montant: parseFloat(document.getElementById('produitMontant').value),
+        exercice: currentExerciceId
+    };
+    
+    if (!data.centre_cout || !data.periode || !data.type_produit || !data.montant) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+
+    
+
+
+
+
+
+    try {
+        await fetchAPI(`${API_URL}/produits/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        alert('✅ Produit enregistré !');
+        document.getElementById('produitMontant').value = '';
+        document.getElementById('produitPeriode').value = '1';
+        document.getElementById('produitType').value = 'ORDINAIRE';
+        chargerProduits();
+    } catch (e) {
+        alert('❌ Erreur: ' + e.message);
+    }
+}
+
+async function supprimerProduit(id) {
+    if (!confirm('Supprimer ce produit ?')) return;
+    try {
+        await fetchAPI(`${API_URL}/produits/${id}/`, { method: 'DELETE' });
+        chargerProduits();
+    } catch (e) {
+        alert('Erreur suppression: ' + e.message);
+    }
+}
+
+async function modifierProduit(id) {
+    const produit = produitsById[String(id)];
+    if (!produit) {
+        alert('Produit introuvable. Rechargez la liste.');
+        return;
+    }
+
+    await ensureCentresCoutsCache();
+
+    const centreOptions = sortByCode(
+        centresCoutsCache.filter(c => ['CT_MT', 'CT_CL'].includes(c.type_centre)),
+        'code'
+    ).map(c => ({ value: String(c.id), label: `${c.code} - ${c.libelle}` }));
+
+    openEditModal({
+        title: `Modifier produit #${id}`,
+        fields: [
+            {
+                name: 'centre_cout',
+                label: 'Centre tarifaire',
+                type: 'select',
+                required: true,
+                parse: 'int',
+                value: String(produit.centre_cout || ''),
+                options: centreOptions
+            },
+            {
+                name: 'type_produit',
+                label: 'Type de produit',
+                type: 'select',
+                required: true,
+                value: String(produit.type_produit || 'ORDINAIRE'),
+                options: TYPE_PRODUIT_OPTIONS
+            },
+            {
+                name: 'periode',
+                label: 'Periode',
+                type: 'select',
+                required: true,
+                parse: 'int',
+                value: String(produit.periode ?? '1'),
+                options: getPeriodeOptions()
+            },
+            {
+                name: 'montant',
+                label: 'Montant',
+                type: 'number',
+                required: true,
+                parse: 'float',
+                min: 0.01,
+                step: '0.01',
+                value: String(produit.montant ?? '')
+            }
+        ],
+        onSave: async (payload) => {
+            await fetchAPI(`${API_URL}/produits/${id}/`, {
+                method: 'PATCH',
+                body: JSON.stringify(payload)
+            });
+            await chargerProduits();
+        }
+    });
+}
+
+// ========== ACTIVITÉS ==========
+async function chargerActivites() {
+    try {
+        const activites = sortByCode(await fetchAllPages(`${API_URL}/activites/`), 'centre_cout_code');
+        activitesById = Object.fromEntries(activites.map(a => [String(a.id), a]));
+        const tbody = document.querySelector('#tableActivites tbody');
+        tbody.innerHTML = activites.map(a => `
+            <tr>
+                <td>${a.centre_cout_code} - ${a.centre_cout_libelle}</td>
+                <td>${a.centre_cout_unite_oeuvre || 'Non definie pour ce centre'}</td>
+                <td class="num">${parseFloat(a.volume).toLocaleString('fr-FR')}</td>
+                <td>${getMoisLabel(a.periode)}</td>
+                <td>
+                    <button onclick="modifierActivite(${a.id})" class="btn btn-sm" style="background:#f59e0b;color:white;">✏️</button>
+                    <button onclick="supprimerActivite(${a.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        console.error('Erreur chargement activités:', e);
+    }
+}
+
+async function sauverActivite() {
+    if (!currentExerciceId) {
+        alert("Aucun exercice actif trouvé pour votre hôpital.");
+        return;
+    }
+
+    const data = {
+        centre_cout: parseInt(document.getElementById('activiteCentre').value),
+        periode: parseInt(document.getElementById('activitePeriode').value),
+        volume: parseFloat(document.getElementById('activiteVolume').value),
+        exercice: currentExerciceId
+    };
+    
+    if (!data.centre_cout || !data.periode || !data.volume) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+    
+    try {
+        await fetchAPI(`${API_URL}/activites/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        alert('✅ Activité enregistrée !');
+        document.getElementById('activiteVolume').value = '';
+        document.getElementById('activitePeriode').value = '1';
+        updateActiviteUnite();
+        chargerActivites();
+    } catch (e) {
+        alert('❌ Erreur: ' + e.message);
+    }
+}
+
+async function supprimerActivite(id) {
+    if (!confirm('Supprimer cette activité ?')) return;
+    try {
+        await fetchAPI(`${API_URL}/activites/${id}/`, { method: 'DELETE' });
+        chargerActivites();
+    } catch (e) {
+        alert('Erreur suppression: ' + e.message);
+    }
+}
+
+async function modifierActivite(id) {
+    const activite = activitesById[String(id)];
+    if (!activite) {
+        alert('Activité introuvable. Rechargez la liste.');
+        return;
+    }
+
+    await ensureCentresCoutsCache();
+
+    const centreOptions = sortByCode(
+        centresCoutsCache.filter(c => ['CT_MT', 'CT_CL'].includes(c.type_centre)),
+        'code'
+    ).map(c => ({ value: String(c.id), label: `${c.code} - ${c.libelle}` }));
+
+    openEditModal({
+        title: `Modifier activité #${id}`,
+        fields: [
+            {
+                name: 'centre_cout',
+                label: 'Centre tarifaire',
+                type: 'select',
+                required: true,
+                parse: 'int',
+                value: String(activite.centre_cout || ''),
+                options: centreOptions
+            },
+            {
+                name: 'periode',
+                label: 'Periode',
+                type: 'select',
+                required: true,
+                parse: 'int',
+                value: String(activite.periode ?? '1'),
+                options: getPeriodeOptions()
+            },
+            {
+                name: 'volume',
+                label: 'Volume',
+                type: 'number',
+                required: true,
+                parse: 'float',
+                min: 0.01,
+                step: '0.01',
+                value: String(activite.volume ?? '')
+            }
+        ],
+        onSave: async (payload) => {
+            await fetchAPI(`${API_URL}/activites/${id}/`, {
+                method: 'PATCH',
+                body: JSON.stringify(payload)
+            });
+            await chargerActivites();
+        }
+    });
+}
+
+async function fetchAPI(url, options = {}) {
+    const defaultOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        credentials: 'same-origin'
+    };
+    
+    console.log('API Call:', url, options.method || 'GET');
+    
+    const response = await fetch(url, {...defaultOptions, ...options});
+
+    if (response.status === 204) {
+        return { success: true };
+    }
+    
+    // Vérifier si la réponse est du JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        if (response.ok) {
+            return { success: true };
+        }
+        const text = await response.text();
+        console.error('Réponse non-JSON:', text.substring(0, 200));
+        throw new Error(`Erreur ${response.status}: URL non trouvée ou erreur serveur`);
+    }
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        const errorMsg = JSON.stringify(errorData);
+        throw new Error(`Erreur ${response.status}: ${errorMsg}`);
+    }
+    
+    return response.json();
+}
+
+async function fetchAllPages(url) {
+    let nextUrl = url;
+    const allItems = [];
+
+    while (nextUrl) {
+        const payload = await fetchAPI(nextUrl);
+
+        if (Array.isArray(payload)) {
+            return payload;
+        }
+
+        allItems.push(...(payload.results || []));
+        nextUrl = payload.next;
+    }
+
+    return allItems;
+}
+
+document.getElementById('editModalForm').addEventListener('submit', saveEditModal);
+document.getElementById('editModalCancel').addEventListener('click', closeEditModal);
+document.getElementById('editModalClose').addEventListener('click', closeEditModal);
+document.getElementById('editModalFields').addEventListener('scroll', updateModalScrollHints);
+window.addEventListener('resize', updateModalScrollHints);
+document.getElementById('modalScrollUp').addEventListener('click', () => {
+    const body = document.getElementById('editModalFields');
+    if (body) {
+        body.scrollBy({ top: -220, behavior: 'smooth' });
+    }
+});
+document.getElementById('modalScrollDown').addEventListener('click', () => {
+    const body = document.getElementById('editModalFields');
+    if (body) {
+        body.scrollBy({ top: 220, behavior: 'smooth' });
+    }
+});
+document.getElementById('editModal').addEventListener('click', (event) => {
+    if (event.target.id === 'editModal') {
+        closeEditModal();
+    }
+});
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !document.getElementById('editModal').classList.contains('hidden')) {
+        closeEditModal();
+    }
+});
+
+
+
+
+</script>
+</body>
+</html>
+

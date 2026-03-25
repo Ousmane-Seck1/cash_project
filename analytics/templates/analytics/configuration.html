@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASH - Configuration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.5rem; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #666;
+        }
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .info-note {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            color: #0c4a6e;
+            padding: 0.7rem 0.9rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .card h3 {
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.85rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        select.form-control option {
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border: 1px solid #d7dce5;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #d7dce5;
+            font-size: 0.95rem;
+        }
+        th { background: #f8f9fa; font-weight: 600; }
+        table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f8f9fa;
+        }
+        .actions { display: flex; gap: 0.5rem; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-actif { background: #dcfce7; color: #166534; }
+        .status-cloture { background: #fee2e2; color: #991b1b; }
+        .status-inactif { background: #e5e7eb; color: #374151; }
+        .badge-mini {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #eef2ff;
+            color: #3730a3;
+            margin-left: 0.35rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-card {
+            width: min(760px, 100%);
+            max-height: min(92vh, 860px);
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid #d7dce5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .modal-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1f2937;
+        }
+        .modal-body {
+            padding: 1rem 1.25rem 0.75rem;
+            overflow-y: auto;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        #editModalForm {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem 1.25rem;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+            position: sticky;
+            bottom: 0;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .hidden { display: none; }
+        @media (max-width: 768px) {
+            .modal-card {
+                max-height: 94vh;
+            }
+            .modal-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚙️ CASH - Configuration Annuelle</h1>
+        <a href="/accueil/" class="back-btn">← Retour à l'accueil</a>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab" id="tabHopital" onclick="showTab('hopital', this)" style="display:none;">🏥 Hôpital</button>
+            <button class="tab active" id="tabExercice" onclick="showTab('exercice', this)">📅 Exercice</button>
+            <button class="tab" onclick="showTab('fonctions', this)">👥 Fonctions</button>
+            <button class="tab" onclick="showTab('responsabilite', this)">🏢 Centres de Responsabilité</button>
+            <button class="tab" onclick="showTab('couts', this)">💰 Centres de Coûts</button>
+            <button class="tab" onclick="showTab('comptes', this)">📋 Comptes de Charges</button>
+        </div>
+
+        <!-- Hôpital -->
+        <div id="hopital" class="content hidden">
+            <div class="card">
+                <h3>Gestion des Hôpitaux (Superuser)</h3>
+                <div class="info-note" id="hopitalNote">
+                    Seul un superuser peut créer/modifier un hôpital. Les utilisateurs d'hôpital n'ont pas accès à cette rubrique.
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" id="nomHopital" placeholder="CHU de Dakar">
+                    </div>
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" class="form-control" id="codeHopital" placeholder="CHU-DAK">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Adresse</label>
+                        <input type="text" class="form-control" id="adresseHopital">
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="tel" class="form-control" id="telephoneHopital">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="emailHopital">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="sauverHopital()">💾 Sauvegarder Hôpital</button>
+                <button class="btn btn-secondary" onclick="nouveauHopitalForm()">➕ Nouveau</button>
+                <button class="btn btn-warning" onclick="dupliquerConfigurationHopital()">📋 Dupliquer configuration</button>
+
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Source de duplication</label>
+                        <select class="form-control" id="sourceHopitalDuplication"></select>
+                    </div>
+                </div>
+            </div>
+            <div id="hopitalInfo" class="card hidden">
+                <h3>Hôpital Actuel</h3>
+                <p id="hopitalActuelText"></p>
+            </div>
+            <div class="card" id="hopitauxListeCard">
+                <h3>Liste des Hôpitaux et Exercices</h3>
+                <table id="tableHopitauxGestion">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Code</th>
+                            <th>Exercices</th>
+                            <th>Exercice actif</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Exercice -->
+        <div id="exercice" class="content">
+            <div class="card">
+                <h3>Exercice Comptable</h3>
+                <!-- Sélecteur d'hôpital (visible uniquement pour le superuser) -->
+                <div id="exerciceHopitalSelectorRow" class="form-row hidden">
+                    <div class="form-group">
+                        <label>Hôpital</label>
+                        <select class="form-control" id="selectHopitalExercice" onchange="onChangeHopitalExercice(this.value)">
+                            <option value="">-- Sélectionner un hôpital --</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="exerciceId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Année</label>
+                        <input type="number" class="form-control" id="anneeExercice" value="2025">
+                    </div>
+                    <div class="form-group">
+                        <label>Date de début</label>
+                        <input type="date" class="form-control" id="dateDebut">
+                    </div>
+                    <div class="form-group">
+                        <label>Date de fin</label>
+                        <input type="date" class="form-control" id="dateFin">
+                    </div>
+                    </div>
+                    <div class="form-row">
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select class="form-control" id="statutExercice">
+                            <option value="actif">Actif</option>
+                            <option value="inactif">Inactif</option>
+                            <option value="cloture">Clôturé</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="sauverExercice()">💾 Sauvegarder</button>
+                <button class="btn btn-warning" onclick="copierExercice()">📋 Copier depuis l'année précédente</button>
+                <button class="btn btn-secondary" onclick="reinitialiserFormExercice()">🧹 Réinitialiser</button>
+
+                <h3 style="margin-top: 1.4rem;">Liste des Exercices de l'Hôpital</h3>
+                <table id="tableExercices">
+                    <thead>
+                        <tr>
+                            <th>Année d'exercice</th>
+                            <th>Date de début</th>
+                            <th>Date de fin</th>
+                            <th>Statut</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Fonctions -->
+        <div id="fonctions" class="content hidden">
+            <div class="card">
+                <h3>Fonctions</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" class="form-control" id="codeFonction" placeholder="ex: MED">
+                    </div>
+                    <div class="form-group">
+                        <label>Libellé</label>
+                        <input type="text" class="form-control" id="libelleFonction" placeholder="ex: Médical">
+                    </div>
+                    <div class="form-group">
+                        <label></label>
+                        <button class="btn btn-success" onclick="ajouterFonction()" style="margin-top: 1.5rem;">➕ Ajouter</button>
+                    </div>
+                </div>
+                <table id="tableFonctions">
+                    <thead>
+                        <tr><th>Code</th><th>Libellé</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Centres de Responsabilité -->
+        <div id="responsabilite" class="content hidden">
+            <div class="card">
+                <h3>Centres de Responsabilité</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" class="form-control" id="codeResp">
+                    </div>
+                    <div class="form-group">
+                        <label>Libellé</label>
+                        <input type="text" class="form-control" id="libelleResp">
+                    </div>
+                    <div class="form-group">
+                        <label>Fonction</label>
+                        <select class="form-control" id="fonctionResp"></select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="ajouterResponsabilite()">➕ Ajouter</button>
+                <table id="tableResponsabilite">
+                    <thead>
+                        <tr><th>Code</th><th>Libellé</th><th>Fonction</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Centres de Coûts -->
+        <div id="couts" class="content hidden">
+            <div class="card">
+                <h3>Centres de Coûts</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" class="form-control" id="codeCentre" placeholder="ex: 94.1.2.3">
+                    </div>
+                    <div class="form-group">
+                        <label>Libellé</label>
+                        <input type="text" class="form-control" id="libelleCentre">
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-control" id="typeCentre">
+                            <option value="NT_UO">Non tarifaire avec UO</option>
+                            <option value="NT_TF">Non tarifaire avec TF</option>
+                            <option value="CT_MT">Centre tarifaire médico-tech</option>
+                            <option value="CT_CL">Centre tarifaire clinique</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Centre de responsabilité</label>
+                        <select class="form-control" id="centreResp"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unité d'œuvre (obligatoire pour NT_UO, CT_MT, CT_CL)</label>
+                        <input type="text" class="form-control" id="uniteOeuvre" placeholder="ex: acte, examen, journée, repas...">
+                    </div>
+                    <div class="form-group">
+                        <label>Tarif (obligatoire pour CT_MT et CT_CL)</label>
+                        <input type="number" class="form-control" id="tarifCentre" step="0.01" min="0" placeholder="ex: 1500.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Ordre cascade (pour NT_TF)</label>
+                        <input type="number" class="form-control" id="ordreCascade">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="ajouterCentreCout()">➕ Ajouter</button>
+                <table id="tableCentres">
+                    <thead>
+                        <tr><th>Code</th><th>Libellé</th><th>Type</th><th>Unité d'oeuvre</th><th>Tarif</th><th>Centre de Responsabilité</th><th>Ordre déversement</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Comptes de Charges -->
+        <div id="comptes" class="content hidden">
+            <div class="card">
+                <h3>Comptes de Charges</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Numéro</label>
+                        <input type="text" class="form-control" id="numeroCompte" placeholder="ex: 6611000">
+                    </div>
+                    <div class="form-group">
+                        <label>Libellé</label>
+                        <input type="text" class="form-control" id="libelleCompte">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="ajouterCompte()">➕ Ajouter</button>
+                <table id="tableComptes">
+                    <thead>
+                        <tr><th>Numéro</th><th>Libellé</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h4 id="editModalTitle">Modifier</h4>
+                <button type="button" id="editModalClose" class="btn btn-secondary">Fermer</button>
+            </div>
+            <form id="editModalForm">
+                <div id="editModalFields" class="modal-body"></div>
+                <div class="modal-actions">
+                    <button type="button" id="editModalCancel" class="btn btn-secondary">Annuler</button>
+                    <button type="submit" id="editModalSave" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    const API_URL = '/api';
+    let csrfToken = '';
+    let editModalState = null;
+    let fonctionsCache = [];
+    let responsabilitesCache = [];
+    let centresCache = [];
+    let comptesCache = [];
+    let currentHopitalId = null;
+    let isSuperuserSession = false;
+    let exerciceEditionId = null;
+
+    function tokenizeForNaturalSort(value) {
+        return String(value || '')
+            .trim()
+            .split(/(\d+)/)
+            .filter(Boolean)
+            .map(part => (/^\d+$/.test(part) ? Number(part) : part.toLowerCase()));
+    }
+
+    function compareCodeValues(left, right) {
+        const leftParts = tokenizeForNaturalSort(left);
+        const rightParts = tokenizeForNaturalSort(right);
+        const maxLength = Math.max(leftParts.length, rightParts.length);
+
+        for (let index = 0; index < maxLength; index += 1) {
+            if (index >= leftParts.length) return -1;
+            if (index >= rightParts.length) return 1;
+
+            const leftPart = leftParts[index];
+            const rightPart = rightParts[index];
+
+            if (leftPart === rightPart) continue;
+
+            if (typeof leftPart === 'number' && typeof rightPart === 'number') {
+                return leftPart - rightPart;
+            }
+
+            return String(leftPart).localeCompare(String(rightPart), 'fr', { numeric: true, sensitivity: 'base' });
+        }
+
+        return 0;
+    }
+
+    function sortByCode(items, fieldName) {
+        return [...items].sort((firstItem, secondItem) => compareCodeValues(firstItem[fieldName], secondItem[fieldName]));
+    }
+
+    async function chargerContexteSession() {
+        try {
+            const sessionInfo = await fetchAPI('/api/info-session/');
+            currentHopitalId = sessionInfo?.hopital_id || null;
+            isSuperuserSession = !!sessionInfo?.is_superuser;
+
+            const hopitalTabButton = document.getElementById('tabHopital');
+            const hopitalTabContent = document.getElementById('hopital');
+
+            if (isSuperuserSession) {
+                if (hopitalTabButton) {
+                    hopitalTabButton.style.display = '';
+                }
+                return;
+            }
+
+            if (hopitalTabButton) {
+                hopitalTabButton.style.display = 'none';
+                hopitalTabButton.classList.remove('active');
+            }
+            if (hopitalTabContent) {
+                hopitalTabContent.classList.add('hidden');
+            }
+            // Basculer par défaut sur Exercice pour un hôpital.
+            const exerciceTabButton = document.getElementById('tabExercice') || document.querySelector(".tab[onclick*=\"showTab('exercice'\"]");
+            if (exerciceTabButton) {
+                showTab('exercice', exerciceTabButton);
+            }
+        } catch (e) {
+            console.error('Erreur chargement session:', e);
+            currentHopitalId = null;
+            isSuperuserSession = false;
+        }
+    }
+
+    function setFieldGroupVisibility(fieldId, visible, clearWhenHidden = false) {
+        const fieldElement = document.getElementById(fieldId);
+        if (!fieldElement) return;
+
+        const group = fieldElement.closest('.form-group');
+        if (group) {
+            group.style.display = visible ? '' : 'none';
+        }
+
+        fieldElement.disabled = !visible;
+        if (!visible && clearWhenHidden) {
+            fieldElement.value = '';
+        }
+    }
+
+    function updateCentreCoutFieldVisibility() {
+        const typeCentre = document.getElementById('typeCentre')?.value;
+        const showTarif = ['CT_MT', 'CT_CL'].includes(typeCentre);
+        const showOrdreCascade = typeCentre === 'NT_TF';
+
+        setFieldGroupVisibility('tarifCentre', showTarif, true);
+        setFieldGroupVisibility('ordreCascade', showOrdreCascade, true);
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editModal');
+        const fieldsContainer = document.getElementById('editModalFields');
+        if (modal) modal.classList.add('hidden');
+        if (fieldsContainer) fieldsContainer.innerHTML = '';
+        editModalState = null;
+    }
+
+    function openEditModal(config) {
+        const modal = document.getElementById('editModal');
+        const titleElement = document.getElementById('editModalTitle');
+        const fieldsContainer = document.getElementById('editModalFields');
+        const saveButton = document.getElementById('editModalSave');
+        if (!modal || !titleElement || !fieldsContainer || !saveButton) return;
+
+        titleElement.textContent = config.title;
+        saveButton.textContent = config.saveLabel || 'Enregistrer';
+
+        fieldsContainer.innerHTML = (config.fields || []).map(field => {
+            if (field.type === 'select') {
+                const options = (field.options || []).map(option => {
+                    const selected = String(option.value) === String(field.value ?? '');
+                    return `<option value="${escapeHtml(option.value)}" ${selected ? 'selected' : ''}>${escapeHtml(option.label)}</option>`;
+                }).join('');
+
+                return `
+                    <div class="form-group" style="margin-bottom: 0.9rem;">
+                        <label for="${escapeHtml(field.name)}">${escapeHtml(field.label)}</label>
+                        <select id="${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" class="form-control" ${field.required ? 'required' : ''}>${options}</select>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="form-group" style="margin-bottom: 0.9rem;">
+                    <label for="${escapeHtml(field.name)}">${escapeHtml(field.label)}</label>
+                    <input id="${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" type="${escapeHtml(field.type || 'text')}" class="form-control"
+                        value="${escapeHtml(field.value ?? '')}" ${field.step ? `step="${escapeHtml(field.step)}"` : ''}
+                        ${field.min !== undefined ? `min="${field.min}"` : ''}
+                        ${field.max !== undefined ? `max="${field.max}"` : ''}
+                        ${field.required ? 'required' : ''}>
+                </div>
+            `;
+        }).join('');
+
+        editModalState = config;
+        modal.classList.remove('hidden');
+    }
+
+    async function saveEditModal(event) {
+        event.preventDefault();
+        if (!editModalState || typeof editModalState.onSave !== 'function') return;
+
+        const formData = new FormData(document.getElementById('editModalForm'));
+        const payload = {};
+
+        for (const field of (editModalState.fields || [])) {
+            const rawValue = formData.get(field.name);
+            const isEmpty = rawValue === null || String(rawValue).trim() === '';
+            if (field.required && (!rawValue || String(rawValue).trim() === '')) {
+                alert(`Le champ ${field.label} est obligatoire.`);
+                return;
+            }
+
+            if (!field.required && isEmpty) {
+                payload[field.name] = null;
+                continue;
+            }
+
+            if (field.parse === 'int') {
+                const parsed = parseInt(rawValue, 10);
+                if (Number.isNaN(parsed)) {
+                    alert(`Le champ ${field.label} est invalide.`);
+                    return;
+                }
+                payload[field.name] = parsed;
+            } else if (field.parse === 'float') {
+                const parsed = parseFloat(rawValue);
+                if (Number.isNaN(parsed)) {
+                    alert(`Le champ ${field.label} est invalide.`);
+                    return;
+                }
+                payload[field.name] = parsed;
+            } else {
+                payload[field.name] = rawValue;
+            }
+
+            if (field.min !== undefined && payload[field.name] < field.min) {
+                alert(`Le champ ${field.label} doit etre >= ${field.min}.`);
+                return;
+            }
+            if (field.max !== undefined && payload[field.name] > field.max) {
+                alert(`Le champ ${field.label} doit etre <= ${field.max}.`);
+                return;
+            }
+        }
+
+        try {
+            await editModalState.onSave(payload);
+            closeEditModal();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    csrfToken = getCookie('csrftoken');
+    console.log('CSRF Token:', csrfToken); // Debug
+    
+    async function fetchAPI(url, options = {}) {
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin'
+        };
+        
+        console.log('API Call:', url, options.method || 'GET', options.body); // Debug
+        
+        const response = await fetch(url, {...defaultOptions, ...options});
+        
+        console.log('Response status:', response.status); // Debug
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error:', errorText);
+            throw new Error(`Erreur ${response.status}: ${errorText}`);
+        }
+        
+        // 204 No Content n'a pas de body à parser
+        if (response.status === 204) {
+            return { success: true };
+        }
+        
+        return response.json();
+    }
+
+    async function fetchAllPages(url) {
+        let nextUrl = url;
+        const allItems = [];
+
+        while (nextUrl) {
+            const payload = await fetchAPI(nextUrl);
+
+            if (Array.isArray(payload)) {
+                return payload;
+            }
+
+            const pageItems = payload.results || [];
+            allItems.push(...pageItems);
+            nextUrl = payload.next;
+        }
+
+        return allItems;
+    }
+    
+    function showTab(tabId, clickedElement) {
+        if (tabId === 'hopital' && !isSuperuserSession) {
+            return;
+        }
+
+        document.querySelectorAll('.content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        if (clickedElement) clickedElement.classList.add('active');
+        
+        // Charger les données selon l'onglet
+        if (tabId === 'fonctions') chargerFonctions();
+        if (tabId === 'exercice') {
+            if (isSuperuserSession) chargerSelecteurHopitalExercice();
+            chargerListeExercices();
+        }
+        if (tabId === 'responsabilite') {
+            chargerFonctionsSelect();
+            chargerResponsabilites();
+        }
+        if (tabId === 'couts') {
+            chargerResponsabilitesSelect();
+            chargerCentres();
+        }
+        if (tabId === 'comptes') chargerComptes();
+    }
+    
+    // ========== HÔPITAL ==========
+    async function sauverHopital() {
+        const data = {
+            nom: document.getElementById('nomHopital').value,
+            code: document.getElementById('codeHopital').value,
+            adresse: document.getElementById('adresseHopital').value,
+            telephone: document.getElementById('telephoneHopital').value,
+            email: document.getElementById('emailHopital').value
+        };
+        
+        if (!data.nom || !data.code) {
+            alert('Veuillez remplir au moins le nom et le code');
+            return;
+        }
+        
+        try {
+            if (isSuperuserSession) {
+                if (currentHopitalId) {
+                    await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                    alert('✅ Hôpital mis à jour !');
+                } else {
+                    const created = await fetchAPI(`${API_URL}/hopitaux/`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    currentHopitalId = created?.id || null;
+                    alert('✅ Nouvel hôpital créé !');
+                }
+                await chargerHopitauxGestion();
+                await chargerHopital();
+                return;
+            }
+
+            if (!currentHopitalId) {
+                throw new Error("Aucun hôpital actif associé à votre session.");
+            }
+
+            await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+            alert('✅ Hôpital sauvegardé !');
+            chargerHopital();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+    
+    async function chargerHopital() {
+        try {
+            if (!currentHopitalId && !isSuperuserSession) {
+                const hopitaux = await fetchAllPages(`${API_URL}/hopitaux/`);
+                currentHopitalId = hopitaux[0]?.id || null;
+            }
+
+            if (!currentHopitalId) {
+                if (isSuperuserSession) {
+                    document.getElementById('hopitalInfo').classList.add('hidden');
+                    return;
+                }
+                throw new Error("Aucun hôpital disponible pour cette session.");
+            }
+
+            const hopital = await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/`);
+            document.getElementById('nomHopital').value = hopital.nom || '';
+            document.getElementById('codeHopital').value = hopital.code || '';
+            document.getElementById('adresseHopital').value = hopital.adresse || '';
+            document.getElementById('telephoneHopital').value = hopital.telephone || '';
+            document.getElementById('emailHopital').value = hopital.email || '';
+            
+            // Afficher les infos en bas
+            const info = document.getElementById('hopitalInfo');
+            info.classList.remove('hidden');
+            document.getElementById('hopitalActuelText').innerHTML = 
+                `<strong>${hopital.nom}</strong> (${hopital.code})<br>${hopital.adresse}<br>${hopital.telephone} - ${hopital.email}`;
+        } catch (e) {
+            console.error('Erreur chargement hôpital:', e);
+        }
+    }
+
+    async function chargerHopitauxGestion() {
+        if (!isSuperuserSession) return;
+
+        const tbody = document.querySelector('#tableHopitauxGestion tbody');
+        const sourceSelect = document.getElementById('sourceHopitalDuplication');
+
+        try {
+            const [hopitaux, exercices] = await Promise.all([
+                fetchAllPages(`${API_URL}/hopitaux/`),
+                fetchAllPages(`${API_URL}/exercices/`)
+            ]);
+
+            const exercicesByHopital = {};
+            (exercices || []).forEach(ex => {
+                const hid = parseInt(ex.hopital, 10);
+                if (!exercicesByHopital[hid]) exercicesByHopital[hid] = [];
+                exercicesByHopital[hid].push(ex);
+            });
+
+            tbody.innerHTML = (hopitaux || []).map(h => {
+                const exList = exercicesByHopital[h.id] || [];
+                const exActif = exList.find(ex => ex.est_actif && !ex.est_clos);
+                return `
+                    <tr>
+                        <td>${escapeHtml(h.nom)} <span class="badge-mini">ID ${h.id}</span></td>
+                        <td>${escapeHtml(h.code || '-')}</td>
+                        <td>${exList.length}</td>
+                        <td>${exActif ? exActif.annee : '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="selectionnerHopitalGestion(${h.id})">Charger</button>
+                            <button class="btn btn-sm btn-warning" onclick="dupliquerConfigurationHopital(${h.id})">Dupliquer config</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="5">Aucun hôpital trouvé.</td></tr>';
+
+            sourceSelect.innerHTML = '<option value="">Choisir un hôpital source...</option>' +
+                (hopitaux || [])
+                    .filter(h => !currentHopitalId || h.id !== currentHopitalId)
+                    .map(h => `<option value="${h.id}">${escapeHtml(h.nom)} (${escapeHtml(h.code || '-')})</option>`)
+                    .join('');
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5">Erreur de chargement: ${escapeHtml(e.message)}</td></tr>`;
+        }
+    }
+
+    function nouveauHopitalForm() {
+        if (!isSuperuserSession) return;
+        currentHopitalId = null;
+        document.getElementById('nomHopital').value = '';
+        document.getElementById('codeHopital').value = '';
+        document.getElementById('adresseHopital').value = '';
+        document.getElementById('telephoneHopital').value = '';
+        document.getElementById('emailHopital').value = '';
+        document.getElementById('hopitalInfo').classList.add('hidden');
+    }
+
+    async function selectionnerHopitalGestion(hopitalId) {
+        if (!isSuperuserSession) return;
+        currentHopitalId = hopitalId;
+        // Synchroniser le sélecteur d'hôpital de l'onglet Exercice
+        const sel = document.getElementById('selectHopitalExercice');
+        if (sel) sel.value = hopitalId;
+        await chargerHopital();
+        await chargerHopitauxGestion();
+    }
+
+    async function chargerSelecteurHopitalExercice() {
+        if (!isSuperuserSession) return;
+        const selectorRow = document.getElementById('exerciceHopitalSelectorRow');
+        if (selectorRow) selectorRow.classList.remove('hidden');
+        try {
+            const hopitaux = await fetchAllPages(`${API_URL}/hopitaux/`);
+            const sel = document.getElementById('selectHopitalExercice');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Sélectionner un hôpital --</option>' +
+                (hopitaux || [])
+                    .sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || ''), 'fr'))
+                    .map(h => `<option value="${h.id}">${escapeHtml(h.nom)} (${escapeHtml(h.code || '')})</option>`)
+                    .join('');
+            if (currentHopitalId) sel.value = currentHopitalId;
+        } catch (e) {
+            console.error('Erreur chargement sélecteur hôpital exercice:', e);
+        }
+    }
+
+    function onChangeHopitalExercice(hopitalId) {
+        currentHopitalId = hopitalId ? parseInt(hopitalId, 10) : null;
+        chargerListeExercices();
+    }
+
+    async function dupliquerConfigurationHopital(targetHopitalId = null) {
+        if (!isSuperuserSession) return;
+
+        const cibleId = targetHopitalId || currentHopitalId;
+        if (!cibleId) {
+            alert("Veuillez d'abord charger un hôpital cible.");
+            return;
+        }
+
+        const sourceHopitalId = document.getElementById('sourceHopitalDuplication').value || null;
+        if (!sourceHopitalId) {
+            alert("Veuillez choisir un hôpital source pour la duplication.");
+            return;
+        }
+        if (String(sourceHopitalId) === String(cibleId)) {
+            alert("La source et la cible doivent être différentes.");
+            return;
+        }
+
+        if (!confirm('Dupliquer la configuration (fonctions, centres, comptes) vers cet hôpital ?')) {
+            return;
+        }
+
+        try {
+            await fetchAPI(`${API_URL}/hopitaux/${cibleId}/dupliquer_configuration/`, {
+                method: 'POST',
+                body: JSON.stringify({ source_hopital_id: parseInt(sourceHopitalId, 10) })
+            });
+            alert('✅ Configuration dupliquée avec succès.');
+        } catch (e) {
+            alert('❌ Erreur duplication: ' + e.message);
+        }
+    }
+    
+    async function sauverExercice() {
+        if (!currentHopitalId) {
+            alert("Aucun hôpital actif associé à votre session.");
+            return;
+        }
+
+    const annee = parseInt(document.getElementById('anneeExercice').value);
+    const statutValue = document.getElementById('statutExercice').value;
+    const estActif = statutValue === 'actif';
+    const estClos = statutValue === 'cloture';
+    const data = {
+        annee: annee,
+        date_debut: document.getElementById('dateDebut').value,
+        date_fin: document.getElementById('dateFin').value,
+        est_actif: estActif,
+        est_clos: estClos,
+        hopital: currentHopitalId
+    };
+
+    if (estClos) {
+        data.est_actif = false;
+    }
+
+    if (!data.annee || !data.date_debut || !data.date_fin) {
+        alert('Veuillez renseigner année, date de début et date de fin.');
+        return;
+    }
+    
+    try {
+        let exerciceCibleId = exerciceEditionId;
+
+        if (!exerciceCibleId) {
+            const exercices = await fetchAllPages(`${API_URL}/exercices/`);
+            const existant = exercices.find(e => e.annee === annee && parseInt(e.hopital) === parseInt(currentHopitalId));
+            exerciceCibleId = existant ? existant.id : null;
+        }
+        
+        if (exerciceCibleId) {
+            await fetchAPI(`${API_URL}/exercices/${exerciceCibleId}/`, {
+                method: 'PATCH',
+                body: JSON.stringify(data)
+            });
+            alert('✅ Exercice mis à jour !');
+        } else {
+            await fetchAPI(`${API_URL}/exercices/`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            alert('✅ Exercice créé !');
+        }
+
+        await chargerListeExercices();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+
+    function formatDateFr(value) {
+        if (!value) return '-';
+        const date = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleDateString('fr-FR');
+    }
+
+    function getExerciceStatusInfo(exercice) {
+        if (exercice.est_clos) {
+            return { text: 'Cloture', css: 'status-cloture' };
+        }
+        if (exercice.est_actif) {
+            return { text: 'Actif', css: 'status-actif' };
+        }
+        return { text: 'Inactif', css: 'status-inactif' };
+    }
+
+    async function chargerListeExercices() {
+        const tbody = document.querySelector('#tableExercices tbody');
+        if (!tbody) return;
+
+        if (!currentHopitalId) {
+            if (isSuperuserSession) {
+                tbody.innerHTML = '<tr><td colspan="5">Veuillez sélectionner un hôpital ci-dessus.</td></tr>';
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5">Aucun hôpital actif.</td></tr>';
+            }
+            return;
+        }
+
+        try {
+            const exercices = await fetchAllPages(`${API_URL}/exercices/`);
+            const exercicesHopital = exercices
+                .filter(e => parseInt(e.hopital, 10) === parseInt(currentHopitalId, 10))
+                .sort((a, b) => (b.annee || 0) - (a.annee || 0));
+
+            if (!exercicesHopital.length) {
+                tbody.innerHTML = '<tr><td colspan="5">Aucun exercice trouvé pour cet hôpital.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = exercicesHopital.map(exercice => {
+                const status = getExerciceStatusInfo(exercice);
+                const chargerDisabled = exercice.est_clos ? 'disabled' : '';
+                const chargerTitle = exercice.est_clos
+                    ? 'Exercice cloture: non modifiable'
+                    : 'Charger cet exercice';
+
+                return `
+                    <tr>
+                        <td>${exercice.annee || '-'}</td>
+                        <td>${formatDateFr(exercice.date_debut)}</td>
+                        <td>${formatDateFr(exercice.date_fin)}</td>
+                        <td><span class="status-badge ${status.css}">${status.text}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="chargerExerciceDansForm(${exercice.id})" ${chargerDisabled} title="${chargerTitle}">Charger</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5">Erreur de chargement: ${escapeHtml(e.message)}</td></tr>`;
+        }
+    }
+
+    async function chargerExerciceDansForm(exerciceId) {
+        try {
+            const exercice = await fetchAPI(`${API_URL}/exercices/${exerciceId}/`);
+            document.getElementById('exerciceId').value = String(exercice.id || '');
+            exerciceEditionId = exercice.id || null;
+            document.getElementById('anneeExercice').value = exercice.annee || '';
+            document.getElementById('dateDebut').value = exercice.date_debut || '';
+            document.getElementById('dateFin').value = exercice.date_fin || '';
+
+            if (exercice.est_clos) {
+                document.getElementById('statutExercice').value = 'cloture';
+                alert('Cet exercice est cloture: il est charge en lecture seule.');
+            } else if (exercice.est_actif) {
+                document.getElementById('statutExercice').value = 'actif';
+            } else {
+                document.getElementById('statutExercice').value = 'inactif';
+            }
+        } catch (e) {
+            alert('❌ Erreur chargement exercice: ' + e.message);
+        }
+    }
+
+    function reinitialiserFormExercice() {
+        exerciceEditionId = null;
+        document.getElementById('exerciceId').value = '';
+        document.getElementById('anneeExercice').value = new Date().getFullYear();
+        document.getElementById('dateDebut').value = '';
+        document.getElementById('dateFin').value = '';
+        document.getElementById('statutExercice').value = 'actif';
+    }
+    
+    async function copierExercice() {
+        if (!currentHopitalId) {
+            alert("Aucun hôpital actif associé à votre session.");
+            return;
+        }
+
+        const anneeActuelle = parseInt(document.getElementById('anneeExercice').value) || new Date().getFullYear();
+        const anneeSuivante = anneeActuelle + 1;
+
+        if (!confirm(`Clôturer l'exercice ${anneeActuelle} et ouvrir ${anneeSuivante} ?\n\nLa configuration est conservée et la saisie repart à zéro pour la nouvelle année.`)) {
+            return;
+        }
+
+        try {
+            const result = await fetchAPI(`${API_URL}/exercices/cloturer_ouvrir/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    hopital: currentHopitalId,
+                    annee: anneeSuivante,
+                    date_debut: `${anneeSuivante}-01-01`,
+                    date_fin: `${anneeSuivante}-12-31`
+                })
+            });
+
+            document.getElementById('anneeExercice').value = String(result.nouvel_exercice?.annee || anneeSuivante);
+            document.getElementById('dateDebut').value = result.nouvel_exercice?.date_debut || `${anneeSuivante}-01-01`;
+            document.getElementById('dateFin').value = result.nouvel_exercice?.date_fin || `${anneeSuivante}-12-31`;
+            document.getElementById('statutExercice').value = 'actif';
+            exerciceEditionId = result.nouvel_exercice?.id || null;
+
+            alert(`✅ Exercice ${anneeActuelle} clôturé et ${anneeSuivante} ouvert.`);
+            await chargerListeExercices();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+    
+    // ========== FONCTIONS ==========
+    async function chargerFonctions() {
+        try {
+            fonctionsCache = sortByCode(await fetchAllPages(`${API_URL}/fonctions/`), 'code');
+            const tbody = document.querySelector('#tableFonctions tbody');
+            tbody.innerHTML = fonctionsCache.map(f => `
+                <tr>
+                    <td>${f.code}</td>
+                    <td>${f.libelle}</td>
+                    <td>
+                        <button onclick="editerFonction(${f.id})" class="btn btn-sm" style="background:#3b82f6;color:white;margin-right:5px;">✏️</button>
+                        <button onclick="supprimerFonction(${f.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Erreur chargement fonctions:', e);
+        }
+    }
+    
+    async function chargerFonctionsSelect() {
+        try {
+            fonctionsCache = sortByCode(await fetchAllPages(`${API_URL}/fonctions/`), 'code');
+            const select = document.getElementById('fonctionResp');
+            select.innerHTML = '<option value="">Sélectionner...</option>';
+            fonctionsCache.forEach(f => {
+                select.innerHTML += `<option value="${f.id}">${f.code} - ${f.libelle}</option>`;
+            });
+        } catch (e) {
+            console.error('Erreur chargement fonctions select:', e);
+        }
+    }
+    
+    async function ajouterFonction() {
+        if (!currentHopitalId) {
+            alert("Aucun hôpital actif associé à votre session.");
+            return;
+        }
+
+        const data = {
+            code: document.getElementById('codeFonction').value,
+            libelle: document.getElementById('libelleFonction').value,
+            hopital: currentHopitalId
+        };
+        
+        if (!data.code || !data.libelle) {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
+        
+        try {
+            await fetchAPI(`${API_URL}/fonctions/`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            alert('✅ Fonction ajoutée !');
+            document.getElementById('codeFonction').value = '';
+            document.getElementById('libelleFonction').value = '';
+            chargerFonctions();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+
+    function editerFonction(id) {
+        const fonction = fonctionsCache.find(item => item.id === id);
+        if (!fonction) {
+            alert('Fonction introuvable.');
+            return;
+        }
+
+        openEditModal({
+            title: `Modifier fonction ${fonction.code}`,
+            fields: [
+                { name: 'code', label: 'Code', type: 'text', required: true, value: fonction.code || '' },
+                { name: 'libelle', label: 'Libelle', type: 'text', required: true, value: fonction.libelle || '' }
+            ],
+            onSave: async (payload) => {
+                payload.code = String(payload.code || '').trim();
+                payload.libelle = String(payload.libelle || '').trim();
+                await fetchAPI(`${API_URL}/fonctions/${id}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload)
+                });
+                await chargerFonctions();
+                await chargerFonctionsSelect();
+                await chargerResponsabilites();
+            }
+        });
+    }
+    
+    async function supprimerFonction(id) {
+        if (!confirm('Supprimer cette fonction ?')) return;
+        console.log('Suppression de la fonction ID:', id, 'type:', typeof id);
+        try {
+            const url = `${API_URL}/fonctions/${id}/`;
+            console.log('URL de suppression:', url);
+            await fetchAPI(url, { method: 'DELETE' });
+            alert('✅ Fonction supprimée !');
+            chargerFonctions();
+        } catch (e) {
+            alert('Erreur suppression: ' + e.message);
+        }
+    }
+    
+    // ========== RESPONSABILITÉS ==========
+    async function chargerResponsabilites() {
+        try {
+            responsabilitesCache = sortByCode(await fetchAllPages(`${API_URL}/centres-responsabilite/`), 'code');
+            const tbody = document.querySelector('#tableResponsabilite tbody');
+            tbody.innerHTML = responsabilitesCache.map(r => `
+                <tr>
+                    <td>${r.code}</td>
+                    <td>${r.libelle}</td>
+                    <td>${r.fonction_code ? r.fonction_code + ' - ' + r.fonction_libelle : '-'}</td>
+                    <td>
+                        <button onclick="editerResponsabilite(${r.id})" class="btn btn-sm" style="background:#3b82f6;color:white;margin-right:5px;">✏️</button>
+                        <button onclick="supprimerResponsabilite(${r.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Erreur chargement responsabilités:', e);
+        }
+    }
+    
+    async function chargerResponsabilitesSelect() {
+        try {
+            responsabilitesCache = sortByCode(await fetchAllPages(`${API_URL}/centres-responsabilite/`), 'code');
+            const select = document.getElementById('centreResp');
+            select.innerHTML = '<option value="">Sélectionner...</option>';
+            responsabilitesCache.forEach(r => {
+                select.innerHTML += `<option value="${r.id}">${r.code} - ${r.libelle}</option>`;
+            });
+        } catch (e) {
+            console.error('Erreur chargement responsabilités select:', e);
+        }
+    }
+    
+    async function ajouterResponsabilite() {
+        const fonctionValue = document.getElementById('fonctionResp').value;
+        const data = {
+            code: document.getElementById('codeResp').value,
+            libelle: document.getElementById('libelleResp').value,
+            fonction: fonctionValue ? parseInt(fonctionValue) : null
+        };
+        
+        if (!data.code || !data.libelle || !data.fonction) {
+            alert('Veuillez remplir tous les champs obligatoires');
+            return;
+        }
+        
+        try {
+            await fetchAPI(`${API_URL}/centres-responsabilite/`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            alert('✅ Centre de responsabilité ajouté !');
+            document.getElementById('codeResp').value = '';
+            document.getElementById('libelleResp').value = '';
+            chargerResponsabilites();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+
+    async function editerResponsabilite(id) {
+        const responsabilite = responsabilitesCache.find(item => item.id === id);
+        if (!responsabilite) {
+            alert('Centre de responsabilité introuvable.');
+            return;
+        }
+
+        if (!fonctionsCache.length) {
+            await chargerFonctionsSelect();
+        }
+
+        const fonctionOptions = fonctionsCache.map(f => ({ value: String(f.id), label: `${f.code} - ${f.libelle}` }));
+
+        openEditModal({
+            title: `Modifier centre de responsabilité ${responsabilite.code}`,
+            fields: [
+                { name: 'code', label: 'Code', type: 'text', required: true, value: responsabilite.code || '' },
+                { name: 'libelle', label: 'Libelle', type: 'text', required: true, value: responsabilite.libelle || '' },
+                {
+                    name: 'fonction',
+                    label: 'Fonction',
+                    type: 'select',
+                    required: true,
+                    parse: 'int',
+                    value: String(responsabilite.fonction || ''),
+                    options: fonctionOptions
+                }
+            ],
+            onSave: async (payload) => {
+                payload.code = String(payload.code || '').trim();
+                payload.libelle = String(payload.libelle || '').trim();
+                await fetchAPI(`${API_URL}/centres-responsabilite/${id}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload)
+                });
+                await chargerResponsabilites();
+                await chargerResponsabilitesSelect();
+                await chargerCentres();
+            }
+        });
+    }
+    
+    async function supprimerResponsabilite(id) {
+        if (!confirm('Supprimer ce centre de responsabilité ?')) return;
+        try {
+            await fetchAPI(`${API_URL}/centres-responsabilite/${id}/`, { method: 'DELETE' });
+            chargerResponsabilites();
+        } catch (e) {
+            alert('Erreur suppression: ' + e.message);
+        }
+    }
+    
+    // ========== CENTRES DE COÛTS ==========
+    async function chargerCentres() {
+        try {
+            centresCache = sortByCode(await fetchAllPages(`${API_URL}/centres-couts/`), 'code');
+            const tbody = document.querySelector('#tableCentres tbody');
+            tbody.innerHTML = centresCache.map(c => `
+                <tr>
+                    <td>${c.code}</td>
+                    <td>${c.libelle}</td>
+                    <td>${c.type_centre}</td>
+                    <td>${c.unite_oeuvre || '-'}</td>
+                    <td>${c.tarif !== null && c.tarif !== undefined ? parseFloat(c.tarif).toLocaleString('fr-FR') : '-'}</td>
+                    <td>${c.centre_responsabilite_code ? c.centre_responsabilite_code + ' - ' + c.centre_responsabilite_libelle : '-'}</td>
+                    <td>${c.ordre_cascade || '-'}</td>
+                    <td>
+                        <button onclick="editerCentre(${c.id})" class="btn btn-sm" style="background:#3b82f6;color:white;margin-right:5px;">✏️</button>
+                        <button onclick="supprimerCentre(${c.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Erreur chargement centres:', e);
+        }
+    }
+    
+    async function ajouterCentreCout() {
+        const data = {
+            code: document.getElementById('codeCentre').value,
+            libelle: document.getElementById('libelleCentre').value,
+            type_centre: document.getElementById('typeCentre').value,
+            unite_oeuvre: document.getElementById('uniteOeuvre').value.trim(),
+            tarif: (() => {
+                const valeur = document.getElementById('tarifCentre').value;
+                return valeur === '' ? null : parseFloat(valeur);
+            })(),
+            centre_responsabilite: parseInt(document.getElementById('centreResp').value) || null,
+            ordre_cascade: parseInt(document.getElementById('ordreCascade').value) || null,
+            est_actif: true
+        };
+        
+        if (!data.code || !data.libelle || !data.type_centre) {
+            alert('Veuillez remplir tous les champs obligatoires');
+            return;
+        }
+
+        const typesAvecUO = ['NT_UO', 'CT_MT', 'CT_CL'];
+        if (typesAvecUO.includes(data.type_centre) && !data.unite_oeuvre) {
+            alert("L'unité d'œuvre est obligatoire pour ce type de centre.");
+            return;
+        }
+
+        const typesTarifaires = ['CT_MT', 'CT_CL'];
+        if (typesTarifaires.includes(data.type_centre) && (data.tarif === null || Number.isNaN(data.tarif))) {
+            alert("Le tarif est obligatoire pour les centres tarifaires.");
+            return;
+        }
+        
+        try {
+            await fetchAPI(`${API_URL}/centres-couts/`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            alert('✅ Centre de coût ajouté !');
+            document.getElementById('codeCentre').value = '';
+            document.getElementById('libelleCentre').value = '';
+            document.getElementById('uniteOeuvre').value = '';
+            document.getElementById('tarifCentre').value = '';
+            document.getElementById('ordreCascade').value = '';
+            chargerCentres();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+    
+    async function editerCentre(id) {
+        const centre = centresCache.find(item => item.id === id);
+        if (!centre) {
+            alert('Centre de coût introuvable.');
+            return;
+        }
+
+        if (!responsabilitesCache.length) {
+            await chargerResponsabilitesSelect();
+        }
+
+        const typeOptions = [
+            { value: 'NT_UO', label: 'Non tarifaire avec UO' },
+            { value: 'NT_TF', label: 'Non tarifaire avec TF' },
+            { value: 'CT_MT', label: 'Centre tarifaire medico-tech' },
+            { value: 'CT_CL', label: 'Centre tarifaire clinique' }
+        ];
+        const respOptions = responsabilitesCache.map(r => ({ value: String(r.id), label: `${r.code} - ${r.libelle}` }));
+
+        openEditModal({
+            title: `Modifier centre de coût ${centre.code}`,
+            fields: [
+                { name: 'code', label: 'Code', type: 'text', required: true, value: centre.code || '' },
+                { name: 'libelle', label: 'Libelle', type: 'text', required: true, value: centre.libelle || '' },
+                {
+                    name: 'type_centre',
+                    label: 'Type de centre',
+                    type: 'select',
+                    required: true,
+                    value: centre.type_centre || 'NT_UO',
+                    options: typeOptions
+                },
+                {
+                    name: 'centre_responsabilite',
+                    label: 'Centre de responsabilité',
+                    type: 'select',
+                    required: true,
+                    parse: 'int',
+                    value: String(centre.centre_responsabilite || ''),
+                    options: respOptions
+                },
+                { name: 'unite_oeuvre', label: "Unité d'oeuvre", type: 'text', value: centre.unite_oeuvre || '' },
+                {
+                    name: 'tarif',
+                    label: 'Tarif',
+                    type: 'number',
+                    parse: 'float',
+                    step: '0.01',
+                    min: 0,
+                    value: centre.tarif ?? ''
+                },
+                {
+                    name: 'ordre_cascade',
+                    label: 'Ordre déversement',
+                    type: 'number',
+                    parse: 'int',
+                    min: 1,
+                    value: centre.ordre_cascade ?? ''
+                }
+            ],
+            onSave: async (payload) => {
+                payload.code = String(payload.code || '').trim();
+                payload.libelle = String(payload.libelle || '').trim();
+                payload.unite_oeuvre = String(payload.unite_oeuvre || '').trim();
+
+                if (String(payload.tarif).trim() === '') {
+                    payload.tarif = null;
+                }
+                if (String(payload.ordre_cascade).trim() === '') {
+                    payload.ordre_cascade = null;
+                }
+
+                const typesAvecUO = ['NT_UO', 'CT_MT', 'CT_CL'];
+                if (typesAvecUO.includes(payload.type_centre) && !payload.unite_oeuvre) {
+                    throw new Error("L'unité d'œuvre est obligatoire pour ce type de centre.");
+                }
+
+                const typesTarifaires = ['CT_MT', 'CT_CL'];
+                if (typesTarifaires.includes(payload.type_centre) && (payload.tarif === null || Number.isNaN(payload.tarif))) {
+                    throw new Error('Le tarif est obligatoire pour les centres tarifaires.');
+                }
+
+                await fetchAPI(`${API_URL}/centres-couts/${id}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload)
+                });
+                await chargerCentres();
+            }
+        });
+
+        const typeElement = document.getElementById('type_centre');
+        const updateEditCentreFieldVisibility = () => {
+            const typeValue = typeElement?.value;
+            const showTarif = ['CT_MT', 'CT_CL'].includes(typeValue);
+            const showOrdreCascade = typeValue === 'NT_TF';
+            setFieldGroupVisibility('tarif', showTarif, true);
+            setFieldGroupVisibility('ordre_cascade', showOrdreCascade, true);
+        };
+
+        if (typeElement) {
+            typeElement.addEventListener('change', updateEditCentreFieldVisibility);
+        }
+        updateEditCentreFieldVisibility();
+    }
+    
+    async function supprimerCentre(id) {
+        if (!confirm('Supprimer ce centre de coût ?')) return;
+        try {
+            await fetchAPI(`${API_URL}/centres-couts/${id}/`, { method: 'DELETE' });
+            chargerCentres();
+        } catch (e) {
+            alert('Erreur suppression: ' + e.message);
+        }
+    }
+    
+    // ========== COMPTES DE CHARGES ==========
+    async function chargerComptes() {
+        try {
+            comptesCache = sortByCode(await fetchAllPages(`${API_URL}/comptes-charges/`), 'numero');
+            const tbody = document.querySelector('#tableComptes tbody');
+            tbody.innerHTML = comptesCache.map(c => `
+                <tr>
+                    <td>${c.numero}</td>
+                    <td>${c.libelle}</td>
+                    <td>
+                        <button onclick="editerCompte(${c.id})" class="btn btn-sm" style="background:#3b82f6;color:white;margin-right:5px;">✏️</button>
+                        <button onclick="supprimerCompte(${c.id})" class="btn btn-sm" style="background:#ef4444;color:white;">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Erreur chargement comptes:', e);
+        }
+    }
+    
+    async function ajouterCompte() {
+        const data = {
+            numero: document.getElementById('numeroCompte').value,
+            libelle: document.getElementById('libelleCompte').value
+        };
+        
+        if (!data.numero || !data.libelle) {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
+        
+        try {
+            await fetchAPI(`${API_URL}/comptes-charges/`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            alert('✅ Compte de charge ajouté !');
+            document.getElementById('numeroCompte').value = '';
+            document.getElementById('libelleCompte').value = '';
+            chargerComptes();
+        } catch (e) {
+            alert('❌ Erreur: ' + e.message);
+        }
+    }
+
+    function editerCompte(id) {
+        const compte = comptesCache.find(item => item.id === id);
+        if (!compte) {
+            alert('Compte de charge introuvable.');
+            return;
+        }
+
+        openEditModal({
+            title: `Modifier compte ${compte.numero}`,
+            fields: [
+                { name: 'numero', label: 'Numéro', type: 'text', required: true, value: compte.numero || '' },
+                { name: 'libelle', label: 'Libelle', type: 'text', required: true, value: compte.libelle || '' }
+            ],
+            onSave: async (payload) => {
+                payload.numero = String(payload.numero || '').trim();
+                payload.libelle = String(payload.libelle || '').trim();
+                await fetchAPI(`${API_URL}/comptes-charges/${id}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload)
+                });
+                await chargerComptes();
+            }
+        });
+    }
+
+    document.getElementById('editModalForm').addEventListener('submit', saveEditModal);
+    document.getElementById('editModalCancel').addEventListener('click', closeEditModal);
+    document.getElementById('editModalClose').addEventListener('click', closeEditModal);
+    document.getElementById('editModal').addEventListener('click', (event) => {
+        if (event.target.id === 'editModal') {
+            closeEditModal();
+        }
+    });
+    document.addEventListener('keydown', (event) => {
+        const modal = document.getElementById('editModal');
+        if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+            closeEditModal();
+        }
+    });
+    
+    async function supprimerCompte(id) {
+        if (!confirm('Supprimer ce compte ?')) return;
+        try {
+            await fetchAPI(`${API_URL}/comptes-charges/${id}/`, { method: 'DELETE' });
+            chargerComptes();
+        } catch (e) {
+            alert('Erreur suppression: ' + e.message);
+        }
+    }
+    
+    // Initialisation
+    window.addEventListener('load', async function() {
+        console.log('Configuration page loaded');
+        await chargerContexteSession();
+        const typeCentreElement = document.getElementById('typeCentre');
+        if (typeCentreElement) {
+            typeCentreElement.addEventListener('change', updateCentreCoutFieldVisibility);
+        }
+        updateCentreCoutFieldVisibility();
+        await chargerHopital();
+        await chargerHopitauxGestion();
+        await chargerListeExercices();
+        chargerFonctions();  // Charger les fonctions au démarrage
+    });
+    </script>
+</body>
+</html>

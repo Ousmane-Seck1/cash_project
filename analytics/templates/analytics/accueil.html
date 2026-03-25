@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASH - Accueil</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            min-height: 200px;
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .header .info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        .menu-section {
+            margin-bottom: 1.8rem;
+        }
+        .menu-section h2 {
+            font-size: 1.05rem;
+            color: #1f2937;
+            margin-bottom: 0.2rem;
+        }
+        .menu-section p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 0.6rem;
+        }
+        .menu-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 0.9rem;
+            border: 1px solid #dbe2ef;
+        }
+        .kpi-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1f2937;
+        }
+        .kpi-label {
+            font-size: 0.82rem;
+            color: #6b7280;
+        }
+        .alert-box {
+            background: #fff7ed;
+            border: 1px solid #fdba74;
+            border-radius: 10px;
+            padding: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .alert-box h4 {
+            margin-bottom: 0.5rem;
+            color: #9a3412;
+            font-size: 0.95rem;
+        }
+        .alert-box ul {
+            margin: 0;
+            padding-left: 1rem;
+            color: #7c2d12;
+            font-size: 0.86rem;
+        }
+        .menu-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.2rem 0.8rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            flex: 1;
+            min-width: 0;
+        }
+        .menu-card:hover, .menu-card:focus {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            outline: none;
+        }
+        .menu-card:focus {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        .menu-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.6rem;
+        }
+        .menu-card h3 {
+            color: #333;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+        }
+        .menu-card p {
+            color: #666;
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .config { border-top: 4px solid #667eea; }
+        .config:hover { border-top-color: #5568d3; }
+        .saisie { border-top: 4px solid #10b981; }
+        .saisie:hover { border-top-color: #059669; }
+        .resultats { border-top: 4px solid #f59e0b; }
+        .resultats:hover { border-top-color: #d97706; }
+        .deconnexion { border-top: 4px solid #ef4444; }
+        .deconnexion:hover { border-top-color: #dc2626; }
+        .utilisateurs { border-top: 4px solid #8b5cf6; }
+        .utilisateurs:hover { border-top-color: #7c3aed; }
+        .roles-permissions { border-top: 4px solid #0f766e; }
+        .roles-permissions:hover { border-top-color: #0d6660; }
+        .hopitaux { border-top: 4px solid #2563eb; }
+        .hopitaux:hover { border-top-color: #1d4ed8; }
+        .comparaison { border-top: 4px solid #0f766e; }
+        .comparaison:hover { border-top-color: #115e59; }
+        .pilotage { border-top: 4px solid #7c3aed; }
+        .pilotage:hover { border-top-color: #6d28d9; }
+        
+        .user-info {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: rgba(255,255,255,0.95);
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+        .ministere {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: rgba(255,255,255,0.95);
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        @media (max-width: 900px) {
+            .menu-grid { flex-wrap: wrap; }
+            .menu-card { min-width: 140px; }
+            .user-info {
+                position: static;
+                background: rgba(0,0,0,0.1);
+                margin-top: 1rem;
+                display: inline-block;
+            }
+            .header .info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .ministere {
+                position: static;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="ministere">Ministère de la Santé</div>
+        <div class="user-info">
+            <span id="userName">Utilisateur</span> | 
+            <span id="userRole">Rôle</span>
+        </div>
+        <h1>🏥 <span id="nomHopital">Chargement...</span></h1>
+        <p>CASH - Comptabilité Analytique Hospitalière </p>
+        <div class="info">
+            <div>📅 Exercice: <strong id="anneeExercice">-</strong></div>
+            <div>📊 Statut: <strong id="statutExercice">-</strong></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="menuSuperuser" class="menu-section" style="display:none;">
+            <h2>Espace Superuser</h2>
+            <p>Pilotage multi-hôpitaux, administration et comparaison.</p>
+
+            <div id="superuserSummary" class="hidden">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiHopitaux">-</div>
+                        <div class="kpi-label">Hôpitaux</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiExercicesActifs">-</div>
+                        <div class="kpi-label">Exercices actifs</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiAlertes">-</div>
+                        <div class="kpi-label">Alertes</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiResultatGlobal">-</div>
+                        <div class="kpi-label">Résultat global</div>
+                    </div>
+                </div>
+                <div id="superuserAlerts" class="alert-box hidden">
+                    <h4>Alertes prioritaires</h4>
+                    <ul id="superuserAlertsList"></ul>
+                </div>
+            </div>
+
+            <div class="menu-grid">
+                <a href="/configuration/" class="menu-card hopitaux">
+                    <div class="icon">🏥</div>
+                    <h3>Gestion des Hôpitaux</h3>
+                    <p>Créer un nouvel hôpital, gérer la liste des hôpitaux et leurs exercices</p>
+                </a>
+
+                <a href="/utilisateurs/" class="menu-card utilisateurs">
+                    <div class="icon">👥</div>
+                    <h3>Gestion des Utilisateurs</h3>
+                    <p>Administrer les comptes utilisateurs sur tous les hôpitaux</p>
+                </a>
+
+                <a href="/roles-permissions/" class="menu-card roles-permissions">
+                    <div class="icon">🔐</div>
+                    <h3>Rôles et Permissions</h3>
+                    <p>Définir les rôles par hôpital et les permissions associées</p>
+                </a>
+
+                <a href="/resultats/?mode=comparaison" class="menu-card comparaison">
+                    <div class="icon">⚖️</div>
+                    <h3>Comparaison Hôpitaux</h3>
+                    <p>Comparer les performances, résultats, CRU et tarifs entre hôpitaux</p>
+                </a>
+
+                <a href="/resultats/?mode=pilotage" class="menu-card pilotage">
+                    <div class="icon">🧭</div>
+                    <h3>Pilotage Global</h3>
+                    <p>Analyse complète d'un hôpital : calcul, résultats, dashboard, évolution</p>
+                </a>
+
+                <a href="/logout/" class="menu-card deconnexion">
+                    <div class="icon">🚪</div>
+                    <h3>Déconnexion</h3>
+                    <p>Quitter l'application</p>
+                </a>
+            </div>
+        </div>
+
+        <div id="menuHopital" class="menu-section" style="display:none;">
+            <h2>Espace Hôpital</h2>
+            <p>Configuration locale, saisie et consultation des résultats.</p>
+            <div class="menu-grid">
+                <a href="/utilisateurs/" class="menu-card utilisateurs" id="cardUtilisateurs" style="display:none;">
+                    <div class="icon">👥</div>
+                    <h3>Gestion des Utilisateurs</h3>
+                    <p>Créer, modifier et gérer les accès par rôle et par hôpital</p>
+                </a>
+
+                <a href="/roles-permissions/" class="menu-card roles-permissions" id="cardRolesPermissions" style="display:none;">
+                    <div class="icon">🔐</div>
+                    <h3>Rôles et Permissions</h3>
+                    <p>Définir les rôles propres à chaque hôpital et leur liste de permissions</p>
+                </a>
+
+                <a href="/configuration/" class="menu-card config">
+                    <div class="icon">⚙️</div>
+                    <h3>Configuration Annuelle</h3>
+                    <p>Exercice, Fonctions, Centres de responsabilité, Centres de coûts, Comptes de charges</p>
+                </a>
+                
+                <a href="/saisie/" class="menu-card saisie">
+                    <div class="icon">📝</div>
+                    <h3>Saisie mensuelle</h3>
+                    <p>Charges, Clés de répartition, Produits, Activités</p>
+                </a>
+                
+                <a href="/resultats/" class="menu-card resultats">
+                    <div class="icon">📊</div>
+                    <h3>Résultats Analytiques</h3>
+                    <p>Calculs, tableaux de résultats, dashboard, analyses comparatives</p>
+                </a>
+
+                <a href="/logout/" class="menu-card deconnexion">
+                    <div class="icon">🚪</div>
+                    <h3>Déconnexion</h3>
+                    <p>Quitter l'application</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(value) {
+            const num = Number(value || 0);
+            return num.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+        }
+
+        async function chargerSuperuserSummary() {
+            try {
+                const response = await fetch('/api/hopitaux/tableau_bord_superuser/');
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}`);
+                }
+                const payload = await response.json();
+                const global = payload.global || {};
+                const alertes = payload.alertes || [];
+
+                document.getElementById('superuserSummary').classList.remove('hidden');
+                document.getElementById('kpiHopitaux').textContent = formatNumber(global.nb_hopitaux);
+                document.getElementById('kpiExercicesActifs').textContent = formatNumber(global.nb_exercices_actifs);
+                document.getElementById('kpiAlertes').textContent = formatNumber(global.nb_alertes);
+                document.getElementById('kpiResultatGlobal').textContent = formatNumber(global.total_resultat);
+
+                const alertBox = document.getElementById('superuserAlerts');
+                const alertList = document.getElementById('superuserAlertsList');
+                if (alertes.length) {
+                    alertBox.classList.remove('hidden');
+                    alertList.innerHTML = alertes.slice(0, 5).map(item => `<li>${item.message}</li>`).join('');
+                } else {
+                    alertBox.classList.add('hidden');
+                    alertList.innerHTML = '';
+                }
+            } catch (e) {
+                console.error('Erreur chargement tableau de bord superuser:', e);
+            }
+        }
+
+        async function chargerInfo() {
+            try {
+                const response = await fetch('/api/info-session/');
+                const data = await response.json();
+                
+                document.getElementById('nomHopital').textContent = data.is_superuser ? 'Tous les hôpitaux' : (data.hopital || 'Hôpital');
+                document.getElementById('anneeExercice').textContent = data.exercice || '-';
+                document.getElementById('statutExercice').textContent = data.exercice ? (data.exercice_actif ? 'Actif' : 'Clôturé') : '-';
+                document.getElementById('userName').textContent = data.user;
+                document.getElementById('userRole').textContent = data.role;
+
+                const menuSuperuser = document.getElementById('menuSuperuser');
+                const menuHopital = document.getElementById('menuHopital');
+
+                if (data.is_superuser) {
+                    menuSuperuser.style.display = 'block';
+                    menuHopital.style.display = 'none';
+                    await chargerSuperuserSummary();
+                } else {
+                    menuSuperuser.style.display = 'none';
+                    menuHopital.style.display = 'block';
+
+                    // Afficher Utilisateurs/Roles uniquement pour le contrôleur
+                    if (data.role_code === 'controleur') {
+                        document.getElementById('cardUtilisateurs').style.display = 'block';
+                        document.getElementById('cardRolesPermissions').style.display = 'block';
+                    }
+                }
+            } catch (e) {
+                console.error('Erreur chargement infos:', e);
+            }
+        }
+        chargerInfo();
+    </script>
+</body>
+</html>
