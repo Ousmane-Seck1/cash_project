@@ -89,7 +89,7 @@ class GlobalReferenceAdminTests(TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
 
-    def test_superuser_create_fonction_propagates_to_all_hospitals(self):
+    def test_superuser_create_fonction_creates_only_for_target_hospital(self):
         self.client.force_login(self.superuser)
         payload = {
             "hopital": self.hopital_a.id,
@@ -100,9 +100,9 @@ class GlobalReferenceAdminTests(TestCase):
         self.assertEqual(resp.status_code, 201)
 
         self.assertTrue(Fonction.objects.filter(hopital=self.hopital_a, code="94.9").exists())
-        self.assertTrue(Fonction.objects.filter(hopital=self.hopital_b, code="94.9").exists())
+        self.assertFalse(Fonction.objects.filter(hopital=self.hopital_b, code="94.9").exists())
 
-    def test_superuser_update_centre_cout_updates_all_hospitals(self):
+    def test_superuser_update_centre_cout_updates_only_target_hospital(self):
         self.client.force_login(self.superuser)
 
         self.centre_b.type_centre = "NT_UO"
@@ -127,17 +127,18 @@ class GlobalReferenceAdminTests(TestCase):
         self.centre_a.refresh_from_db()
         self.centre_b.refresh_from_db()
         self.assertEqual(self.centre_a.libelle, "Centre 100 modifie")
-        self.assertEqual(self.centre_b.libelle, "Centre 100 modifie")
+        self.assertEqual(self.centre_b.libelle, "Centre 100")
         self.assertEqual(self.centre_a.type_centre, "CT_MT")
         self.assertEqual(str(self.centre_a.tarif), "250.00")
         self.assertEqual(self.centre_b.type_centre, "NT_UO")
         self.assertEqual(self.centre_b.unite_oeuvre, "journee")
         self.assertIsNone(self.centre_b.tarif)
 
-    def test_superuser_delete_compte_charge_deletes_all_hospitals(self):
+    def test_superuser_delete_compte_charge_deletes_only_target_hospital(self):
         self.client.force_login(self.superuser)
         compte = CompteCharge.objects.get(hopital=self.hopital_a, numero="601100")
         resp = self.client.delete(f"/api/comptes-charges/{compte.id}/")
         self.assertEqual(resp.status_code, 204)
 
-        self.assertFalse(CompteCharge.objects.filter(numero="601100").exists())
+        self.assertFalse(CompteCharge.objects.filter(hopital=self.hopital_a, numero="601100").exists())
+        self.assertTrue(CompteCharge.objects.filter(hopital=self.hopital_b, numero="601100").exists())
