@@ -99,16 +99,16 @@ WSGI_APPLICATION = 'cash_project.wsgi.application'
 
 # ========== BASE DE DONNÉES ==========
 
-db_engine = os.getenv('DB_ENGINE', 'sqlite3')
+db_engine = (os.getenv('DB_ENGINE', 'sqlite3') or '').strip().lower()
 
-if db_engine == 'sqlite3':
+if db_engine in ['sqlite3', 'django.db.backends.sqlite3']:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / os.getenv('DB_NAME', 'db.sqlite3'),
         }
     }
-elif db_engine in ['postgresql', 'django.db.backends.postgresql']:
+elif db_engine in ['postgresql', 'postgres', 'django.db.backends.postgresql', 'django.db.backends.postgresql_psycopg2']:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
