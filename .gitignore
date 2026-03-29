@@ -21,6 +21,9 @@ db.sqlite3
 db.sqlite3.bak_*
 hospital_databases/*.sqlite3
 
+# Generated import diagnostic reports
+import*_report*.csv
+
 # OS/editor artifacts
 .DS_Store
 Thumbs.db
