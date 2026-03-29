@@ -1762,6 +1762,9 @@
         updateCentreCoutFieldVisibility();
         await chargerHopital();
         await chargerHopitauxGestion();
+        if (isSuperuserSession) {
+            await chargerSelecteurHopitalExercice();
+        }
         await chargerListeExercices();
         chargerFonctions();  // Charger les fonctions au démarrage
     });
