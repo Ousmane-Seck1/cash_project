@@ -40,7 +40,7 @@ jobs:
         SECRET_KEY=ci-test-secret-key-not-used-in-production
         DEBUG=True
         ALLOWED_HOSTS=*
-        DB_ENGINE=django.db.backends.sqlite3
+        DB_ENGINE=sqlite3
         DB_NAME=db.sqlite3
         ENVIRONMENT=test
         EOF
