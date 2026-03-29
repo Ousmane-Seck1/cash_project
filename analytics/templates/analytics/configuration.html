@@ -1242,7 +1242,8 @@
     // ========== FONCTIONS ==========
     async function chargerFonctions() {
         try {
-            fonctionsCache = sortByCode(await fetchAllPages(`${API_URL}/fonctions/`), 'code');
+            const hopitalParam = currentHopitalId ? `?hopital=${currentHopitalId}` : '';
+            fonctionsCache = sortByCode(await fetchAllPages(`${API_URL}/fonctions/${hopitalParam}`), 'code');
             const tbody = document.querySelector('#tableFonctions tbody');
             tbody.innerHTML = fonctionsCache.map(f => `
                 <tr>
@@ -1261,7 +1262,8 @@
     
     async function chargerFonctionsSelect() {
         try {
-            fonctionsCache = sortByCode(await fetchAllPages(`${API_URL}/fonctions/`), 'code');
+            const hopitalParam = currentHopitalId ? `?hopital=${currentHopitalId}` : '';
+            fonctionsCache = sortByCode(await fetchAllPages(`${API_URL}/fonctions/${hopitalParam}`), 'code');
             const select = document.getElementById('fonctionResp');
             select.innerHTML = '<option value="">Sélectionner...</option>';
             fonctionsCache.forEach(f => {
@@ -1368,7 +1370,8 @@
     
     async function chargerResponsabilitesSelect() {
         try {
-            responsabilitesCache = sortByCode(await fetchAllPages(`${API_URL}/centres-responsabilite/`), 'code');
+            const hopitalParam = currentHopitalId ? `?hopital=${currentHopitalId}` : '';
+            responsabilitesCache = sortByCode(await fetchAllPages(`${API_URL}/centres-responsabilite/${hopitalParam}`), 'code');
             const select = document.getElementById('centreResp');
             select.innerHTML = '<option value="">Sélectionner...</option>';
             responsabilitesCache.forEach(r => {
@@ -1462,7 +1465,8 @@
     // ========== CENTRES DE COÛTS ==========
     async function chargerCentres() {
         try {
-            centresCache = sortByCode(await fetchAllPages(`${API_URL}/centres-couts/`), 'code');
+            const hopitalParam = currentHopitalId ? `?hopital=${currentHopitalId}` : '';
+            centresCache = sortByCode(await fetchAllPages(`${API_URL}/centres-couts/${hopitalParam}`), 'code');
             const tbody = document.querySelector('#tableCentres tbody');
             tbody.innerHTML = centresCache.map(c => `
                 <tr>
@@ -1652,7 +1656,8 @@
     // ========== COMPTES DE CHARGES ==========
     async function chargerComptes() {
         try {
-            comptesCache = sortByCode(await fetchAllPages(`${API_URL}/comptes-charges/`), 'numero');
+            const hopitalParam = currentHopitalId ? `?hopital=${currentHopitalId}` : '';
+            comptesCache = sortByCode(await fetchAllPages(`${API_URL}/comptes-charges/${hopitalParam}`), 'numero');
             const tbody = document.querySelector('#tableComptes tbody');
             tbody.innerHTML = comptesCache.map(c => `
                 <tr>
@@ -1672,7 +1677,8 @@
     async function ajouterCompte() {
         const data = {
             numero: document.getElementById('numeroCompte').value,
-            libelle: document.getElementById('libelleCompte').value
+            libelle: document.getElementById('libelleCompte').value,
+            hopital: currentHopitalId
         };
         
         if (!data.numero || !data.libelle) {

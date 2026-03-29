@@ -235,17 +235,20 @@ class CompteChargeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompteCharge
         fields = ['id', 'numero', 'libelle', 'hopital']
-        read_only_fields = ['id', 'hopital']
     
     def create(self, validated_data):
         request = self.context.get('request')
+        # Si hopital fourni explicitement (superuser staging), l'utiliser
+        if validated_data.get('hopital'):
+            return super().create(validated_data)
+
         user_hopital_id = None
         if request and request.user and hasattr(request.user, 'profile'):
             user_hopital_id = request.user.profile.hopital_id
 
         if user_hopital_id:
             validated_data['hopital_id'] = user_hopital_id
-        elif not validated_data.get('hopital'):
+        else:
             default_hopital = Hopital.objects.order_by('id').first()
             if default_hopital:
                 validated_data['hopital'] = default_hopital

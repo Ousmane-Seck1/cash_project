@@ -380,43 +380,21 @@ class CentreCoutViewSet(viewsets.ModelViewSet):
         return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        return CentreCout.objects.select_related('centre_responsabilite__fonction', 'centre_responsabilite__fonction__hopital')
+        queryset = CentreCout.objects.select_related('centre_responsabilite__fonction', 'centre_responsabilite__fonction__hopital')
+        hopital_id = self.request.query_params.get('hopital')
+        if self.request.user.is_superuser and hopital_id:
+            return queryset.filter(centre_responsabilite__fonction__hopital_id=hopital_id)
+        return _filter_for_user_hopital(queryset, self.request.user, 'centre_responsabilite__fonction__hopital_id')
 
     @transaction.atomic
     def perform_create(self, serializer):
         centre = serializer.save()
-        parent = centre.centre_responsabilite
-        if not parent:
-            return
-
-        parent_code = parent.code
-        fonction_code = parent.fonction.code
-
-        for hopital in Hopital.objects.all():
-            fonction = Fonction.objects.filter(hopital=hopital, code=fonction_code).first()
-            if not fonction:
-                continue
-            centre_responsabilite = CentreResponsabilite.objects.filter(fonction=fonction, code=parent_code).first()
-            if not centre_responsabilite:
-                continue
-            CentreCout.objects.update_or_create(
-                centre_responsabilite=centre_responsabilite,
-                code=centre.code,
-                defaults={
-                    'libelle': centre.libelle,
-                    'type_centre': centre.type_centre,
-                    'unite_oeuvre': centre.unite_oeuvre,
-                    'tarif': centre.tarif,
-                    'ordre_cascade': centre.ordre_cascade,
-                    'est_actif': centre.est_actif,
-                }
-            )
         _log_audit_event(
             self.request.user,
             'CREATE',
             'CentreCout',
             centre.id,
-            f"Creation centre {centre.code} et synchronisation reseau.",
+            f"Creation centre {centre.code} pour {centre.centre_responsabilite.fonction.hopital.code}.",
         )
 
     @transaction.atomic
@@ -426,60 +404,29 @@ class CentreCoutViewSet(viewsets.ModelViewSet):
         old_parent_id = instance.centre_responsabilite_id
 
         centre = serializer.save()
-        parent = centre.centre_responsabilite
-        if not parent:
-            return
 
         if centre.code != old_code or centre.centre_responsabilite_id != old_parent_id:
             raise ValidationError("Le code et le centre de responsabilite ne peuvent pas etre modifies. Supprimez puis recreez l'element.")
 
-        new_parent_code = parent.code
-        new_fonction_code = parent.fonction.code
-
-        for hopital in Hopital.objects.all():
-            new_parent = CentreResponsabilite.objects.filter(
-                fonction__hopital=hopital,
-                fonction__code=new_fonction_code,
-                code=new_parent_code
-            ).first()
-            if not new_parent:
-                continue
-
-            CentreCout.objects.filter(
-                centre_responsabilite=new_parent,
-                code=centre.code,
-            ).update(
-                libelle=centre.libelle,
-            )
         _log_audit_event(
             self.request.user,
             'UPDATE',
             'CentreCout',
             centre.id,
-            f"Mise a jour centre {centre.code} (libelle global synchronise).",
+            f"Mise a jour centre {centre.code} pour {centre.centre_responsabilite.fonction.hopital.code}.",
         )
 
     @transaction.atomic
     def perform_destroy(self, instance):
-        parent = instance.centre_responsabilite
-        if not parent:
-            return super().perform_destroy(instance)
-
-        centre_code = instance.code
-        parent_code = parent.code
-        fonction_code = parent.fonction.code
-
-        CentreCout.objects.filter(
-            centre_responsabilite__code=parent_code,
-            centre_responsabilite__fonction__code=fonction_code,
-            code=centre_code
-        ).delete()
+        code = instance.code
+        hopital_code = instance.centre_responsabilite.fonction.hopital.code
+        instance.delete()
         _log_audit_event(
             self.request.user,
             'DELETE',
             'CentreCout',
             instance.id,
-            f"Suppression centre {centre_code} sur tout le reseau.",
+            f"Suppression centre {code} pour {hopital_code}.",
         )
 
 
@@ -494,23 +441,21 @@ class CompteChargeViewSet(viewsets.ModelViewSet):
         return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        return CompteCharge.objects.select_related('hopital').all()
+        queryset = CompteCharge.objects.select_related('hopital')
+        hopital_id = self.request.query_params.get('hopital')
+        if self.request.user.is_superuser and hopital_id:
+            return queryset.filter(hopital_id=hopital_id).order_by('numero')
+        return _filter_for_user_hopital(queryset, self.request.user, 'hopital_id').order_by('numero')
 
     @transaction.atomic
     def perform_create(self, serializer):
         compte = serializer.save()
-        for hopital in Hopital.objects.exclude(pk=compte.hopital_id):
-            CompteCharge.objects.update_or_create(
-                hopital=hopital,
-                numero=compte.numero,
-                defaults={'libelle': compte.libelle}
-            )
         _log_audit_event(
             self.request.user,
             'CREATE',
             'CompteCharge',
             compte.id,
-            f"Creation compte {compte.numero} et synchronisation reseau.",
+            f"Creation compte {compte.numero} pour {compte.hopital.code}.",
         )
 
     @transaction.atomic
@@ -522,24 +467,25 @@ class CompteChargeViewSet(viewsets.ModelViewSet):
         if compte.numero != old_numero:
             raise ValidationError("Le numero de compte ne peut pas etre modifie. Supprimez puis recreez le compte.")
 
-        CompteCharge.objects.filter(numero=old_numero).update(libelle=compte.libelle)
         _log_audit_event(
             self.request.user,
             'UPDATE',
             'CompteCharge',
             compte.id,
-            f"Mise a jour libelle compte {compte.numero} sur tout le reseau.",
+            f"Mise a jour libelle compte {compte.numero} pour {compte.hopital.code}.",
         )
 
     @transaction.atomic
     def perform_destroy(self, instance):
-        CompteCharge.objects.filter(numero=instance.numero).delete()
+        numero = instance.numero
+        hopital_code = instance.hopital.code
+        instance.delete()
         _log_audit_event(
             self.request.user,
             'DELETE',
             'CompteCharge',
             instance.id,
-            f"Suppression compte {instance.numero} sur tout le reseau.",
+            f"Suppression compte {numero} pour {hopital_code}.",
         )
 
 
@@ -1678,23 +1624,21 @@ class FonctionViewSet(viewsets.ModelViewSet):
         return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        return Fonction.objects.select_related('hopital').order_by('code', 'hopital__code')
+        queryset = Fonction.objects.select_related('hopital')
+        hopital_id = self.request.query_params.get('hopital')
+        if self.request.user.is_superuser and hopital_id:
+            return queryset.filter(hopital_id=hopital_id).order_by('code')
+        return _filter_for_user_hopital(queryset, self.request.user, 'hopital_id').order_by('code')
 
     @transaction.atomic
     def perform_create(self, serializer):
         fonction = serializer.save()
-        for hopital in Hopital.objects.exclude(pk=fonction.hopital_id):
-            Fonction.objects.update_or_create(
-                hopital=hopital,
-                code=fonction.code,
-                defaults={'libelle': fonction.libelle}
-            )
         _log_audit_event(
             self.request.user,
             'CREATE',
             'Fonction',
             fonction.id,
-            f"Creation fonction {fonction.code} et synchronisation reseau.",
+            f"Creation fonction {fonction.code} pour {fonction.hopital.code}.",
         )
 
     @transaction.atomic
@@ -1706,24 +1650,25 @@ class FonctionViewSet(viewsets.ModelViewSet):
         if fonction.code != old_code:
             raise ValidationError("Le code fonction ne peut pas etre modifie. Supprimez puis recreez la fonction.")
 
-        Fonction.objects.filter(code=old_code).update(libelle=fonction.libelle)
         _log_audit_event(
             self.request.user,
             'UPDATE',
             'Fonction',
             fonction.id,
-            f"Mise a jour libelle fonction {fonction.code} sur tout le reseau.",
+            f"Mise a jour libelle fonction {fonction.code} pour {fonction.hopital.code}.",
         )
 
     @transaction.atomic
     def perform_destroy(self, instance):
-        Fonction.objects.filter(code=instance.code).delete()
+        code = instance.code
+        hopital_code = instance.hopital.code
+        instance.delete()
         _log_audit_event(
             self.request.user,
             'DELETE',
             'Fonction',
             instance.id,
-            f"Suppression fonction {instance.code} sur tout le reseau.",
+            f"Suppression fonction {code} pour {hopital_code}.",
         )
 
 
@@ -1738,28 +1683,21 @@ class CentreResponsabiliteViewSet(viewsets.ModelViewSet):
         return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        return CentreResponsabilite.objects.select_related('fonction', 'fonction__hopital').order_by('fonction__code', 'code', 'fonction__hopital__code')
+        queryset = CentreResponsabilite.objects.select_related('fonction', 'fonction__hopital')
+        hopital_id = self.request.query_params.get('hopital')
+        if self.request.user.is_superuser and hopital_id:
+            return queryset.filter(fonction__hopital_id=hopital_id).order_by('fonction__code', 'code')
+        return _filter_for_user_hopital(queryset, self.request.user, 'fonction__hopital_id').order_by('fonction__code', 'code')
 
     @transaction.atomic
     def perform_create(self, serializer):
         centre = serializer.save()
-        fonction_code = centre.fonction.code
-
-        for hopital in Hopital.objects.all():
-            fonction = Fonction.objects.filter(hopital=hopital, code=fonction_code).first()
-            if not fonction:
-                continue
-            CentreResponsabilite.objects.update_or_create(
-                fonction=fonction,
-                code=centre.code,
-                defaults={'libelle': centre.libelle}
-            )
         _log_audit_event(
             self.request.user,
             'CREATE',
             'CentreResponsabilite',
             centre.id,
-            f"Creation centre responsabilite {centre.code} et synchronisation reseau.",
+            f"Creation centre responsabilite {centre.code} pour {centre.fonction.hopital.code}.",
         )
 
     @transaction.atomic
@@ -1772,30 +1710,25 @@ class CentreResponsabiliteViewSet(viewsets.ModelViewSet):
         if centre.code != old_code or centre.fonction_id != old_fonction_id:
             raise ValidationError("Le code et la fonction ne peuvent pas etre modifies. Supprimez puis recreez l'element.")
 
-        CentreResponsabilite.objects.filter(
-            fonction__code=centre.fonction.code,
-            code=old_code
-        ).update(libelle=centre.libelle)
         _log_audit_event(
             self.request.user,
             'UPDATE',
             'CentreResponsabilite',
             centre.id,
-            f"Mise a jour libelle centre responsabilite {centre.code} sur tout le reseau.",
+            f"Mise a jour libelle centre responsabilite {centre.code} pour {centre.fonction.hopital.code}.",
         )
 
     @transaction.atomic
     def perform_destroy(self, instance):
-        CentreResponsabilite.objects.filter(
-            fonction__code=instance.fonction.code,
-            code=instance.code
-        ).delete()
+        code = instance.code
+        hopital_code = instance.fonction.hopital.code
+        instance.delete()
         _log_audit_event(
             self.request.user,
             'DELETE',
             'CentreResponsabilite',
             instance.id,
-            f"Suppression centre responsabilite {instance.code} sur tout le reseau.",
+            f"Suppression centre responsabilite {code} pour {hopital_code}.",
         )
     
 
