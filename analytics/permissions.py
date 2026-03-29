@@ -57,3 +57,22 @@ class ReadOnly(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS
+
+
+class IsGlobalAdmin(permissions.BasePermission):
+    """Autorise uniquement le super administrateur global."""
+
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(user and user.is_authenticated and user.is_superuser)
+
+
+class CanRunSensitiveOperations(permissions.BasePermission):
+    """Autorise les operations critiques pour superuser ou controleur configure."""
+
+    def has_permission(self, request, view):
+        return _has_configured_permission(
+            request.user,
+            'manage_configuration',
+            legacy_roles=['controleur'],
+        )

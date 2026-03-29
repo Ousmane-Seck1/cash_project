@@ -2,6 +2,7 @@ from collections import defaultdict
 from decimal import Decimal
 from datetime import datetime
 from io import BytesIO
+import logging
 
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
@@ -10,6 +11,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from openpyxl import Workbook
@@ -31,7 +33,9 @@ from .permissions import (
     IsControleurGestion, 
     IsComptableAnalytique,
     ReadOnly,
-    CanManageUsers
+    CanManageUsers,
+    IsGlobalAdmin,
+    CanRunSensitiveOperations,
 )
 from .hospital_databases import ensure_hospital_database
 
@@ -39,7 +43,7 @@ from django.contrib.auth.models import User
 from .models import (
     Charge, CentreCout, CleRepartition, Activite, Produit,
     ResultatCalcul, Exercice, CompteCharge,
-    Fonction, CentreResponsabilite, Hopital, UserProfile, HopitalRole, Role,
+    Fonction, CentreResponsabilite, Hopital, UserProfile, HopitalRole, Role, AuditLog,
     ROLE_DEFAULT_PERMISSIONS
 )
 
@@ -171,6 +175,32 @@ def _build_pdf_response(filename, title, hopital_name, table_headers, table_rows
     response.write(pdf)
     return response
 
+
+def _log_audit_event(user, action, model_name, object_id, description):
+    if not user or not user.is_authenticated:
+        return
+
+    allowed_actions = {choice[0] for choice in AuditLog.ACTION_CHOICES}
+    if action not in allowed_actions:
+        action = 'UPDATE'
+
+    AuditLog.objects.create(
+        user=user,
+        action=action,
+        model_name=model_name,
+        object_id=int(object_id) if object_id else 0,
+        description=description[:1000],
+    )
+    logger = logging.getLogger('analytics')
+    logger.info(
+        'audit_event user=%s action=%s model=%s object_id=%s desc="%s"',
+        getattr(user, 'username', 'unknown'),
+        action,
+        model_name,
+        int(object_id) if object_id else 0,
+        description[:220],
+    )
+
 class ExerciceViewSet(viewsets.ModelViewSet):
     """Seul le contrôleur de gestion peut créer/modifier/supprimer des exercices"""
     queryset = Exercice.objects.all()
@@ -294,6 +324,48 @@ class ExerciceViewSet(viewsets.ModelViewSet):
             }
         })
 
+    @action(detail=False, methods=['get'])
+    def workflow_annuel_precheck(self, request):
+        """Checklist prealable pour demarrage/cloture annuelle."""
+        if not CanRunSensitiveOperations().has_permission(request, self):
+            return Response({'error': 'Acces reserve aux profils autorises.'}, status=403)
+
+        hopital_id = request.query_params.get('hopital')
+        if request.user.is_superuser:
+            if not hopital_id:
+                return Response({'error': 'hopital requis pour un superuser'}, status=400)
+            hopital = Hopital.objects.filter(id=hopital_id).first()
+        else:
+            user_hopital_id = _get_user_hopital_id(request.user)
+            hopital = Hopital.objects.filter(id=user_hopital_id).first() if user_hopital_id else None
+
+        if not hopital:
+            return Response({'error': 'Hôpital introuvable.'}, status=404)
+
+        has_exercice_actif = Exercice.objects.filter(hopital=hopital, est_actif=True, est_clos=False).exists()
+        has_fonctions = Fonction.objects.filter(hopital=hopital).exists()
+        has_comptes = CompteCharge.objects.filter(hopital=hopital).exists()
+        centres_count = CentreCout.objects.filter(centre_responsabilite__fonction__hopital=hopital).count()
+        has_ref_same_level = Hopital.objects.filter(niveau=hopital.niveau, est_reference_niveau=True).exclude(id=hopital.id).exists()
+
+        checks = [
+            {'code': 'exercice_actif', 'ok': has_exercice_actif, 'message': 'Exercice actif non cloture present.'},
+            {'code': 'fonctions', 'ok': has_fonctions, 'message': 'Fonctions configurees.'},
+            {'code': 'comptes', 'ok': has_comptes, 'message': 'Comptes de charges configures.'},
+            {'code': 'centres', 'ok': centres_count > 0, 'message': 'Centres de cout configures.'},
+            {'code': 'reference_niveau', 'ok': has_ref_same_level or hopital.est_reference_niveau, 'message': 'Reference de niveau disponible.'},
+        ]
+
+        return Response({
+            'hopital': {'id': hopital.id, 'nom': hopital.nom, 'niveau': hopital.niveau},
+            'ready': all(item['ok'] for item in checks[:4]),
+            'checks': checks,
+            'next_steps': [
+                'Lancer copier_referentiel_niveau en mode preview_only pour verifier les impacts.',
+                'Demarrer cloturer_ouvrir pour ouvrir le nouvel exercice.',
+            ],
+        }, status=200)
+
 
 class CentreCoutViewSet(viewsets.ModelViewSet):
     """Gestion des centres de coûts - Permissions par rôle"""
@@ -305,15 +377,109 @@ class CentreCoutViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.IsAuthenticated()]
-        # Seul le contrôleur peut créer/modifier/supprimer
-        return [IsControleurGestion()]
+        return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        queryset = CentreCout.objects.select_related('centre_responsabilite__fonction')
-        return _filter_for_user_hopital(
-            queryset,
+        return CentreCout.objects.select_related('centre_responsabilite__fonction', 'centre_responsabilite__fonction__hopital')
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        centre = serializer.save()
+        parent = centre.centre_responsabilite
+        if not parent:
+            return
+
+        parent_code = parent.code
+        fonction_code = parent.fonction.code
+
+        for hopital in Hopital.objects.all():
+            fonction = Fonction.objects.filter(hopital=hopital, code=fonction_code).first()
+            if not fonction:
+                continue
+            centre_responsabilite = CentreResponsabilite.objects.filter(fonction=fonction, code=parent_code).first()
+            if not centre_responsabilite:
+                continue
+            CentreCout.objects.update_or_create(
+                centre_responsabilite=centre_responsabilite,
+                code=centre.code,
+                defaults={
+                    'libelle': centre.libelle,
+                    'type_centre': centre.type_centre,
+                    'unite_oeuvre': centre.unite_oeuvre,
+                    'tarif': centre.tarif,
+                    'ordre_cascade': centre.ordre_cascade,
+                    'est_actif': centre.est_actif,
+                }
+            )
+        _log_audit_event(
             self.request.user,
-            'centre_responsabilite__fonction__hopital_id'
+            'CREATE',
+            'CentreCout',
+            centre.id,
+            f"Creation centre {centre.code} et synchronisation reseau.",
+        )
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        old_code = instance.code
+        old_parent_id = instance.centre_responsabilite_id
+
+        centre = serializer.save()
+        parent = centre.centre_responsabilite
+        if not parent:
+            return
+
+        if centre.code != old_code or centre.centre_responsabilite_id != old_parent_id:
+            raise ValidationError("Le code et le centre de responsabilite ne peuvent pas etre modifies. Supprimez puis recreez l'element.")
+
+        new_parent_code = parent.code
+        new_fonction_code = parent.fonction.code
+
+        for hopital in Hopital.objects.all():
+            new_parent = CentreResponsabilite.objects.filter(
+                fonction__hopital=hopital,
+                fonction__code=new_fonction_code,
+                code=new_parent_code
+            ).first()
+            if not new_parent:
+                continue
+
+            CentreCout.objects.filter(
+                centre_responsabilite=new_parent,
+                code=centre.code,
+            ).update(
+                libelle=centre.libelle,
+            )
+        _log_audit_event(
+            self.request.user,
+            'UPDATE',
+            'CentreCout',
+            centre.id,
+            f"Mise a jour centre {centre.code} (libelle global synchronise).",
+        )
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        parent = instance.centre_responsabilite
+        if not parent:
+            return super().perform_destroy(instance)
+
+        centre_code = instance.code
+        parent_code = parent.code
+        fonction_code = parent.fonction.code
+
+        CentreCout.objects.filter(
+            centre_responsabilite__code=parent_code,
+            centre_responsabilite__fonction__code=fonction_code,
+            code=centre_code
+        ).delete()
+        _log_audit_event(
+            self.request.user,
+            'DELETE',
+            'CentreCout',
+            instance.id,
+            f"Suppression centre {centre_code} sur tout le reseau.",
         )
 
 
@@ -325,11 +491,56 @@ class CompteChargeViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.IsAuthenticated()]
-        return [IsControleurGestion()]
+        return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        queryset = CompteCharge.objects.select_related('hopital')
-        return _filter_for_user_hopital(queryset, self.request.user, 'hopital_id')
+        return CompteCharge.objects.select_related('hopital').all()
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        compte = serializer.save()
+        for hopital in Hopital.objects.exclude(pk=compte.hopital_id):
+            CompteCharge.objects.update_or_create(
+                hopital=hopital,
+                numero=compte.numero,
+                defaults={'libelle': compte.libelle}
+            )
+        _log_audit_event(
+            self.request.user,
+            'CREATE',
+            'CompteCharge',
+            compte.id,
+            f"Creation compte {compte.numero} et synchronisation reseau.",
+        )
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        old_numero = instance.numero
+        compte = serializer.save()
+
+        if compte.numero != old_numero:
+            raise ValidationError("Le numero de compte ne peut pas etre modifie. Supprimez puis recreez le compte.")
+
+        CompteCharge.objects.filter(numero=old_numero).update(libelle=compte.libelle)
+        _log_audit_event(
+            self.request.user,
+            'UPDATE',
+            'CompteCharge',
+            compte.id,
+            f"Mise a jour libelle compte {compte.numero} sur tout le reseau.",
+        )
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        CompteCharge.objects.filter(numero=instance.numero).delete()
+        _log_audit_event(
+            self.request.user,
+            'DELETE',
+            'CompteCharge',
+            instance.id,
+            f"Suppression compte {instance.numero} sur tout le reseau.",
+        )
 
 
 class ChargeViewSet(viewsets.ModelViewSet):
@@ -1462,17 +1673,58 @@ class FonctionViewSet(viewsets.ModelViewSet):
     serializer_class = FonctionSerializer
     
     def get_permissions(self):
-        # Superuser passe toujours
-        if self.request.user.is_superuser:
-            return [permissions.IsAuthenticated()]
         if self.action in ['list', 'retrieve']:
             return [permissions.IsAuthenticated()]
-        # Pour les modifications : contrôleur ou superuser
-        return [IsControleurGestion()]
+        return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        queryset = Fonction.objects.select_related('hopital')
-        return _filter_for_user_hopital(queryset, self.request.user, 'hopital_id')
+        return Fonction.objects.select_related('hopital').order_by('code', 'hopital__code')
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        fonction = serializer.save()
+        for hopital in Hopital.objects.exclude(pk=fonction.hopital_id):
+            Fonction.objects.update_or_create(
+                hopital=hopital,
+                code=fonction.code,
+                defaults={'libelle': fonction.libelle}
+            )
+        _log_audit_event(
+            self.request.user,
+            'CREATE',
+            'Fonction',
+            fonction.id,
+            f"Creation fonction {fonction.code} et synchronisation reseau.",
+        )
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        old_code = instance.code
+        fonction = serializer.save()
+
+        if fonction.code != old_code:
+            raise ValidationError("Le code fonction ne peut pas etre modifie. Supprimez puis recreez la fonction.")
+
+        Fonction.objects.filter(code=old_code).update(libelle=fonction.libelle)
+        _log_audit_event(
+            self.request.user,
+            'UPDATE',
+            'Fonction',
+            fonction.id,
+            f"Mise a jour libelle fonction {fonction.code} sur tout le reseau.",
+        )
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        Fonction.objects.filter(code=instance.code).delete()
+        _log_audit_event(
+            self.request.user,
+            'DELETE',
+            'Fonction',
+            instance.id,
+            f"Suppression fonction {instance.code} sur tout le reseau.",
+        )
 
 
 
@@ -1483,11 +1735,68 @@ class CentreResponsabiliteViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.IsAuthenticated()]
-        return [IsControleurGestion()]
+        return [IsGlobalAdmin()]
 
     def get_queryset(self):
-        queryset = CentreResponsabilite.objects.select_related('fonction', 'fonction__hopital')
-        return _filter_for_user_hopital(queryset, self.request.user, 'fonction__hopital_id')
+        return CentreResponsabilite.objects.select_related('fonction', 'fonction__hopital').order_by('fonction__code', 'code', 'fonction__hopital__code')
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        centre = serializer.save()
+        fonction_code = centre.fonction.code
+
+        for hopital in Hopital.objects.all():
+            fonction = Fonction.objects.filter(hopital=hopital, code=fonction_code).first()
+            if not fonction:
+                continue
+            CentreResponsabilite.objects.update_or_create(
+                fonction=fonction,
+                code=centre.code,
+                defaults={'libelle': centre.libelle}
+            )
+        _log_audit_event(
+            self.request.user,
+            'CREATE',
+            'CentreResponsabilite',
+            centre.id,
+            f"Creation centre responsabilite {centre.code} et synchronisation reseau.",
+        )
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        old_code = instance.code
+        old_fonction_id = instance.fonction_id
+        centre = serializer.save()
+
+        if centre.code != old_code or centre.fonction_id != old_fonction_id:
+            raise ValidationError("Le code et la fonction ne peuvent pas etre modifies. Supprimez puis recreez l'element.")
+
+        CentreResponsabilite.objects.filter(
+            fonction__code=centre.fonction.code,
+            code=old_code
+        ).update(libelle=centre.libelle)
+        _log_audit_event(
+            self.request.user,
+            'UPDATE',
+            'CentreResponsabilite',
+            centre.id,
+            f"Mise a jour libelle centre responsabilite {centre.code} sur tout le reseau.",
+        )
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        CentreResponsabilite.objects.filter(
+            fonction__code=instance.fonction.code,
+            code=instance.code
+        ).delete()
+        _log_audit_event(
+            self.request.user,
+            'DELETE',
+            'CentreResponsabilite',
+            instance.id,
+            f"Suppression centre responsabilite {instance.code} sur tout le reseau.",
+        )
     
 
 class ProduitViewSet(viewsets.ModelViewSet):
@@ -1614,7 +1923,56 @@ class HopitalViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if not self.request.user.is_superuser:
             raise PermissionDenied("Seul un superuser peut créer un hôpital.")
-        serializer.save()
+        data = serializer.validated_data
+        self._check_reference_conflict(
+            niveau=data.get('niveau', Hopital.NIVEAU_1),
+            est_reference_niveau=data.get('est_reference_niveau', False),
+            current_id=None,
+        )
+        hopital = serializer.save()
+        _log_audit_event(
+            self.request.user,
+            'CREATE',
+            'Hopital',
+            hopital.id,
+            f"Creation hopital {hopital.nom} ({hopital.code}) niveau={hopital.niveau} ref_niveau={hopital.est_reference_niveau}.",
+        )
+
+    def perform_update(self, serializer):
+        if not self.request.user.is_superuser:
+            raise PermissionDenied("Seul un superuser peut modifier un hôpital.")
+        current = self.get_object()
+        data = serializer.validated_data
+        niveau = data.get('niveau', current.niveau)
+        est_reference_niveau = data.get('est_reference_niveau', current.est_reference_niveau)
+        self._check_reference_conflict(
+            niveau=niveau,
+            est_reference_niveau=est_reference_niveau,
+            current_id=current.id,
+        )
+        hopital = serializer.save()
+        _log_audit_event(
+            self.request.user,
+            'UPDATE',
+            'Hopital',
+            hopital.id,
+            f"Mise a jour hopital {hopital.nom} ({hopital.code}) niveau={hopital.niveau} ref_niveau={hopital.est_reference_niveau}.",
+        )
+
+    def _check_reference_conflict(self, niveau, est_reference_niveau, current_id=None):
+        if not est_reference_niveau:
+            return
+        duplicate = Hopital.objects.filter(
+            niveau=niveau,
+            est_reference_niveau=True,
+        )
+        if current_id:
+            duplicate = duplicate.exclude(id=current_id)
+        duplicate = duplicate.first()
+        if duplicate:
+            raise ValidationError(
+                f"Le niveau {niveau} a deja un hopital de reference: {duplicate.nom}."
+            )
 
     @action(detail=True, methods=['post'])
     def provision_database(self, request, pk=None):
@@ -1625,6 +1983,14 @@ class HopitalViewSet(viewsets.ModelViewSet):
         except Exception as exc:
             return Response({'error': f"Provisionnement impossible: {exc}"}, status=500)
 
+        _log_audit_event(
+            request.user,
+            'UPDATE',
+            'Hopital',
+            hopital.id,
+            f"Provisionnement base dediee: alias={db_info.get('alias')} name={db_info.get('name')}.",
+        )
+
         return Response({
             'success': True,
             'hopital': {'id': hopital.id, 'nom': hopital.nom},
@@ -1634,6 +2000,9 @@ class HopitalViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reinitialiser_saisie(self, request, pk=None):
         """Supprime les données de saisie d'un hôpital (sans toucher aux résultats)."""
+        if str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
+            return Response({'error': 'confirmation_code=CONFIRMER requis pour cette action critique.'}, status=400)
+
         hopital = self.get_object()
         exercices_ids = list(Exercice.objects.filter(hopital=hopital).values_list('id', flat=True))
 
@@ -1644,6 +2013,14 @@ class HopitalViewSet(viewsets.ModelViewSet):
         deleted_cles, _ = CleRepartition.objects.filter(exercice_id__in=exercices_ids).delete()
         deleted_produits, _ = Produit.objects.filter(exercice_id__in=exercices_ids).delete()
         deleted_activites, _ = Activite.objects.filter(exercice_id__in=exercices_ids).delete()
+
+        _log_audit_event(
+            request.user,
+            'DELETE',
+            'Hopital',
+            hopital.id,
+            f"Reinitialisation saisie: charges={deleted_charges}, cles={deleted_cles}, produits={deleted_produits}, activites={deleted_activites}.",
+        )
 
         return Response({
             'success': True,
@@ -1661,6 +2038,9 @@ class HopitalViewSet(viewsets.ModelViewSet):
         """Duplique la configuration (fonctions, centres, comptes) depuis un hôpital source."""
         target_hopital = self.get_object()
         source_hopital_id = request.data.get('source_hopital_id')
+        force = str(request.data.get('force', 'true')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        if force and str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
+            return Response({'error': 'confirmation_code=CONFIRMER requis quand force=true.'}, status=400)
 
         if source_hopital_id:
             source_hopital = Hopital.objects.filter(id=source_hopital_id).first()
@@ -1670,9 +2050,209 @@ class HopitalViewSet(viewsets.ModelViewSet):
         if not source_hopital:
             return Response({'error': 'Aucun hôpital source disponible.'}, status=400)
 
+        preview_only = str(request.data.get('preview_only', 'false')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        diff = self._build_configuration_diff(source_hopital, target_hopital)
+        if preview_only:
+            return Response({
+                'success': True,
+                'preview_only': True,
+                'source_hopital': {'id': source_hopital.id, 'nom': source_hopital.nom},
+                'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
+                'force_center_fields': force,
+                'diff': diff,
+            }, status=200)
+
+        created, updated = self._copy_configuration_between_hospitals(
+            source_hopital=source_hopital,
+            target_hopital=target_hopital,
+            force_center_fields=force,
+        )
+        _log_audit_event(
+            request.user,
+            'UPDATE',
+            'Hopital',
+            target_hopital.id,
+            f"Duplication configuration depuis {source_hopital.code} vers {target_hopital.code} (force={force}).",
+        )
+
+        return Response({
+            'success': True,
+            'source_hopital': {'id': source_hopital.id, 'nom': source_hopital.nom},
+            'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
+            'force_center_fields': force,
+            'diff': diff,
+            'created': created,
+            'updated': updated,
+        }, status=200)
+
+    @action(detail=True, methods=['post'])
+    def copier_referentiel_niveau(self, request, pk=None):
+        """Copie la configuration depuis l'hopital de reference du meme niveau."""
+        if not request.user.is_superuser:
+            raise PermissionDenied("Seul un superuser peut copier le referentiel par niveau.")
+
+        target_hopital = self.get_object()
+        force = str(request.data.get('force', 'false')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        if force and str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
+            return Response({'error': 'confirmation_code=CONFIRMER requis quand force=true.'}, status=400)
+        source_hopital_id = request.data.get('source_hopital_id')
+
+        if source_hopital_id:
+            source_hopital = Hopital.objects.filter(id=source_hopital_id).first()
+            if not source_hopital:
+                return Response({'error': 'Hôpital source introuvable.'}, status=404)
+            if source_hopital.niveau != target_hopital.niveau:
+                return Response({'error': 'Le niveau de la source doit correspondre au niveau de la cible.'}, status=400)
+        else:
+            source_hopital = Hopital.objects.filter(
+                niveau=target_hopital.niveau,
+                est_reference_niveau=True,
+            ).exclude(id=target_hopital.id).order_by('id').first()
+
+        if not source_hopital:
+            return Response(
+                {'error': f"Aucun hôpital de référence trouvé pour le niveau {target_hopital.get_niveau_display()}."},
+                status=400,
+            )
+
+        preview_only = str(request.data.get('preview_only', 'false')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        diff = self._build_configuration_diff(source_hopital, target_hopital)
+        if preview_only:
+            return Response({
+                'success': True,
+                'preview_only': True,
+                'niveau': target_hopital.niveau,
+                'source_hopital': {'id': source_hopital.id, 'nom': source_hopital.nom},
+                'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
+                'force_center_fields': force,
+                'diff': diff,
+            }, status=200)
+
+        created, updated = self._copy_configuration_between_hospitals(
+            source_hopital=source_hopital,
+            target_hopital=target_hopital,
+            force_center_fields=force,
+        )
+        _log_audit_event(
+            request.user,
+            'UPDATE',
+            'Hopital',
+            target_hopital.id,
+            f"Copie referentiel niveau {target_hopital.niveau} depuis {source_hopital.code} vers {target_hopital.code} (force={force}).",
+        )
+
+        return Response({
+            'success': True,
+            'niveau': target_hopital.niveau,
+            'source_hopital': {'id': source_hopital.id, 'nom': source_hopital.nom},
+            'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
+            'force_center_fields': force,
+            'diff': diff,
+            'created': created,
+            'updated': updated,
+        }, status=200)
+
+    def _build_configuration_diff(self, source_hopital, target_hopital):
+        src_f = set(Fonction.objects.filter(hopital=source_hopital).values_list('code', flat=True))
+        tgt_f = set(Fonction.objects.filter(hopital=target_hopital).values_list('code', flat=True))
+
+        src_r = set(CentreResponsabilite.objects.filter(fonction__hopital=source_hopital).values_list('fonction__code', 'code'))
+        tgt_r = set(CentreResponsabilite.objects.filter(fonction__hopital=target_hopital).values_list('fonction__code', 'code'))
+
+        src_c = set(CentreCout.objects.filter(centre_responsabilite__fonction__hopital=source_hopital).values_list('centre_responsabilite__fonction__code', 'centre_responsabilite__code', 'code'))
+        tgt_c = set(CentreCout.objects.filter(centre_responsabilite__fonction__hopital=target_hopital).values_list('centre_responsabilite__fonction__code', 'centre_responsabilite__code', 'code'))
+
+        src_cp = set(CompteCharge.objects.filter(hopital=source_hopital).values_list('numero', flat=True))
+        tgt_cp = set(CompteCharge.objects.filter(hopital=target_hopital).values_list('numero', flat=True))
+
+        diff = {
+            'fonctions': {'a_ajouter': len(src_f - tgt_f), 'deja_presentes': len(src_f & tgt_f)},
+            'centres_responsabilite': {'a_ajouter': len(src_r - tgt_r), 'deja_presents': len(src_r & tgt_r)},
+            'centres_cout': {'a_ajouter': len(src_c - tgt_c), 'deja_presents': len(src_c & tgt_c)},
+            'comptes_charges': {'a_ajouter': len(src_cp - tgt_cp), 'deja_presents': len(src_cp & tgt_cp)},
+        }
+        diff['resume'] = {
+            'total_a_ajouter': (
+                diff['fonctions']['a_ajouter']
+                + diff['centres_responsabilite']['a_ajouter']
+                + diff['centres_cout']['a_ajouter']
+                + diff['comptes_charges']['a_ajouter']
+            ),
+            'message': 'Verification terminee. Utiliser preview_only=false pour appliquer.',
+        }
+        return diff
+
+    @action(detail=False, methods=['get'])
+    def controle_qualite_donnees(self, request):
+        if not request.user.is_superuser:
+            return Response({'error': 'Acces reserve au superuser.'}, status=403)
+
+        anomalies = []
+        for hopital in Hopital.objects.order_by('nom'):
+            centres = CentreCout.objects.filter(centre_responsabilite__fonction__hopital=hopital)
+            comptes_count = CompteCharge.objects.filter(hopital=hopital).count()
+
+            if not Fonction.objects.filter(hopital=hopital).exists():
+                anomalies.append({'hopital_id': hopital.id, 'hopital_nom': hopital.nom, 'type': 'fonctions_absentes', 'message': 'Aucune fonction configuree.'})
+
+            if comptes_count == 0:
+                anomalies.append({'hopital_id': hopital.id, 'hopital_nom': hopital.nom, 'type': 'comptes_absents', 'message': 'Aucun compte de charge configure.'})
+
+            invalid_uo = centres.filter(type_centre__in=['NT_UO', 'CT_MT', 'CT_CL'], unite_oeuvre='').count()
+            if invalid_uo:
+                anomalies.append({'hopital_id': hopital.id, 'hopital_nom': hopital.nom, 'type': 'uo_manquante', 'message': f'{invalid_uo} centre(s) avec unite d\'oeuvre manquante.'})
+
+            invalid_tarif = centres.filter(type_centre__in=['CT_MT', 'CT_CL'], tarif__isnull=True).count()
+            if invalid_tarif:
+                anomalies.append({'hopital_id': hopital.id, 'hopital_nom': hopital.nom, 'type': 'tarif_manquant', 'message': f'{invalid_tarif} centre(s) tarifaire(s) sans tarif.'})
+
+            has_active_ex = Exercice.objects.filter(hopital=hopital, est_actif=True, est_clos=False).exists()
+            if not has_active_ex:
+                anomalies.append({'hopital_id': hopital.id, 'hopital_nom': hopital.nom, 'type': 'exercice_actif_manquant', 'message': 'Aucun exercice actif non cloture.'})
+
+        return Response({
+            'summary': {
+                'nb_hopitaux': Hopital.objects.count(),
+                'nb_anomalies': len(anomalies),
+            },
+            'anomalies': anomalies,
+        }, status=200)
+
+    @action(detail=False, methods=['get'])
+    def alertes_systeme(self, request):
+        """Synthese d'alertes operationnelles pour la supervision superuser."""
+        if not request.user.is_superuser:
+            return Response({'error': 'Acces reserve au superuser.'}, status=403)
+
+        anomalies = self.controle_qualite_donnees(request).data.get('anomalies', [])
+        missing_refs = []
+        for niveau_code, niveau_label in Hopital.NIVEAU_CHOICES:
+            if not Hopital.objects.filter(niveau=niveau_code, est_reference_niveau=True).exists():
+                missing_refs.append({'niveau': niveau_code, 'message': f'Pas de reference definie pour {niveau_label}.'})
+
+        since = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        audits_today = AuditLog.objects.filter(timestamp__gte=since).count()
+
+        return Response({
+            'summary': {
+                'audits_today': audits_today,
+                'anomalies_count': len(anomalies),
+                'missing_references_count': len(missing_refs),
+            },
+            'missing_references': missing_refs,
+            'anomalies': anomalies,
+        }, status=200)
+
+    def _copy_configuration_between_hospitals(self, source_hopital, target_hopital, force_center_fields=False):
         fonction_map = {}
         resp_map = {}
         created = {
+            'fonctions': 0,
+            'centres_responsabilite': 0,
+            'centres_cout': 0,
+            'comptes_charges': 0,
+        }
+        updated = {
             'fonctions': 0,
             'centres_responsabilite': 0,
             'centres_cout': 0,
@@ -1688,6 +2268,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             if not is_created and new_fonction.libelle != fonction.libelle:
                 new_fonction.libelle = fonction.libelle
                 new_fonction.save(update_fields=['libelle'])
+                updated['fonctions'] += 1
             if is_created:
                 created['fonctions'] += 1
             fonction_map[fonction.id] = new_fonction
@@ -1704,6 +2285,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             if not is_created and new_resp.libelle != resp.libelle:
                 new_resp.libelle = resp.libelle
                 new_resp.save(update_fields=['libelle'])
+                updated['centres_responsabilite'] += 1
             if is_created:
                 created['centres_responsabilite'] += 1
             resp_map[resp.id] = new_resp
@@ -1729,31 +2311,44 @@ class HopitalViewSet(viewsets.ModelViewSet):
                 }
             )
             if not is_created:
-                new_centre.libelle = centre.libelle
-                new_centre.type_centre = centre.type_centre
-                new_centre.unite_oeuvre = centre.unite_oeuvre
-                new_centre.tarif = centre.tarif
-                new_centre.ordre_cascade = centre.ordre_cascade
-                new_centre.est_actif = centre.est_actif
-                new_centre.save()
+                fields_to_update = []
+                if new_centre.libelle != centre.libelle:
+                    new_centre.libelle = centre.libelle
+                    fields_to_update.append('libelle')
+
+                if force_center_fields:
+                    center_fields = [
+                        ('type_centre', centre.type_centre),
+                        ('unite_oeuvre', centre.unite_oeuvre),
+                        ('tarif', centre.tarif),
+                        ('ordre_cascade', centre.ordre_cascade),
+                        ('est_actif', centre.est_actif),
+                    ]
+                    for field_name, expected_value in center_fields:
+                        if getattr(new_centre, field_name) != expected_value:
+                            setattr(new_centre, field_name, expected_value)
+                            fields_to_update.append(field_name)
+
+                if fields_to_update:
+                    new_centre.save(update_fields=fields_to_update)
+                    updated['centres_cout'] += 1
             if is_created:
                 created['centres_cout'] += 1
 
         for compte in CompteCharge.objects.filter(hopital=source_hopital).order_by('id'):
-            _, is_created = CompteCharge.objects.get_or_create(
+            new_compte, is_created = CompteCharge.objects.get_or_create(
                 hopital=target_hopital,
                 numero=compte.numero,
                 defaults={'libelle': compte.libelle}
             )
+            if not is_created and new_compte.libelle != compte.libelle:
+                new_compte.libelle = compte.libelle
+                new_compte.save(update_fields=['libelle'])
+                updated['comptes_charges'] += 1
             if is_created:
                 created['comptes_charges'] += 1
 
-        return Response({
-            'success': True,
-            'source_hopital': {'id': source_hopital.id, 'nom': source_hopital.nom},
-            'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
-            'created': created,
-        }, status=200)
+        return created, updated
 
     @action(detail=False, methods=['get'])
     def tableau_bord_superuser(self, request):
@@ -1862,10 +2457,31 @@ class HopitalViewSet(viewsets.ModelViewSet):
         if hopitaux_ids:
             hopitaux_ids = sorted(set(hopitaux_ids))
 
+        niveaux = []
+        raw_niveaux = request.query_params.getlist('niveaux')
+        if not raw_niveaux:
+            raw_single_niveaux = (request.query_params.get('niveaux') or '').strip()
+            if raw_single_niveaux:
+                raw_niveaux = [raw_single_niveaux]
+
+        valid_niveaux = {choice[0] for choice in Hopital.NIVEAU_CHOICES}
+        for raw in raw_niveaux:
+            for token in str(raw).split(','):
+                token = token.strip().upper()
+                if not token:
+                    continue
+                if token not in valid_niveaux:
+                    raise ValidationError("Parametre niveaux invalide. Utiliser N1, N2 ou N3.")
+                niveaux.append(token)
+
+        if niveaux:
+            niveaux = sorted(set(niveaux))
+
         return {
             'annee': annee,
             'actifs_seulement': actifs_seulement,
             'hopitaux_ids': hopitaux_ids,
+            'niveaux': niveaux,
         }
 
     def _collect_interhopitaux_data(self, request):
@@ -1876,10 +2492,13 @@ class HopitalViewSet(viewsets.ModelViewSet):
         annee = filters['annee']
         actifs_seulement = filters['actifs_seulement']
         hopitaux_ids = filters['hopitaux_ids']
+        niveaux = filters['niveaux']
 
         hopitaux_qs = Hopital.objects.all().order_by('nom')
         if hopitaux_ids:
             hopitaux_qs = hopitaux_qs.filter(id__in=hopitaux_ids)
+        if niveaux:
+            hopitaux_qs = hopitaux_qs.filter(niveau__in=niveaux)
 
         rows = []
         for hopital in hopitaux_qs:
@@ -1908,6 +2527,8 @@ class HopitalViewSet(viewsets.ModelViewSet):
                     'hopital_id': hopital.id,
                     'hopital_nom': hopital.nom,
                     'hopital_code': hopital.code,
+                    'niveau': hopital.niveau,
+                    'niveau_label': hopital.get_niveau_display(),
                     'annee': annee_utilisee,
                     'exercice_actif': False,
                     'charges': 0.0,
@@ -1932,6 +2553,8 @@ class HopitalViewSet(viewsets.ModelViewSet):
                 'hopital_id': hopital.id,
                 'hopital_nom': hopital.nom,
                 'hopital_code': hopital.code,
+                'niveau': hopital.niveau,
+                'niveau_label': hopital.get_niveau_display(),
                 'annee': annee_utilisee,
                 'exercice_actif': exercice_actif,
                 'charges': round(charges_float, 2),
@@ -1974,11 +2597,39 @@ class HopitalViewSet(viewsets.ModelViewSet):
                     'message': f"{row['hopital_nom']}: aucun centre calcule.",
                 })
 
+        kpis_par_niveau = {}
+        for niveau_code, niveau_libelle in Hopital.NIVEAU_CHOICES:
+            rows_niveau = [r for r in rows if r.get('niveau') == niveau_code]
+            if not rows_niveau:
+                continue
+            tot_res = round(sum(item['resultat'] for item in rows_niveau), 2)
+            moyenne_res = round(tot_res / len(rows_niveau), 2) if rows_niveau else 0.0
+            meilleur_n = max(rows_niveau, key=lambda item: item['resultat'])
+            pire_n = min(rows_niveau, key=lambda item: item['resultat'])
+            kpis_par_niveau[niveau_code] = {
+                'niveau_label': niveau_libelle,
+                'nb_hopitaux': len(rows_niveau),
+                'resultat_total': tot_res,
+                'moyenne_resultat': moyenne_res,
+                'ecart_resultat': round(meilleur_n['resultat'] - pire_n['resultat'], 2),
+                'meilleur_hopital': {
+                    'id': meilleur_n['hopital_id'],
+                    'nom': meilleur_n['hopital_nom'],
+                    'resultat': meilleur_n['resultat'],
+                },
+                'pire_hopital': {
+                    'id': pire_n['hopital_id'],
+                    'nom': pire_n['hopital_nom'],
+                    'resultat': pire_n['resultat'],
+                },
+            }
+
         return {
             'filters': {
                 'annee': annee,
                 'actifs_seulement': actifs_seulement,
                 'hopitaux_ids': hopitaux_ids,
+                'niveaux': niveaux,
             },
             'rows': rows,
             'totaux': {
@@ -2002,6 +2653,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
                 } if pire else None,
                 'nb_alertes': len(alertes),
             },
+            'kpis_par_niveau': kpis_par_niveau,
             'top_flop': {
                 'top': rows_resultat_desc[:3],
                 'flop': rows_resultat_asc[:3],
@@ -2041,7 +2693,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = 'Inter Hopitaux'
         ws.append([
-            'Hopital', 'Code', 'Annee', 'Exercice Actif', 'Charges',
+            'Hopital', 'Code', 'Niveau', 'Annee', 'Exercice Actif', 'Charges',
             'Produits', 'Resultat', 'Marge (%)', 'Centres Calcules'
         ])
 
@@ -2049,6 +2701,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             ws.append([
                 row['hopital_nom'],
                 row['hopital_code'],
+                row.get('niveau_label') or row.get('niveau') or '-',
                 row['annee'],
                 'Oui' if row.get('exercice_actif') else 'Non',
                 row['charges'],
@@ -2059,7 +2712,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             ])
 
         ws.append([
-            'TOTAL', '', '', '',
+            'TOTAL', '', '', '', '',
             payload['totaux']['charges'],
             payload['totaux']['produits'],
             payload['totaux']['resultat'],
@@ -2072,6 +2725,18 @@ class HopitalViewSet(viewsets.ModelViewSet):
         ws_kpi.append(['Moyenne resultat', payload['kpis']['moyenne_resultat']])
         ws_kpi.append(['Ecart max/min', payload['kpis']['ecart_resultat']])
         ws_kpi.append(['Alertes', payload['kpis']['nb_alertes']])
+
+        ws_niveaux = wb.create_sheet('KPI Par Niveau')
+        ws_niveaux.append(['Niveau', 'Hopitaux', 'Resultat Total', 'Moyenne Resultat', 'Ecart'])
+        for niveau_code in sorted(payload.get('kpis_par_niveau', {}).keys()):
+            item = payload['kpis_par_niveau'][niveau_code]
+            ws_niveaux.append([
+                item.get('niveau_label', niveau_code),
+                item.get('nb_hopitaux', 0),
+                item.get('resultat_total', 0),
+                item.get('moyenne_resultat', 0),
+                item.get('ecart_resultat', 0),
+            ])
 
         _decorate_workbook(wb, 'Comparaison Inter Hopitaux', 'Reseau')
 
@@ -2097,13 +2762,14 @@ class HopitalViewSet(viewsets.ModelViewSet):
             return Response({'error': detail}, status=400)
 
         headers = [
-            'Hopital', 'Code', 'Annee', 'Actif',
+            'Hopital', 'Code', 'Niveau', 'Annee', 'Actif',
             'Charges', 'Produits', 'Resultat', 'Marge %', 'Centres'
         ]
         rows = [
             [
                 item['hopital_nom'],
                 item['hopital_code'] or '-',
+                item.get('niveau_label') or item.get('niveau') or '-',
                 item['annee'] or '-',
                 'Oui' if item.get('exercice_actif') else 'Non',
                 f"{item['charges']:,.0f}",
@@ -2115,7 +2781,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             for item in payload['rows']
         ]
         rows.append([
-            'TOTAL', '', '', '',
+            'TOTAL', '', '', '', '',
             f"{payload['totaux']['charges']:,.0f}",
             f"{payload['totaux']['produits']:,.0f}",
             f"{payload['totaux']['resultat']:,.0f}",

@@ -127,8 +127,22 @@ class UserProfile(models.Model):
 
 class Hopital(models.Model):
     """Information de l'hôpital (mono-établissement pour l'instant)"""
+    NIVEAU_1 = 'N1'
+    NIVEAU_2 = 'N2'
+    NIVEAU_3 = 'N3'
+    NIVEAU_CHOICES = [
+        (NIVEAU_1, 'Niveau 1'),
+        (NIVEAU_2, 'Niveau 2'),
+        (NIVEAU_3, 'Niveau 3'),
+    ]
+
     nom = models.CharField(max_length=100)
     code = models.CharField(max_length=20, unique=True)
+    niveau = models.CharField(max_length=2, choices=NIVEAU_CHOICES, default=NIVEAU_1)
+    est_reference_niveau = models.BooleanField(
+        default=False,
+        help_text='Indique si cet hopital est la reference a copier pour son niveau.'
+    )
     adresse = models.TextField(blank=True)
     telephone = models.CharField(max_length=50, blank=True)
     email = models.EmailField(blank=True)
@@ -140,6 +154,13 @@ class Hopital(models.Model):
     
     class Meta:
         verbose_name_plural = "Hopitaux"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['niveau'],
+                condition=models.Q(est_reference_niveau=True),
+                name='unique_reference_hopital_par_niveau',
+            )
+        ]
 
 
 class Exercice(models.Model):
@@ -154,6 +175,10 @@ class Exercice(models.Model):
     class Meta:
         unique_together = ['hopital', 'annee']
         ordering = ['-annee']
+        indexes = [
+            models.Index(fields=['hopital', 'annee'], name='idx_exercice_hop_annee'),
+            models.Index(fields=['hopital', 'est_actif', 'est_clos'], name='idx_exercice_hop_statut'),
+        ]
     
     def __str__(self):
         return f"{self.hopital.nom} - {self.annee}"
@@ -289,6 +314,11 @@ class Charge(models.Model):
     
     class Meta:
         ordering = ['-date', '-created_at']
+        indexes = [
+            models.Index(fields=['exercice', 'date'], name='idx_charge_ex_date'),
+            models.Index(fields=['centre_cout'], name='idx_charge_centre'),
+            models.Index(fields=['compte'], name='idx_charge_compte'),
+        ]
     
     def __str__(self):
         return f"{self.date} - {self.compte} - {self.montant} - {self.centre_cout}"
@@ -404,6 +434,10 @@ class Produit(models.Model):
     class Meta:
         unique_together = ['exercice', 'centre_cout', 'periode', 'type_produit']
         ordering = ['centre_cout__code', 'periode', 'type_produit']
+        indexes = [
+            models.Index(fields=['exercice', 'periode'], name='idx_produit_ex_periode'),
+            models.Index(fields=['centre_cout'], name='idx_produit_centre'),
+        ]
     
     def __str__(self):
         return f"{self.centre_cout} - P{self.periode} - {self.get_type_produit_display()} - {self.montant}"
@@ -430,6 +464,10 @@ class ResultatCalcul(models.Model):
     class Meta:
         unique_together = ['exercice', 'centre_cout']
         verbose_name_plural = "Résultats de calcul"
+        indexes = [
+            models.Index(fields=['exercice', 'centre_cout'], name='idx_resultat_ex_centre'),
+            models.Index(fields=['resultat_analytique'], name='idx_resultat_value'),
+        ]
     
     def __str__(self):
         return f"{self.centre_cout} - Charges: {self.charges_totales}"
