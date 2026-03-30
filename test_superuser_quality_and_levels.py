@@ -98,6 +98,10 @@ class SuperuserQualityAndLevelTests(TestCase):
         self.assertEqual(payload['rows'][0]['hopital_code'], 'HN2')
         self.assertIn('kpis_par_niveau', payload)
         self.assertIn('N2', payload['kpis_par_niveau'])
+        self.assertIn('benchmark_resultat', payload['kpis'])
+        self.assertIn('taux_couverture_donnees', payload['kpis'])
+        self.assertIn('benchmark_resultat', payload['kpis_par_niveau']['N2'])
+        self.assertIn('taux_couverture_donnees', payload['kpis_par_niveau']['N2'])
 
     def test_controle_qualite_donnees_exposes_anomalies(self):
         self.client.force_login(self.superuser)

@@ -3,6 +3,7 @@ from decimal import Decimal
 from datetime import datetime
 from io import BytesIO
 import logging
+from statistics import median
 
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
@@ -12,6 +13,8 @@ from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from openpyxl import Workbook
@@ -36,6 +39,7 @@ from .permissions import (
     CanManageUsers,
     IsGlobalAdmin,
     CanRunSensitiveOperations,
+    _has_configured_permission,
 )
 from .hospital_databases import ensure_hospital_database
 
@@ -45,6 +49,7 @@ from .models import (
     ResultatCalcul, Exercice, CompteCharge,
     Fonction, CentreResponsabilite, Hopital, UserProfile, HopitalRole, Role, AuditLog,
     ROLE_DEFAULT_PERMISSIONS
+    , ReferentialSnapshot
 )
 
 
@@ -95,6 +100,37 @@ def _get_export_hopital_name(user=None):
         return user.profile.hopital.nom
     hopital = Hopital.objects.order_by('id').first()
     return hopital.nom if hopital else 'Hopital'
+
+
+def _has_business_permission(user, permission_code, legacy_roles=None):
+    return _has_configured_permission(user, permission_code, legacy_roles=legacy_roles or ['controleur'])
+
+
+def _compute_quartiles(values):
+    if not values:
+        return {'q1': 0.0, 'median': 0.0, 'q3': 0.0}
+
+    sorted_values = sorted(float(v) for v in values)
+    n = len(sorted_values)
+
+    if n == 1:
+        only = round(sorted_values[0], 2)
+        return {'q1': only, 'median': only, 'q3': only}
+
+    def percentile(pct):
+        if n == 1:
+            return sorted_values[0]
+        pos = (n - 1) * pct
+        low = int(pos)
+        high = min(low + 1, n - 1)
+        fraction = pos - low
+        return sorted_values[low] + (sorted_values[high] - sorted_values[low]) * fraction
+
+    return {
+        'q1': round(percentile(0.25), 2),
+        'median': round(median(sorted_values), 2),
+        'q3': round(percentile(0.75), 2),
+    }
 
 
 def _decorate_worksheet(ws, title, hopital_name, generated_at_text):
@@ -260,6 +296,23 @@ class ExerciceViewSet(viewsets.ModelViewSet):
                 "Impossible de supprimer l'exercice actif. Changez d'exercice actif d'abord."
             )
         instance.delete()
+
+    def _cloturer_ouvrir_exercice_for_hopital(self, hopital, nouvelle_annee, date_debut, date_fin):
+        """Cloture l'exercice actif d'un hopital puis ouvre/active l'exercice cible."""
+        exercice_actif = Exercice.objects.filter(
+            hopital=hopital,
+            est_actif=True,
+            est_clos=False,
+        ).order_by('-annee').first()
+
+        exercice_actif, nouvel_exercice = self._cloturer_ouvrir_exercice_for_hopital(
+            hopital=hopital,
+            nouvelle_annee=nouvelle_annee,
+            date_debut=date_debut,
+            date_fin=date_fin,
+        )
+
+        return exercice_actif, nouvel_exercice
 
     @action(detail=False, methods=['post'])
     def cloturer_ouvrir(self, request):
@@ -726,6 +779,14 @@ class CalculViewSet(viewsets.ViewSet):
         try:
             moteur = MoteurCalculCAH(exercice_id)
             resultats = moteur.calculer_tout()
+
+            _log_audit_event(
+                request.user,
+                'CALCULATE',
+                'ResultatCalcul',
+                int(exercice_id),
+                f"SUCCES calcul analytique exercice={exercice_id} centres={len(resultats)}.",
+            )
             
             return Response({
                 'success': True,
@@ -733,6 +794,13 @@ class CalculViewSet(viewsets.ViewSet):
                 'nb_centres': len(resultats)
             })
         except Exception as e:
+            _log_audit_event(
+                request.user,
+                'CALCULATE',
+                'ResultatCalcul',
+                int(exercice_id) if str(exercice_id).isdigit() else 0,
+                f"ECHEC calcul analytique exercice={exercice_id}: {str(e)[:200]}",
+            )
             return Response({
                 'success': False,
                 'error': str(e)
@@ -1933,6 +2001,9 @@ class HopitalViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reinitialiser_saisie(self, request, pk=None):
         """Supprime les données de saisie d'un hôpital (sans toucher aux résultats)."""
+        if not _has_business_permission(request.user, 'reset_hospital_input'):
+            raise PermissionDenied("Vous n'avez pas la permission de reinitialiser la saisie.")
+
         if str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
             return Response({'error': 'confirmation_code=CONFIRMER requis pour cette action critique.'}, status=400)
 
@@ -1969,9 +2040,14 @@ class HopitalViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def dupliquer_configuration(self, request, pk=None):
         """Duplique la configuration (fonctions, centres, comptes) depuis un hôpital source."""
+        if not _has_business_permission(request.user, 'copy_level_reference'):
+            raise PermissionDenied("Vous n'avez pas la permission de copier le referentiel.")
+
         target_hopital = self.get_object()
         source_hopital_id = request.data.get('source_hopital_id')
         force = str(request.data.get('force', 'true')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        if force and not _has_business_permission(request.user, 'force_local_fields'):
+            raise PermissionDenied("Vous n'avez pas la permission d'utiliser le mode forçage.")
         if force and str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
             return Response({'error': 'confirmation_code=CONFIRMER requis quand force=true.'}, status=400)
 
@@ -1995,6 +2071,13 @@ class HopitalViewSet(viewsets.ModelViewSet):
                 'diff': diff,
             }, status=200)
 
+        snapshot = self._create_referential_snapshot(
+            hopital=target_hopital,
+            source_hopital=source_hopital,
+            actor=request.user,
+            operation=ReferentialSnapshot.OP_COPY,
+        )
+
         created, updated = self._copy_configuration_between_hospitals(
             source_hopital=source_hopital,
             target_hopital=target_hopital,
@@ -2014,6 +2097,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
             'force_center_fields': force,
             'diff': diff,
+            'snapshot_id': snapshot.id,
             'created': created,
             'updated': updated,
         }, status=200)
@@ -2021,11 +2105,13 @@ class HopitalViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def copier_referentiel_niveau(self, request, pk=None):
         """Copie la configuration depuis l'hopital de reference du meme niveau."""
-        if not request.user.is_superuser:
-            raise PermissionDenied("Seul un superuser peut copier le referentiel par niveau.")
+        if not _has_business_permission(request.user, 'copy_level_reference'):
+            raise PermissionDenied("Vous n'avez pas la permission de copier le referentiel par niveau.")
 
         target_hopital = self.get_object()
         force = str(request.data.get('force', 'false')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        if force and not _has_business_permission(request.user, 'force_local_fields'):
+            raise PermissionDenied("Vous n'avez pas la permission d'utiliser le mode forçage.")
         if force and str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
             return Response({'error': 'confirmation_code=CONFIRMER requis quand force=true.'}, status=400)
         source_hopital_id = request.data.get('source_hopital_id')
@@ -2061,6 +2147,13 @@ class HopitalViewSet(viewsets.ModelViewSet):
                 'diff': diff,
             }, status=200)
 
+        snapshot = self._create_referential_snapshot(
+            hopital=target_hopital,
+            source_hopital=source_hopital,
+            actor=request.user,
+            operation=ReferentialSnapshot.OP_LEVEL_COPY,
+        )
+
         created, updated = self._copy_configuration_between_hospitals(
             source_hopital=source_hopital,
             target_hopital=target_hopital,
@@ -2081,6 +2174,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             'target_hopital': {'id': target_hopital.id, 'nom': target_hopital.nom},
             'force_center_fields': force,
             'diff': diff,
+            'snapshot_id': snapshot.id,
             'created': created,
             'updated': updated,
         }, status=200)
@@ -2114,6 +2208,411 @@ class HopitalViewSet(viewsets.ModelViewSet):
             'message': 'Verification terminee. Utiliser preview_only=false pour appliquer.',
         }
         return diff
+
+    def _serialize_referential_state(self, hopital):
+        fonctions = list(
+            Fonction.objects.filter(hopital=hopital)
+            .order_by('code')
+            .values('code', 'libelle')
+        )
+
+        respons = list(
+            CentreResponsabilite.objects.filter(fonction__hopital=hopital)
+            .select_related('fonction')
+            .order_by('fonction__code', 'code')
+            .values('fonction__code', 'code', 'libelle')
+        )
+        respons = [
+            {
+                'fonction_code': item['fonction__code'],
+                'code': item['code'],
+                'libelle': item['libelle'],
+            }
+            for item in respons
+        ]
+
+        centres = list(
+            CentreCout.objects.filter(centre_responsabilite__fonction__hopital=hopital)
+            .select_related('centre_responsabilite__fonction')
+            .order_by('centre_responsabilite__fonction__code', 'centre_responsabilite__code', 'code')
+            .values(
+                'centre_responsabilite__fonction__code',
+                'centre_responsabilite__code',
+                'code',
+                'libelle',
+                'type_centre',
+                'unite_oeuvre',
+                'tarif',
+                'ordre_cascade',
+                'est_actif',
+            )
+        )
+        centres = [
+            {
+                'fonction_code': item['centre_responsabilite__fonction__code'],
+                'responsabilite_code': item['centre_responsabilite__code'],
+                'code': item['code'],
+                'libelle': item['libelle'],
+                'type_centre': item['type_centre'],
+                'unite_oeuvre': item['unite_oeuvre'],
+                'tarif': float(item['tarif']) if item['tarif'] is not None else None,
+                'ordre_cascade': item['ordre_cascade'],
+                'est_actif': bool(item['est_actif']),
+            }
+            for item in centres
+        ]
+
+        comptes = list(
+            CompteCharge.objects.filter(hopital=hopital)
+            .order_by('numero')
+            .values('numero', 'libelle')
+        )
+
+        return {
+            'fonctions': fonctions,
+            'centres_responsabilite': respons,
+            'centres_cout': centres,
+            'comptes_charges': comptes,
+        }
+
+    def _create_referential_snapshot(self, hopital, source_hopital, actor, operation):
+        payload = {
+            'hopital': {'id': hopital.id, 'code': hopital.code, 'nom': hopital.nom},
+            'source_hopital': (
+                {'id': source_hopital.id, 'code': source_hopital.code, 'nom': source_hopital.nom}
+                if source_hopital else None
+            ),
+            'state': self._serialize_referential_state(hopital),
+        }
+        return ReferentialSnapshot.objects.create(
+            hopital=hopital,
+            source_hopital=source_hopital,
+            actor=actor,
+            operation=operation,
+            payload=payload,
+        )
+
+    def _restore_referential_from_snapshot(self, hopital, snapshot, sections):
+        state = (snapshot.payload or {}).get('state') or {}
+        section_set = set(sections or [])
+        if not section_set:
+            section_set = {'fonctions', 'centres_responsabilite', 'centres_cout', 'comptes_charges'}
+
+        restored = {
+            'fonctions': 0,
+            'centres_responsabilite': 0,
+            'centres_cout': 0,
+            'comptes_charges': 0,
+        }
+
+        structure_requested = bool(section_set & {'fonctions', 'centres_responsabilite', 'centres_cout'})
+        with transaction.atomic():
+            if structure_requested:
+                CentreCout.objects.filter(centre_responsabilite__fonction__hopital=hopital).delete()
+                CentreResponsabilite.objects.filter(fonction__hopital=hopital).delete()
+                Fonction.objects.filter(hopital=hopital).delete()
+
+                fonction_map = {}
+                for f in state.get('fonctions', []):
+                    obj = Fonction.objects.create(hopital=hopital, code=f['code'], libelle=f['libelle'])
+                    fonction_map[f['code']] = obj
+                    restored['fonctions'] += 1
+
+                resp_map = {}
+                for r in state.get('centres_responsabilite', []):
+                    parent = fonction_map.get(r['fonction_code'])
+                    if not parent:
+                        continue
+                    obj = CentreResponsabilite.objects.create(
+                        fonction=parent,
+                        code=r['code'],
+                        libelle=r['libelle'],
+                    )
+                    resp_map[(r['fonction_code'], r['code'])] = obj
+                    restored['centres_responsabilite'] += 1
+
+                for c in state.get('centres_cout', []):
+                    parent = resp_map.get((c['fonction_code'], c['responsabilite_code']))
+                    if not parent:
+                        continue
+                    CentreCout.objects.create(
+                        centre_responsabilite=parent,
+                        code=c['code'],
+                        libelle=c['libelle'],
+                        type_centre=c['type_centre'],
+                        unite_oeuvre=c.get('unite_oeuvre') or '',
+                        tarif=c.get('tarif'),
+                        ordre_cascade=c.get('ordre_cascade'),
+                        est_actif=bool(c.get('est_actif', True)),
+                    )
+                    restored['centres_cout'] += 1
+
+            if 'comptes_charges' in section_set:
+                CompteCharge.objects.filter(hopital=hopital).delete()
+                for cp in state.get('comptes_charges', []):
+                    CompteCharge.objects.create(
+                        hopital=hopital,
+                        numero=cp['numero'],
+                        libelle=cp['libelle'],
+                    )
+                    restored['comptes_charges'] += 1
+
+        applied_sections = set(section_set)
+        if structure_requested:
+            applied_sections.update({'fonctions', 'centres_responsabilite', 'centres_cout'})
+
+        return restored, sorted(applied_sections)
+
+    @action(detail=True, methods=['get'])
+    def referentiel_snapshots(self, request, pk=None):
+        hopital = self.get_object()
+        if not _has_business_permission(request.user, 'copy_level_reference'):
+            raise PermissionDenied("Vous n'avez pas la permission de consulter les snapshots de referentiel.")
+
+        limit = int(request.query_params.get('limit') or 10)
+        snapshots = ReferentialSnapshot.objects.filter(hopital=hopital).order_by('-created_at')[:max(1, min(limit, 50))]
+        data = [
+            {
+                'id': snap.id,
+                'operation': snap.operation,
+                'created_at': snap.created_at,
+                'actor': getattr(snap.actor, 'username', None),
+                'source_hopital': (
+                    {'id': snap.source_hopital_id, 'nom': snap.source_hopital.nom}
+                    if snap.source_hopital_id else None
+                ),
+            }
+            for snap in snapshots
+        ]
+        return Response({'snapshots': data}, status=200)
+
+    @action(detail=True, methods=['post'])
+    def rollback_referentiel(self, request, pk=None):
+        hopital = self.get_object()
+        if not _has_business_permission(request.user, 'copy_level_reference'):
+            raise PermissionDenied("Vous n'avez pas la permission de rollback du referentiel.")
+
+        if str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
+            return Response({'error': 'confirmation_code=CONFIRMER requis pour rollback.'}, status=400)
+
+        snapshot_id = request.data.get('snapshot_id')
+        if not snapshot_id:
+            return Response({'error': 'snapshot_id requis.'}, status=400)
+
+        snapshot = ReferentialSnapshot.objects.filter(id=snapshot_id, hopital=hopital).first()
+        if not snapshot:
+            return Response({'error': 'Snapshot introuvable pour cet hôpital.'}, status=404)
+
+        sections = request.data.get('sections') or []
+        if sections and not isinstance(sections, list):
+            return Response({'error': 'sections doit être une liste.'}, status=400)
+
+        rollback_snapshot = self._create_referential_snapshot(
+            hopital=hopital,
+            source_hopital=snapshot.source_hopital,
+            actor=request.user,
+            operation=ReferentialSnapshot.OP_ROLLBACK,
+        )
+
+        restored, applied_sections = self._restore_referential_from_snapshot(
+            hopital=hopital,
+            snapshot=snapshot,
+            sections=sections,
+        )
+
+        _log_audit_event(
+            request.user,
+            'UPDATE',
+            'Hopital',
+            hopital.id,
+            f"Rollback referentiel via snapshot={snapshot.id} sections={','.join(applied_sections)}.",
+        )
+
+        return Response({
+            'success': True,
+            'hopital': {'id': hopital.id, 'nom': hopital.nom},
+            'snapshot_utilise': snapshot.id,
+            'snapshot_rollback_id': rollback_snapshot.id,
+            'sections_appliquees': applied_sections,
+            'restored': restored,
+        }, status=200)
+
+    def _build_wizard_checks(self, hopital):
+        has_exercice_actif = Exercice.objects.filter(hopital=hopital, est_actif=True, est_clos=False).exists()
+        has_fonctions = Fonction.objects.filter(hopital=hopital).exists()
+        has_comptes = CompteCharge.objects.filter(hopital=hopital).exists()
+        centres_count = CentreCout.objects.filter(centre_responsabilite__fonction__hopital=hopital).count()
+        has_ref_same_level = Hopital.objects.filter(
+            niveau=hopital.niveau,
+            est_reference_niveau=True,
+        ).exclude(id=hopital.id).exists() or hopital.est_reference_niveau
+        has_activites = Activite.objects.filter(exercice__hopital=hopital).exists()
+        has_produits = Produit.objects.filter(exercice__hopital=hopital).exists()
+
+        checks = [
+            {'code': 'exercice_actif', 'ok': has_exercice_actif, 'message': 'Exercice actif non cloture present.'},
+            {'code': 'fonctions', 'ok': has_fonctions, 'message': 'Fonctions configurees.'},
+            {'code': 'comptes', 'ok': has_comptes, 'message': 'Comptes de charges configures.'},
+            {'code': 'centres', 'ok': centres_count > 0, 'message': 'Centres de cout configures.'},
+            {'code': 'reference_niveau', 'ok': has_ref_same_level, 'message': 'Reference de niveau disponible.'},
+            {'code': 'activites', 'ok': has_activites, 'message': 'Activites disponibles.'},
+            {'code': 'produits', 'ok': has_produits, 'message': 'Produits disponibles.'},
+        ]
+        return checks
+
+    @action(detail=True, methods=['post'])
+    def wizard_demarrage_exercice(self, request, pk=None):
+        hopital = self.get_object()
+        if not _has_business_permission(request.user, 'manage_configuration'):
+            raise PermissionDenied("Vous n'avez pas la permission de lancer le wizard de demarrage.")
+
+        checks = self._build_wizard_checks(hopital)
+        blocking = [c for c in checks if c['code'] in {'fonctions', 'comptes', 'centres', 'reference_niveau'} and not c['ok']]
+        if blocking:
+            return Response({'error': 'Prerequis non satisfaits.', 'checks': checks}, status=400)
+
+        preview_only = str(request.data.get('preview_only', 'false')).strip().lower() in {'1', 'true', 'yes', 'oui', 'on'}
+        current_active = Exercice.objects.filter(hopital=hopital, est_actif=True, est_clos=False).order_by('-annee').first()
+        target_annee = int(request.data.get('annee') or ((current_active.annee + 1) if current_active else datetime.now().year))
+        source_ref = Hopital.objects.filter(niveau=hopital.niveau, est_reference_niveau=True).exclude(id=hopital.id).order_by('id').first()
+        diff = self._build_configuration_diff(source_ref, hopital) if source_ref else None
+
+        if preview_only:
+            return Response({
+                'success': True,
+                'preview_only': True,
+                'hopital': {'id': hopital.id, 'nom': hopital.nom, 'niveau': hopital.niveau},
+                'target_annee': target_annee,
+                'checks': checks,
+                'source_reference': (
+                    {'id': source_ref.id, 'nom': source_ref.nom} if source_ref else None
+                ),
+                'diff': diff,
+                'steps': [
+                    'Verifier prerequis',
+                    'Copier referentiel niveau',
+                    'Valider activites/produits',
+                    'Activer exercice',
+                ],
+            }, status=200)
+
+        if source_ref:
+            self._copy_configuration_between_hospitals(
+                source_hopital=source_ref,
+                target_hopital=hopital,
+                force_center_fields=False,
+            )
+
+        date_debut = request.data.get('date_debut') or f'{target_annee}-01-01'
+        date_fin = request.data.get('date_fin') or f'{target_annee}-12-31'
+        Exercice.objects.filter(hopital=hopital, est_actif=True).update(est_actif=False)
+        exercice, created = Exercice.objects.get_or_create(
+            hopital=hopital,
+            annee=target_annee,
+            defaults={
+                'date_debut': date_debut,
+                'date_fin': date_fin,
+                'est_actif': True,
+                'est_clos': False,
+            }
+        )
+        if not created:
+            exercice.date_debut = date_debut
+            exercice.date_fin = date_fin
+            exercice.est_actif = True
+            exercice.est_clos = False
+            exercice.save(update_fields=['date_debut', 'date_fin', 'est_actif', 'est_clos'])
+
+        _log_audit_event(
+            request.user,
+            'UPDATE',
+            'Exercice',
+            exercice.id,
+            f"Wizard demarrage exercice hopital={hopital.code} annee={target_annee}.",
+        )
+
+        return Response({
+            'success': True,
+            'hopital': {'id': hopital.id, 'nom': hopital.nom},
+            'checks': checks,
+            'exercice': {
+                'id': exercice.id,
+                'annee': exercice.annee,
+                'date_debut': str(exercice.date_debut),
+                'date_fin': str(exercice.date_fin),
+                'est_actif': exercice.est_actif,
+            },
+        }, status=200)
+
+    @action(detail=True, methods=['post'])
+    def wizard_cloture_exercice(self, request, pk=None):
+        hopital = self.get_object()
+        if not _has_business_permission(request.user, 'manage_configuration'):
+            raise PermissionDenied("Vous n'avez pas la permission de lancer le wizard de cloture.")
+
+        checks = self._build_wizard_checks(hopital)
+        active = Exercice.objects.filter(hopital=hopital, est_actif=True, est_clos=False).order_by('-annee').first()
+        if not active:
+            return Response({'error': 'Aucun exercice actif a cloturer.', 'checks': checks}, status=400)
+
+        if str(request.data.get('confirmation_code') or '').strip().upper() != 'CONFIRMER':
+            return Response({'error': 'confirmation_code=CONFIRMER requis pour la cloture.'}, status=400)
+
+        next_annee = int(request.data.get('annee') or (active.annee + 1))
+        date_debut = request.data.get('date_debut') or f'{next_annee}-01-01'
+        date_fin = request.data.get('date_fin') or f'{next_annee}-12-31'
+
+        exercice_cloture = Exercice.objects.filter(
+            hopital=hopital,
+            est_actif=True,
+            est_clos=False,
+        ).order_by('-annee').first()
+
+        with transaction.atomic():
+            if exercice_cloture:
+                exercice_cloture.est_actif = False
+                exercice_cloture.est_clos = True
+                exercice_cloture.save(update_fields=['est_actif', 'est_clos'])
+
+            Exercice.objects.filter(hopital=hopital, est_actif=True).update(est_actif=False)
+
+            nouvel_exercice, created = Exercice.objects.get_or_create(
+                hopital=hopital,
+                annee=next_annee,
+                defaults={
+                    'date_debut': date_debut,
+                    'date_fin': date_fin,
+                    'est_actif': True,
+                    'est_clos': False,
+                }
+            )
+            if not created:
+                nouvel_exercice.date_debut = date_debut
+                nouvel_exercice.date_fin = date_fin
+                nouvel_exercice.est_actif = True
+                nouvel_exercice.est_clos = False
+                nouvel_exercice.save(update_fields=['date_debut', 'date_fin', 'est_actif', 'est_clos'])
+
+        _log_audit_event(
+            request.user,
+            'UPDATE',
+            'Exercice',
+            nouvel_exercice.id,
+            f"Wizard cloture exercice hopital={hopital.code} cloture={exercice_cloture.annee if exercice_cloture else None} ouverture={nouvel_exercice.annee}.",
+        )
+
+        return Response({
+            'success': True,
+            'hopital': {'id': hopital.id, 'nom': hopital.nom},
+            'exercice_cloture': exercice_cloture.annee if exercice_cloture else None,
+            'nouvel_exercice': {
+                'id': nouvel_exercice.id,
+                'annee': nouvel_exercice.annee,
+                'date_debut': str(nouvel_exercice.date_debut),
+                'date_fin': str(nouvel_exercice.date_fin),
+            },
+            'checks': checks,
+        }, status=200)
 
     @action(detail=False, methods=['get'])
     def controle_qualite_donnees(self, request):
@@ -2165,15 +2664,39 @@ class HopitalViewSet(viewsets.ModelViewSet):
 
         since = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         audits_today = AuditLog.objects.filter(timestamp__gte=since).count()
+        failed_calculs = AuditLog.objects.filter(action='CALCULATE', description__icontains='ECHEC').count()
+
+        divergences = []
+        for hopital in Hopital.objects.order_by('nom'):
+            source_ref = Hopital.objects.filter(
+                niveau=hopital.niveau,
+                est_reference_niveau=True,
+            ).exclude(id=hopital.id).first()
+            if not source_ref:
+                continue
+            diff = self._build_configuration_diff(source_ref, hopital)
+            total_a_ajouter = (diff.get('resume') or {}).get('total_a_ajouter', 0)
+            if total_a_ajouter > 0:
+                divergences.append({
+                    'hopital_id': hopital.id,
+                    'hopital_nom': hopital.nom,
+                    'niveau': hopital.niveau,
+                    'source_reference': {'id': source_ref.id, 'nom': source_ref.nom},
+                    'diff_resume': diff.get('resume', {}),
+                })
 
         return Response({
             'summary': {
                 'audits_today': audits_today,
                 'anomalies_count': len(anomalies),
                 'missing_references_count': len(missing_refs),
+                'divergences_count': len(divergences),
+                'failed_calculs_today': failed_calculs,
             },
             'missing_references': missing_refs,
             'anomalies': anomalies,
+            'divergences_referentiel': divergences,
+            'failed_calculs_today': failed_calculs,
         }, status=200)
 
     def _copy_configuration_between_hospitals(self, source_hopital, target_hopital, force_center_fields=False):
@@ -2283,6 +2806,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
 
         return created, updated
 
+    @method_decorator(cache_page(60))
     @action(detail=False, methods=['get'])
     def tableau_bord_superuser(self, request):
         """Indicateurs globaux et alertes pour le superuser."""
@@ -2539,11 +3063,16 @@ class HopitalViewSet(viewsets.ModelViewSet):
             moyenne_res = round(tot_res / len(rows_niveau), 2) if rows_niveau else 0.0
             meilleur_n = max(rows_niveau, key=lambda item: item['resultat'])
             pire_n = min(rows_niveau, key=lambda item: item['resultat'])
+            non_vides_n = [r for r in rows_niveau if (r['charges'] > 0 or r['produits'] > 0 or r['nb_centres'] > 0)]
+            coverage_n = round((len(non_vides_n) / len(rows_niveau)) * 100, 2) if rows_niveau else 0.0
+            quartiles_n = _compute_quartiles([r['resultat'] for r in rows_niveau])
             kpis_par_niveau[niveau_code] = {
                 'niveau_label': niveau_libelle,
                 'nb_hopitaux': len(rows_niveau),
                 'resultat_total': tot_res,
                 'moyenne_resultat': moyenne_res,
+                'benchmark_resultat': quartiles_n,
+                'taux_couverture_donnees': coverage_n,
                 'ecart_resultat': round(meilleur_n['resultat'] - pire_n['resultat'], 2),
                 'meilleur_hopital': {
                     'id': meilleur_n['hopital_id'],
@@ -2556,6 +3085,10 @@ class HopitalViewSet(viewsets.ModelViewSet):
                     'resultat': pire_n['resultat'],
                 },
             }
+
+        non_vides = [r for r in rows if (r['charges'] > 0 or r['produits'] > 0 or r['nb_centres'] > 0)]
+        coverage_rate = round((len(non_vides) / len(rows)) * 100, 2) if rows else 0.0
+        benchmark_global = _compute_quartiles([r['resultat'] for r in rows])
 
         return {
             'filters': {
@@ -2573,6 +3106,8 @@ class HopitalViewSet(viewsets.ModelViewSet):
             'kpis': {
                 'nb_hopitaux': nb_hopitaux,
                 'moyenne_resultat': moyenne_resultat,
+                'benchmark_resultat': benchmark_global,
+                'taux_couverture_donnees': coverage_rate,
                 'ecart_resultat': round((meilleur['resultat'] - pire['resultat']), 2) if meilleur and pire else 0.0,
                 'meilleur_hopital': {
                     'id': meilleur['hopital_id'],
@@ -2594,6 +3129,7 @@ class HopitalViewSet(viewsets.ModelViewSet):
             'alertes': alertes,
         }
 
+    @method_decorator(cache_page(60))
     @action(detail=False, methods=['get'])
     def comparaison_interhopitaux(self, request):
         """Comparaison financiere entre hopitaux pour le superuser."""

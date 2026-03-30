@@ -144,3 +144,30 @@ class HopitalReferentielNiveauTests(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_rollback_referentiel_on_selected_section(self):
+        self.client.force_login(self.superuser)
+
+        copy_response = self.client.post(
+            f"/api/hopitaux/{self.target_n2.id}/copier_referentiel_niveau/",
+            {},
+            format="json",
+        )
+        self.assertEqual(copy_response.status_code, 200)
+        snapshot_id = copy_response.json().get('snapshot_id')
+        self.assertIsNotNone(snapshot_id)
+
+        CompteCharge.objects.create(hopital=self.target_n2, numero="999999", libelle="Temporaire")
+        self.assertTrue(CompteCharge.objects.filter(hopital=self.target_n2, numero="999999").exists())
+
+        rollback_response = self.client.post(
+            f"/api/hopitaux/{self.target_n2.id}/rollback_referentiel/",
+            {
+                "snapshot_id": snapshot_id,
+                "sections": ["comptes_charges"],
+                "confirmation_code": "CONFIRMER",
+            },
+            format="json",
+        )
+        self.assertEqual(rollback_response.status_code, 200)
+        self.assertFalse(CompteCharge.objects.filter(hopital=self.target_n2, numero="999999").exists())

@@ -17,6 +17,9 @@ class RolePermission(models.TextChoices):
     """Catalogue de permissions fonctionnelles."""
     MANAGE_USERS = 'manage_users', 'Gerer les utilisateurs'
     MANAGE_CONFIGURATION = 'manage_configuration', 'Configurer le referentiel'
+    COPY_LEVEL_REFERENCE = 'copy_level_reference', 'Copier le referentiel par niveau'
+    FORCE_LOCAL_FIELDS = 'force_local_fields', 'Forcer les champs locaux lors des copies'
+    RESET_HOSPITAL_INPUT = 'reset_hospital_input', 'Reinitialiser la saisie d un hopital'
     ENTER_CHARGES = 'enter_charges', 'Saisir les charges'
     ENTER_PRODUCTS = 'enter_products', 'Saisir les produits'
     ENTER_ACTIVITIES = 'enter_activities', 'Saisir les activites'
@@ -29,6 +32,9 @@ ROLE_DEFAULT_PERMISSIONS = {
     Role.CONTROLEUR_GESTION: [
         RolePermission.MANAGE_USERS,
         RolePermission.MANAGE_CONFIGURATION,
+        RolePermission.COPY_LEVEL_REFERENCE,
+        RolePermission.FORCE_LOCAL_FIELDS,
+        RolePermission.RESET_HOSPITAL_INPUT,
         RolePermission.ENTER_CHARGES,
         RolePermission.ENTER_PRODUCTS,
         RolePermission.ENTER_ACTIVITIES,
@@ -497,3 +503,39 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+
+
+class ReferentialSnapshot(models.Model):
+    """Snapshot du referentiel pour rollback selectif."""
+
+    OP_COPY = 'COPY'
+    OP_LEVEL_COPY = 'LEVEL_COPY'
+    OP_ROLLBACK = 'ROLLBACK'
+    OPERATION_CHOICES = [
+        (OP_COPY, 'Duplication configuration'),
+        (OP_LEVEL_COPY, 'Copie referentiel niveau'),
+        (OP_ROLLBACK, 'Rollback referentiel'),
+    ]
+
+    hopital = models.ForeignKey('Hopital', on_delete=models.CASCADE, related_name='referential_snapshots')
+    source_hopital = models.ForeignKey(
+        'Hopital',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='referential_snapshot_sources',
+    )
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    operation = models.CharField(max_length=20, choices=OPERATION_CHOICES)
+    payload = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['hopital', 'created_at'], name='idx_refsnapshot_hop_date'),
+            models.Index(fields=['operation'], name='idx_refsnapshot_op'),
+        ]
+
+    def __str__(self):
+        return f"Snapshot {self.id} - {self.hopital.code} - {self.operation}"

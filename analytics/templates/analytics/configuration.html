@@ -291,7 +291,37 @@
                         <label>Source de duplication</label>
                         <select class="form-control" id="sourceHopitalDuplication"></select>
                     </div>
+                    <div class="form-group">
+                        <label>Mode de copie</label>
+                        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;">
+                            <input type="checkbox" id="forceDuplicationFields">
+                            <span>Forçage (écrase les champs locaux centre)</span>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="card hidden" id="duplicationDiffCard">
+                    <h3>Différence avant copie</h3>
+                    <div id="duplicationDiffContent">Aucun aperçu disponible.</div>
+                </div>
+
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Rollback référentiel (snapshot)</label>
+                        <select class="form-control" id="rollbackSnapshotSelect"></select>
+                    </div>
+                    <div class="form-group" style="max-width: 320px;">
+                        <label>Sections rollback</label>
+                        <select class="form-control" id="rollbackSections" multiple>
+                            <option value="fonctions">Fonctions</option>
+                            <option value="centres_responsabilite">Centres de responsabilité</option>
+                            <option value="centres_cout">Centres de coûts</option>
+                            <option value="comptes_charges">Comptes de charges</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="chargerSnapshotsReferentiel()">🔄 Rafraîchir snapshots</button>
+                <button class="btn btn-danger" onclick="rollbackReferentielSelection()">↩️ Rollback sélectionné</button>
             </div>
             <div id="hopitalInfo" class="card hidden">
                 <h3>Hôpital Actuel</h3>
@@ -357,6 +387,8 @@
                 <button class="btn btn-primary" onclick="sauverExercice()">💾 Sauvegarder</button>
                 <button class="btn btn-warning" onclick="copierExercice()">📋 Copier depuis l'année précédente</button>
                 <button class="btn btn-secondary" onclick="reinitialiserFormExercice()">🧹 Réinitialiser</button>
+                <button class="btn btn-success" onclick="wizardDemarrageExercice()">🧭 Wizard début exercice</button>
+                <button class="btn btn-danger" onclick="wizardClotureExercice()">🧾 Wizard clôture</button>
 
                 <h3 style="margin-top: 1.4rem;">Liste des Exercices de l'Hôpital</h3>
                 <table id="tableExercices">
@@ -989,6 +1021,7 @@
         if (sel) sel.value = hopitalId;
         await chargerHopital();
         await chargerHopitauxGestion();
+        await chargerSnapshotsReferentiel();
     }
 
     async function chargerSelecteurHopitalExercice() {
@@ -1013,6 +1046,7 @@
     function onChangeHopitalExercice(hopitalId) {
         currentHopitalId = hopitalId ? parseInt(hopitalId, 10) : null;
         chargerListeExercices();
+        chargerSnapshotsReferentiel();
     }
 
     async function dupliquerConfigurationHopital(targetHopitalId = null) {
@@ -1038,14 +1072,208 @@
             return;
         }
 
+        const force = !!document.getElementById('forceDuplicationFields')?.checked;
+        const payloadBase = {
+            source_hopital_id: parseInt(sourceHopitalId, 10),
+            force: force,
+        };
+        if (force) {
+            const confirmation = prompt('Action en mode forçage. Saisissez CONFIRMER pour continuer :', '');
+            if ((confirmation || '').trim().toUpperCase() !== 'CONFIRMER') {
+                alert('Duplication annulée: confirmation invalide.');
+                return;
+            }
+            payloadBase.confirmation_code = 'CONFIRMER';
+        }
+
         try {
+            const preview = await fetchAPI(`${API_URL}/hopitaux/${cibleId}/dupliquer_configuration/`, {
+                method: 'POST',
+                body: JSON.stringify({ ...payloadBase, preview_only: true })
+            });
+
+            renderDuplicationDiff(preview);
+
+            if (!confirm('Aperçu généré. Voulez-vous appliquer cette copie ?')) {
+                return;
+            }
+
             await fetchAPI(`${API_URL}/hopitaux/${cibleId}/dupliquer_configuration/`, {
                 method: 'POST',
-                body: JSON.stringify({ source_hopital_id: parseInt(sourceHopitalId, 10) })
+                body: JSON.stringify(payloadBase)
             });
             alert('✅ Configuration dupliquée avec succès.');
         } catch (e) {
             alert('❌ Erreur duplication: ' + e.message);
+        }
+    }
+
+    function renderDuplicationDiff(previewPayload) {
+        const card = document.getElementById('duplicationDiffCard');
+        const content = document.getElementById('duplicationDiffContent');
+        if (!card || !content) return;
+
+        const diff = previewPayload?.diff || {};
+        const resume = diff.resume || {};
+        const rows = [
+            { key: 'fonctions', label: 'Fonctions' },
+            { key: 'centres_responsabilite', label: 'Centres de responsabilité' },
+            { key: 'centres_cout', label: 'Centres de coûts' },
+            { key: 'comptes_charges', label: 'Comptes de charges' },
+        ];
+
+        const htmlRows = rows.map(item => {
+            const d = diff[item.key] || {};
+            return `
+                <tr>
+                    <td>${item.label}</td>
+                    <td>${d.a_ajouter ?? 0}</td>
+                    <td>${d.deja_presents ?? d.deja_presentes ?? 0}</td>
+                </tr>
+            `;
+        }).join('');
+
+        content.innerHTML = `
+            <p><strong>Source:</strong> ${(previewPayload?.source_hopital?.nom || '-')} | <strong>Cible:</strong> ${(previewPayload?.target_hopital?.nom || '-')}</p>
+            <p><strong>Total à ajouter:</strong> ${resume.total_a_ajouter ?? 0}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Élément</th>
+                        <th>À ajouter</th>
+                        <th>Déjà présent</th>
+                    </tr>
+                </thead>
+                <tbody>${htmlRows}</tbody>
+            </table>
+            <p style="margin-top:.75rem;color:#475569;">${resume.message || ''}</p>
+        `;
+        card.classList.remove('hidden');
+    }
+
+    async function chargerSnapshotsReferentiel() {
+        if (!isSuperuserSession || !currentHopitalId) return;
+        const select = document.getElementById('rollbackSnapshotSelect');
+        if (!select) return;
+        try {
+            const res = await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/referentiel_snapshots/?limit=20`);
+            const snapshots = res.snapshots || [];
+            select.innerHTML = '<option value="">Choisir un snapshot...</option>' + snapshots.map(s => {
+                const d = new Date(s.created_at);
+                const labelDate = Number.isNaN(d.getTime()) ? String(s.created_at || '') : d.toLocaleString('fr-FR');
+                const source = s.source_hopital?.nom ? ` | src: ${s.source_hopital.nom}` : '';
+                const actor = s.actor ? ` | par: ${s.actor}` : '';
+                return `<option value="${s.id}">#${s.id} - ${s.operation} - ${labelDate}${source}${actor}</option>`;
+            }).join('');
+        } catch (e) {
+            console.error('Erreur chargement snapshots:', e);
+        }
+    }
+
+    async function rollbackReferentielSelection() {
+        if (!isSuperuserSession || !currentHopitalId) return;
+        const snapshotId = document.getElementById('rollbackSnapshotSelect')?.value;
+        if (!snapshotId) {
+            alert('Veuillez sélectionner un snapshot de rollback.');
+            return;
+        }
+
+        const sectionsSelect = document.getElementById('rollbackSections');
+        const sections = sectionsSelect
+            ? Array.from(sectionsSelect.selectedOptions || []).map(o => o.value).filter(Boolean)
+            : [];
+
+        const confirmation = prompt('Rollback critique. Saisissez CONFIRMER pour continuer :', '');
+        if ((confirmation || '').trim().toUpperCase() !== 'CONFIRMER') {
+            alert('Rollback annulé: confirmation invalide.');
+            return;
+        }
+
+        try {
+            const res = await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/rollback_referentiel/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    snapshot_id: parseInt(snapshotId, 10),
+                    sections: sections,
+                    confirmation_code: 'CONFIRMER',
+                })
+            });
+            alert(`✅ Rollback appliqué (snapshot ${res.snapshot_utilise}).`);
+            await Promise.all([
+                chargerFonctions(),
+                chargerFonctionsSelect(),
+                chargerResponsabilites(),
+                chargerResponsabilitesSelect(),
+                chargerCentres(),
+                chargerComptes(),
+                chargerSnapshotsReferentiel(),
+            ]);
+        } catch (e) {
+            alert('❌ Erreur rollback: ' + e.message);
+        }
+    }
+
+    async function wizardDemarrageExercice() {
+        if (!currentHopitalId) {
+            alert("Aucun hôpital actif associé à votre session.");
+            return;
+        }
+        const annee = parseInt(document.getElementById('anneeExercice').value, 10) || (new Date().getFullYear() + 1);
+        try {
+            const preview = await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/wizard_demarrage_exercice/`, {
+                method: 'POST',
+                body: JSON.stringify({ annee, preview_only: true })
+            });
+
+            const koChecks = (preview.checks || []).filter(c => !c.ok);
+            if (koChecks.length) {
+                alert('Précheck wizard: ' + koChecks.map(c => c.message).join(' | '));
+                return;
+            }
+
+            if (!confirm(`Démarrer le wizard annuel pour ${annee} ?`)) {
+                return;
+            }
+
+            const res = await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/wizard_demarrage_exercice/`, {
+                method: 'POST',
+                body: JSON.stringify({ annee })
+            });
+
+            alert(`✅ Wizard début terminé. Exercice actif: ${res.exercice?.annee || annee}.`);
+            await chargerListeExercices();
+        } catch (e) {
+            alert('❌ Erreur wizard début: ' + e.message);
+        }
+    }
+
+    async function wizardClotureExercice() {
+        if (!currentHopitalId) {
+            alert("Aucun hôpital actif associé à votre session.");
+            return;
+        }
+        const annee = parseInt(document.getElementById('anneeExercice').value, 10);
+        const nextAnnee = Number.isFinite(annee) ? (annee + 1) : (new Date().getFullYear() + 1);
+        const confirmation = prompt(`Clôture annuelle critique. Saisissez CONFIRMER pour clôturer et ouvrir ${nextAnnee}:`, '');
+        if ((confirmation || '').trim().toUpperCase() !== 'CONFIRMER') {
+            alert('Clôture annulée: confirmation invalide.');
+            return;
+        }
+
+        try {
+            const res = await fetchAPI(`${API_URL}/hopitaux/${currentHopitalId}/wizard_cloture_exercice/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    annee: nextAnnee,
+                    date_debut: `${nextAnnee}-01-01`,
+                    date_fin: `${nextAnnee}-12-31`,
+                    confirmation_code: 'CONFIRMER'
+                })
+            });
+            alert(`✅ Clôture ${res.exercice_cloture || '-'} et ouverture ${res.nouvel_exercice?.annee || nextAnnee} terminées.`);
+            await chargerListeExercices();
+        } catch (e) {
+            alert('❌ Erreur wizard clôture: ' + e.message);
         }
     }
     
@@ -1764,6 +1992,7 @@
         await chargerHopitauxGestion();
         if (isSuperuserSession) {
             await chargerSelecteurHopitalExercice();
+            await chargerSnapshotsReferentiel();
         }
         await chargerListeExercices();
         chargerFonctions();  // Charger les fonctions au démarrage
